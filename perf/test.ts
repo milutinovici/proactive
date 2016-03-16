@@ -10,8 +10,12 @@ suite.add("ComputedList#filter", () => {
             list.push(i);
         }
     })
-     .add("ComputedList#mapListInc", () => {
-
+     .add("ComputedList#map", () => {
+        const list = px.list([]);
+        const even = list.mapList(x => x % 2 === 0);
+        for (let i = 0; i < 100; i++) {
+            list.push(i);
+        }
     });
 
 export = suite;

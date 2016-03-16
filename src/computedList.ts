@@ -3,9 +3,6 @@ import { ComputedObservable } from "./computed";
 import { Func, Disposable, Computed } from "./interfaces";
 
 export class ComputedListObservable<T> extends ComputedObservable<T[]> {
-    get size(): Observable<number> {
-        return this.startWith(this.getValue()).filter(x => x !== undefined).map(x => x.length);
-    }
 
     constructor(source: Observable<T[]>, initial: T[]) {
         super(source, initial);
