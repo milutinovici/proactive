@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "debug": "registry:npm/debug#2.0.0+20160211003958"
+  },
+  "ambientDependencies": {
+    "benchmark": "registry:dt/benchmark#1.0.0+20151014212526",
+    "jasmine": "registry:dt/jasmine#2.2.0+20160308082659"
+  }
+}
