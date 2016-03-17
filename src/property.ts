@@ -1,13 +1,12 @@
-import { Subject } from "rxjs/Rx";
+import { BehaviorSubject } from "rxjs/Rx";
 import { Property } from "./interfaces";
 import { ComputedObservable } from "./computed";
 
 export class PropertyObservable<T> extends ComputedObservable<T> {
-    protected source: Subject<T>;
+    protected source: BehaviorSubject<T>;
 
     constructor(initial: T) {
-        super(new Subject<T>(), initial);
-        this.source.next(initial);
+        super(new BehaviorSubject<T>(initial), initial);
     }
     protected setValue(value: T) {
         this.value = value;

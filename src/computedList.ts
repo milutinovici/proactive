@@ -27,23 +27,22 @@ export class ComputedListObservable<T> extends ComputedObservable<T[]> {
     }
 
     mapList<R>(fn: (x: T, ix?: number) => R): ComputedList<R> {
-        const obs = this.startWith(this.value).map(x => x.map(fn));
-        return obs["toComputedList"]();
+        return this.map(x => x.map(fn))["toComputedList"]();
     }
     filterList(fn: (x: T, ix?: number) => boolean): ComputedList<T> {
-        return this.startWith(this.value).map(x => x.filter(fn))["toComputedList"]();
+        return this.map(x => x.filter(fn))["toComputedList"]();
     }
     sortList(fn: (x: T, y: T) => number): ComputedList<T> {
-        return this.startWith(this.value).map(x => x.sort(fn))["toComputedList"]();
+        return this.map(x => x.sort(fn))["toComputedList"]();
     }
     everyList(fn: (x: T, ix?: number) => boolean): Computed<boolean> {
-        return this.startWith(this.value).map(x => x.every(fn)).toComputed();
+        return this.map(x => x.every(fn)).toComputed();
     }
     someList(fn: (x: T, ix?: number) => boolean): Computed<boolean> {
-        return this.startWith(this.value).map(x => x.some(fn)).toComputed();
+        return this.map(x => x.some(fn)).toComputed();
     }
     reduceList<R>(fn: (x: R, y: T) => R, initial: R): Computed<R> {
-        return this.startWith(this.value).map(x => x.reduce(fn, initial)).toComputed();
+        return this.map(x => x.reduce(fn, initial)).toComputed();
     }
 
 }

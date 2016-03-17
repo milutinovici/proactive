@@ -1,11 +1,11 @@
-import { Observable, Subject } from "rxjs/Rx";
+import { Observable, BehaviorSubject } from "rxjs/Rx";
 import { ComputedListObservable } from "./computedList";
 import { Computed, Func, Action } from "./interfaces";
 
 export class ListObservable<T> extends ComputedListObservable<T> {
-    protected source: Subject<T[]>;
+    protected source: BehaviorSubject<T[]>;
     constructor(initial: T[] = []) {
-        super(new Subject<T[]>(), initial);
+        super(new BehaviorSubject<T[]>(initial), initial);
     }
     protected setValue(value: T[]) {
         this.value = value;
