@@ -22,17 +22,30 @@ describe("Observable List", () => {
         expect(removed).toEqual([2, 4]);
     });
 
-    it("should remove last item using pop", () => {
+    it("push should add item to the end", () => {
+        const items = px.list([1, 2]);
+        items.push(3);
+        expect(items()).toEqual([1, 2, 3]);
+        items.push(4, 5);
+        expect(items()).toEqual([1, 2, 3, 4, 5]);
+    });
+
+    it("pop should remove last item", () => {
         const items = px.list([1, 2, 3, 4, 5]);
         const removed = items.pop();
         expect(items()).toEqual([1, 2, 3, 4]);
         expect(removed).toEqual(5);
     });
-    it("should remove 1st item using shift", () => {
+    it("shift should remove 1st item", () => {
         const items = px.list([1, 2, 3, 4, 5]);
         const removed = items.shift();
         expect(items()).toEqual([2, 3, 4, 5]);
         expect(removed).toEqual(1);
+    });
+    it("unshift should insert item at the begining of a list", () => {
+        const items = px.list([1, 2, 3]);
+        const removed = items.unshift(0);
+        expect(items()).toEqual([0, 1, 2, 3]);
     });
     it("should reverse order of items", () => {
         const items = px.list([1, 2, 3, 4, 5]);
@@ -42,7 +55,7 @@ describe("Observable List", () => {
         expect(items()).toEqual([5, 4, 3, 2, 1]);
         expect(reversed).toEqual([5, 4, 3, 2, 1]);
     });
-    it("should remove range using splice", () => {
+    it("splice should remove item range", () => {
         const items = px.list([1, 2, 3, 4, 5]);
         let latest: number[] = [];
         items.subscribe(x => latest = x);
@@ -50,5 +63,10 @@ describe("Observable List", () => {
         expect(items()).toEqual([1, 5]);
         expect(removed).toEqual([2, 3, 4]);
         expect(latest).toEqual([1, 5]);
+    });
+    it("sort should sort items", () => {
+        const items = px.list([1, 2, 3]);
+        items.sort((x, y) => x < y ? 1 : -1);
+        expect(items()).toEqual([3, 2, 1]);
     });
 });

@@ -86,7 +86,9 @@ export class ListObservable<T> extends ComputedListObservable<T> {
         return removed;
     }
     clear(): T[] {
-        return this.remove(x => true);
+        const old = this.getValue();
+        this.setValue(<T[]>[]);
+        return old;
     }
 }
 export interface List<T> extends ListObservable<T>, Func<T[]>, Action<T[]> {
