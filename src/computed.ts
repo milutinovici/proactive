@@ -19,7 +19,7 @@ export class ComputedObservable<T> extends Observable<T> {
         return this.value;
     }
     static createComputed<T>(source: Observable<T>): Computed<T> {
-        if (source["call"] !== undefined && source["source"] !== undefined) {
+        if ("call" in source && "source" in source) {
             return <Computed<T>>source;
         }
         const accessor: any = function(): T {
@@ -29,11 +29,7 @@ export class ComputedObservable<T> extends Observable<T> {
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }
-        accessor.subscription = accessor.subscribe((newValue: T) => {
-            accessor.value = newValue;
-        }, (e: any) => {});
-
-        accessor[Symbol["observable"]] = () => accessor;
+        accessor.subscription = accessor.subscribe((val: T) => accessor.value = val, (e: Error) => {});
         return accessor;
     }
     toString(): string {
