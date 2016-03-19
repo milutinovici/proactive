@@ -4,7 +4,7 @@ import { Func, Disposable, Computed } from "./interfaces";
 
 export class ComputedListObservable<T> extends ComputedObservable<T[]> {
 
-    constructor(source: Observable<T[]>, initial: T[]) {
+    constructor(source: Observable<T[]>, initial?: T[]) {
         super(source, initial);
     }
 
@@ -12,7 +12,7 @@ export class ComputedListObservable<T> extends ComputedObservable<T[]> {
         const accessor: any = function<T>() {
             return accessor.getValue();
         };
-        const observable = new ComputedListObservable(source, undefined);
+        const observable = new ComputedListObservable(source);
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }

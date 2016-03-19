@@ -6,7 +6,7 @@ export class ComputedObservable<T> extends Observable<T> {
     protected source: Observable<T>;
     protected value: T;
 
-    constructor(source: Observable<T>, initial: T) {
+    constructor(source: Observable<T>, initial?: T) {
         super();
         this.value = initial;
         this.source = source.distinctUntilChanged();
@@ -25,7 +25,7 @@ export class ComputedObservable<T> extends Observable<T> {
         const accessor: any = function(): T {
             return accessor.getValue();
         };
-        const observable = new ComputedObservable(source, undefined);
+        const observable = new ComputedObservable(source);
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }
