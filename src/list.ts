@@ -1,4 +1,4 @@
-import { Observable, BehaviorSubject } from "rxjs/Rx";
+import { Observable, BehaviorSubject, Symbol } from "rxjs/Rx";
 import { ComputedListObservable } from "./computedList";
 import { Computed, Func, Action } from "./interfaces";
 
@@ -23,6 +23,7 @@ export class ListObservable<T> extends ComputedListObservable<T> {
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }
+        accessor[Symbol.observable] = () => accessor;
         return accessor;
     }
     push(...items: T[]): void {

@@ -1,4 +1,4 @@
-﻿import { Observable, Subject, Symbol } from "rxjs/Rx";
+﻿import { Observable, Subject, BehaviorSubject } from "rxjs/Rx";
 import { px } from "../src/proactive";
 
 describe("Computed Properties", () => {

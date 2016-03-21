@@ -113,6 +113,7 @@ describe("Observable Properties", () => {
     it("to Computed works", () => {
         const prop = px.property<number>(3);
         const max = prop.scan((x, y) => x > y ? x : y, prop()).toComputed();
+        expect(max()).toEqual(3);
         prop(1);
         expect(max()).toEqual(3);
         prop(5);
