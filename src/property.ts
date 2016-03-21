@@ -1,4 +1,4 @@
-import { BehaviorSubject } from "rxjs/Rx";
+import { BehaviorSubject, Symbol } from "rxjs/Rx";
 import { Property } from "./interfaces";
 import { ComputedObservable } from "./computed";
 
@@ -24,6 +24,7 @@ export class PropertyObservable<T> extends ComputedObservable<T> {
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }
+        accessor[Symbol.observable] = () => accessor;
         return accessor;
     }
 }
