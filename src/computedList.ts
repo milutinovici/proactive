@@ -1,11 +1,16 @@
-import { Observable, Subject, Symbol } from "rxjs/Rx";
+import { Observable, BehaviorSubject, Symbol } from "rxjs/Rx";
 import { ComputedObservable } from "./computed";
 import { Func, Disposable, Computed } from "./interfaces";
+import { ListChange, ItemChange } from "./list.change";
 
 export class ComputedListObservable<T> extends ComputedObservable<T[]> {
-
-    constructor(source: Observable<T[]>, initial?: T[]) {
+    _changes: BehaviorSubject<ListChange<T>>;
+    get changes() {
+        return this._changes.asObservable();
+    }
+    constructor(source: Observable<T[]>, initial: T[] = []) {
         super(source, initial);
+        this._changes = new BehaviorSubject(new ListChange(initial.map((x, i) => ItemChange.add(x, i))));
     }
 
     static createComputedList<T>(source: Observable<T[]>): ComputedList<T> {
@@ -45,6 +50,29 @@ export class ComputedListObservable<T> extends ComputedObservable<T[]> {
         return this.map(x => x.reduce(fn, initial)).toComputed();
     }
 
+    filterInc(fn: (x: T, ix?: number) => boolean): ComputedList<T> {
+        const obs: any = this.changes.scan((acc, change) => {
+                const remove = change.deleted.filter(x => fn(x.value)).map(x => x.value);
+                const add = change.added.filter(x => fn(x.value)).map(x => x.value);
+                const diff = ComputedListObservable.diff<T>(acc, remove);
+                return diff.concat(add);
+            }, []);
+        return obs.toComputedList();
+    }
+    mapInc<R>(fn: (x: T, ix?: number) => R): ComputedList<T> {
+        const obs: any = this.changes.scan((acc, change) => {
+                const old = acc.concat([]);
+                change.deleted.forEach(x => old.splice(x.oldIndex, 1));
+                const add = change.added.map(x => fn(x.value));
+                return old.concat(add);
+            }, []);
+        return obs.toComputedList();
+    }
+
+
+    private static diff<T>(a: T[], b: T[]) {
+        return a.filter((i) => b.indexOf(i) < 0);
+    }
 }
 
 export interface ComputedList<T> extends ComputedListObservable<T>, Func<T[]>, Disposable {

@@ -141,4 +141,59 @@ describe("Projected Observable List", () => {
         origin.push(4);
         expect(output()).toEqual(7);
     });
+
+    it("should be filtered incrementally", () => {
+        let input = [1, 2, 3, 4];
+        let origin = px.list(input);
+        let output = origin.filterInc(x => x % 2 === 0);
+        expect(output()).toEqual([2, 4]);
+
+        origin.push(5);
+        expect(output()).toEqual([2, 4]);
+
+        origin.push(6);
+        expect(output()).toEqual([2, 4, 6]);
+
+        const removed = origin.shift(); // Remove 1
+        expect(output()).toEqual([2, 4, 6]);
+
+        origin.shift(); // Remove "2"
+        expect(output()).toEqual([4, 6]);
+    });
+    it("should be mapped incrementally", () => {
+        let input = [1, 2];
+        let origin = px.list(input);
+        let output = origin.mapInc(x => x * x);
+        expect(output()).toEqual([1, 4]);
+
+        origin.push(3);
+        expect(output()).toEqual([1, 4, 9]);
+
+        origin.push(4);
+        expect(output()).toEqual([1, 4, 9, 16]);
+
+        const removed = origin.shift(); // Remove 1
+        expect(output()).toEqual([4, 9, 16]);
+
+        origin.shift(); // Remove "2"
+        expect(output()).toEqual([9, 16]);
+    });
+    it("incrementall chaining works", () => {
+        let input = [1, 2];
+        let origin = px.list(input);
+        let output = origin.filterInc(x => x % 2 === 0).mapInc(x => x * x);
+        expect(output()).toEqual([4]);
+
+        origin.push(3);
+        expect(output()).toEqual([4]);
+
+        origin.push(4);
+        expect(output()).toEqual([4, 16]);
+
+        const removed = origin.shift(); // Remove 1
+        expect(output()).toEqual([4, 16]);
+
+        origin.shift(); // Remove "2"
+        expect(output()).toEqual([16]);
+    });
 });
