@@ -29,7 +29,7 @@ export class ComputedObservable<T> extends Observable<T> {
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }
-        accessor.subscription = accessor.subscribe((val: T) => accessor.value = val, (e: Error) => {});
+        accessor.subscription = accessor.subscribe((val: T) => accessor.value = val, console.error);
         accessor[Symbol.observable] = () => accessor;
         return accessor;
     }
