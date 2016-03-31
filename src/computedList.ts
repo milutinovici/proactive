@@ -45,7 +45,10 @@ export class ComputedListObservable<T> extends ComputedObservable<T[]> {
     reduceList<R>(fn: (x: R, y: T) => R, initial: R): Computed<R> {
         return this.map(x => x.reduce(fn, initial)).toComputed();
     }
-
+    static whenAny<T>(observables: Observable<Observable<T>[]>): ComputedList<T> {
+        let obs: any = observables.mergeMap<T[]>(array => Observable.combineLatest<T[]>(array));
+        return obs.toComputedList();
+    }
 }
 
 export interface ComputedList<T> extends ComputedListObservable<T>, Func<T[]>, Disposable {
