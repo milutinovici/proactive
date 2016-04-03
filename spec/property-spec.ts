@@ -1,5 +1,5 @@
 ﻿import * as Rx from "rxjs/Rx";
-import { px } from "../src/proactive";
+import * as px from "../src/proactive";
 
 describe("Observable Properties", () => {
     it("can be created using factory method", () => {

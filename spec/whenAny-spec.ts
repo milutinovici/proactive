@@ -1,4 +1,4 @@
-import { px } from "../src/proactive";
+import * as px from "../src/proactive";
 
 describe("Computed Properties", () => {
     it("map list of observables", () => {

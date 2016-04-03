@@ -1,5 +1,4 @@
-import { px } from "../src/proactive";
-import { List } from "../src/list";
+import * as px from "../src/proactive";
 
 describe("Projected Observable List", () => {
     let stringOrderer = (a: any, b: any) => {

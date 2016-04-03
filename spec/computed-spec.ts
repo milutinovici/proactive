@@ -1,5 +1,5 @@
 ﻿import { Observable, Subject, BehaviorSubject } from "rxjs/Rx";
-import { px } from "../src/proactive";
+import * as px from "../src/proactive";
 
 describe("Computed Properties", () => {
     it("can be created using factory method", () => {

@@ -1,6 +1,4 @@
-import { px } from "../src/proactive";
-import { List } from "../src/list";
-import { Observable, Subject, Symbol } from "rxjs/Rx";
+import * as px from "../src/proactive";
 
 describe("Observable List", () => {
     it("is correctly initialized from default value", () => {

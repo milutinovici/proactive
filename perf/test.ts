@@ -1,5 +1,5 @@
 import { Suite } from "benchmark";
-import { px } from "../src/proactive";
+import * as px from "../src/proactive";
 
 const suite = new Suite("Search");
 
