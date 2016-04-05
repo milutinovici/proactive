@@ -140,4 +140,19 @@ describe("Projected Observable List", () => {
         origin.push(4);
         expect(output()).toEqual(7);
     });
+    it("should flatten elements using flatMap", () => {
+        let input = [[2, 3], [5, 7]];
+        let origin = px.list(input);
+        let output = origin.flatMapList(x => x);
+        expect(output()).toEqual([2, 3, 5, 7]);
+
+        origin.push([1, 4]);
+        expect(output()).toEqual([2, 3, 5, 7, 1, 4]);
+
+        const removed = origin.shift();
+        expect(output()).toEqual([5, 7, 1, 4]);
+
+        origin.pop();
+        expect(output()).toEqual([5, 7]);
+    });
 });

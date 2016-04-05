@@ -25,25 +25,29 @@ export class ComputedListObservable<T> extends ComputedObservable<T[]> {
     }
 
     mapList<R>(fn: (x: T, ix?: number) => R): ComputedList<R> {
-        const obs: any = this.map(x => x.map(fn));
+        const obs: any = this.map(array => array.map(fn));
         return obs.toComputedList();
     }
     filterList(fn: (x: T, ix?: number) => boolean): ComputedList<T> {
-        const obs: any = this.map(x => x.filter(fn));
+        const obs: any = this.map(array => array.filter(fn));
         return obs.toComputedList();
     }
     sortList(fn: (x: T, y: T) => number): ComputedList<T> {
-        const obs: any = this.map(x => x.sort(fn));
+        const obs: any = this.map(array => array.sort(fn));
         return obs.toComputedList();
     }
     everyList(fn: (x: T, ix?: number) => boolean): Computed<boolean> {
-        return this.map(x => x.every(fn)).toComputed();
+        return this.map(array => array.every(fn)).toComputed();
     }
     someList(fn: (x: T, ix?: number) => boolean): Computed<boolean> {
-        return this.map(x => x.some(fn)).toComputed();
+        return this.map(array => array.some(fn)).toComputed();
     }
     reduceList<R>(fn: (x: R, y: T) => R, initial: R): Computed<R> {
-        return this.map(x => x.reduce(fn, initial)).toComputed();
+        return this.map(array => array.reduce(fn, initial)).toComputed();
+    }
+    flatMapList<R>(fn: (x: T) => R[]): ComputedList<R> {
+        const obs: any = this.map(array => array.reduce((cumulus: R[], next: T) => [...cumulus, ...fn(next)], <R[]> []));
+        return obs.toComputedList();
     }
     static whenAny<T>(observables: Observable<Observable<T>[]>): ComputedList<T> {
         let obs: any = observables.mergeMap<T[]>(array => Observable.combineLatest<T[]>(array));
