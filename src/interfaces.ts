@@ -1,4 +1,4 @@
-import { Observable, Subscription } from "rxjs/Rx";
+import { Observable, Subscription, Observer } from "rxjs/Rx";
 
 export interface Func<T> {
     (): T;
@@ -13,5 +13,5 @@ export interface Disposable {
 export interface Computed<T> extends Observable<T>, Func<T>, Disposable {
 }
 
-export interface Property<T> extends Observable<T>, Func<T>, Action<T> {
+export interface Property<T> extends Observable<T>, Func<T>, Action<T>, Observer<T> {
 }

@@ -67,4 +67,11 @@ describe("Observable List", () => {
         items.sort((x, y) => x < y ? 1 : -1);
         expect(items()).toEqual([3, 2, 1]);
     });
+    it("list is also an observer", () => {
+        const items1 = px.list([1, 2, 3]);
+        const items2 = px.list([]);
+        items1.subscribe(items2);
+        items1.push(4);
+        expect(items2()).toEqual([1, 2, 3, 4]);
+    });
 });

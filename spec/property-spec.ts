@@ -139,4 +139,10 @@ describe("Observable Properties", () => {
         const ratio = prop1.combineLatest(prop2, (p1: number, p2: number) => p1 / p2).toComputed();
         expect(ratio()).toEqual(2);
     });
+    it("property is also an observer", () => {
+        const prop1 = px.property<number>(4);
+        const prop2 = px.property<number>();
+        prop1.subscribe(prop2);
+        expect(prop2()).toEqual(4);
+    });
 });

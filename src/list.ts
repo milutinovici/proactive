@@ -1,16 +1,28 @@
-import { Observable, BehaviorSubject, Symbol } from "rxjs/Rx";
+import { Observable, BehaviorSubject, Symbol, Observer } from "rxjs/Rx";
 import { ComputedListObservable } from "./computedList";
 import { Computed, Func, Action } from "./interfaces";
 
-export class ListObservable<T> extends ComputedListObservable<T> {
+export class ListObservable<T> extends ComputedListObservable<T> implements Observer<T[]> {
     protected source: BehaviorSubject<T[]>;
+    
     constructor(initial: T[] = []) {
         super(new BehaviorSubject<T[]>(initial), initial);
     }
+    
     protected setValue(value: T[]) {
         this.value = value;
         this.source.next(value);
     }
+    public next(value: T[]) {
+        this.source.next(value)
+    }
+    public error(err?: any) {
+        this.source.error(err);
+    }
+    public complete() {
+        this.source.complete();
+    }
+    
     static createList<T>(initial: T[]): List<T> {
         const accessor: any = function<T>(value: T[]) {
             if (arguments.length > 0) {
@@ -24,6 +36,7 @@ export class ListObservable<T> extends ComputedListObservable<T> {
             accessor[attrname] = observable[attrname];
         }
         accessor[Symbol.observable] = () => accessor;
+        accessor[Symbol.rxSubscriber] = () => accessor;
         return accessor;
     }
     push(...items: T[]): void {
