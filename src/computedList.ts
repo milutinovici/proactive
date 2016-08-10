@@ -33,7 +33,7 @@ export class ComputedListObservable<T> extends ComputedObservable<T[]> {
         return obs.toComputedList();
     }
     sortList(fn: (x: T, y: T) => number): ComputedList<T> {
-        const obs: any = this.map(array => array.sort(fn));
+        const obs: any = this.map(array => array.slice().sort(fn));
         return obs.toComputedList();
     }
     everyList(fn: (x: T, ix?: number) => boolean): Computed<boolean> {
