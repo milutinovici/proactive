@@ -62,6 +62,14 @@ describe("Observable List", () => {
         expect(removed).toEqual([2, 3, 4]);
         expect(latest).toEqual([1, 5]);
     });
+    it("reverse should reverse items", () => {
+        const items = px.list([1, 2, 3]);
+        let reversed: number[] = [];
+        items.subscribe(x => reversed = x);
+        items.reverse();
+        expect(items()).toEqual([3, 2, 1]);
+        expect(reversed).toEqual([3, 2, 1]);
+    });
     it("sort should sort items", () => {
         const items = px.list([1, 2, 3]);
         items.sort((x, y) => x < y ? 1 : -1);

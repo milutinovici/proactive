@@ -83,7 +83,7 @@ export class ListObservable<T> extends ComputedListObservable<T> implements Obse
     }
     reverse(): void {
         const old = this.getValue();
-        const reversed = old.slice().reverse();
+        const reversed = old.reverse();
         this.setValue(reversed);
     }
     sort(fn: (a: T, b: T) => number): void {
