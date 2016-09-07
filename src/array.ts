@@ -1,20 +1,20 @@
-import { Observable, BehaviorSubject, Symbol, Observer } from "rxjs/Rx";
-import { ComputedArray, ComputedArrayImpl } from "./computedArray";
-import { ComputedValue, Func, Action } from "./interfaces";
+import { BehaviorSubject, Symbol, Observer } from "rxjs/Rx";
+import { ComputedArrayImpl } from "./computedArray";
+import { Func, Action } from "./interfaces";
 
 export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Observer<T[]> {
     protected source: BehaviorSubject<T[]>;
-    
+
     constructor(initial: T[] = []) {
         super(new BehaviorSubject<T[]>(initial), initial);
     }
-    
-    protected setValue(value: T[]) {
+
+    public setValue(value: T[]) {
         this.value = value;
         this.source.next(value);
     }
     public next(value: T[]) {
-        this.source.next(value)
+        this.source.next(value);
     }
     public error(err?: any) {
         this.source.error(err);
@@ -22,8 +22,8 @@ export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Observer<T[]> 
     public complete() {
         this.source.complete();
     }
-    
-    static createArray<T>(initial: T[]): ObservableArray<T> {
+
+    public static createArray<T>(initial: T[]): ObservableArray<T> {
         const accessor: any = function<T>(value: T[]) {
             if (arguments.length > 0) {
                 accessor.setValue(value);
@@ -39,34 +39,35 @@ export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Observer<T[]> 
         accessor[Symbol.rxSubscriber] = () => accessor;
         return accessor;
     }
-    push(...items: T[]): void {
+
+    public push(...items: T[]): void {
         if (items === null || items === undefined) {
             throw Error("items null/undefined");
         }
         const old = this.getValue();
         this.setValue(old.concat(items));
     }
-    pop(): T {
+    public pop(): T {
         const old = this.getValue();
         const last = old[old.length - 1];
         this.setValue(old.slice(0, old.length - 1));
         return last;
     }
-    unshift(...items: T[]): void {
+    public unshift(...items: T[]): void {
         if (items === null || items === undefined) {
             throw Error("items null/undefined");
         }
         const old = this.getValue();
         this.setValue(items.concat(old));
     }
-    shift(): T {
+    public shift(): T {
         const old = this.getValue();
         const first = old[0];
         const retained = old.slice(1, old.length);
         this.setValue(retained);
         return first;
     }
-    remove(fn: (element: T) => boolean): T[] {
+    public remove(fn: (element: T) => boolean): T[] {
         const old = this.getValue();
         const removed: T[] = [];
         const retained: T[] = [];
@@ -81,17 +82,17 @@ export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Observer<T[]> 
         this.setValue(retained);
         return removed;
     }
-    reverse(): void {
+    public reverse(): void {
         const old = this.getValue();
         const reversed = old.reverse();
         this.setValue(reversed);
     }
-    sort(fn: (a: T, b: T) => number): void {
+    public sort(fn: (a: T, b: T) => number): void {
         const old = this.getValue();
         const sorted: T[] = old.slice().sort(fn);
         this.setValue(sorted);
     }
-    splice(start: number, deleteCount: number): T[] {
+    public splice(start: number, deleteCount: number): T[] {
         const old = this.getValue();
         const retained1 = old.slice(0, start);
         const retained2 = old.slice(start + deleteCount, old.length);
@@ -99,12 +100,12 @@ export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Observer<T[]> 
         this.setValue(retained1.concat(retained2));
         return removed;
     }
-    clear(): T[] {
+    public clear(): T[] {
         const old = this.getValue();
-        this.setValue(<T[]>[]);
+        this.setValue(<T[]> []);
         return old;
     }
+
 }
 export interface ObservableArray<T> extends ArrayImpl<T>, Func<T[]>, Action<T[]> {
 }
-

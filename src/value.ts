@@ -8,13 +8,13 @@ export class ObservableValueImpl<T> extends ComputedValueImpl<T> implements Obse
     constructor(initial: T) {
         super(new BehaviorSubject<T>(initial), initial);
     }
-    
-    protected setValue(value: T) {
+
+    public setValue(value: T) {
         this.value = value;
         this.source.next(value);
     }
     public next(value: T) {
-        this.source.next(value)
+        this.source.next(value);
     }
     public error(err?: any) {
         this.source.error(err);
@@ -22,8 +22,8 @@ export class ObservableValueImpl<T> extends ComputedValueImpl<T> implements Obse
     public complete() {
         this.source.complete();
     }
-    
-    static createValue<T>(initial: T): ObservableValue<T> {
+
+    public static createValue<T>(initial: T): ObservableValue<T> {
         const accessor: any = function<T>(value: T) {
             if (arguments.length > 0) {
                 accessor.setValue(value);

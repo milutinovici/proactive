@@ -1,6 +1,6 @@
 import { Observable, Subscription, Symbol } from "rxjs/Rx";
 import { PartialObserver } from "rxjs/Observer";
-import { Func, Disposable, ComputedValue } from "./interfaces";
+import { ComputedValue } from "./interfaces";
 
 export class ComputedValueImpl<T> extends Observable<T> {
     protected source: Observable<T>;
@@ -12,15 +12,15 @@ export class ComputedValueImpl<T> extends Observable<T> {
         this.source = source.distinctUntilChanged();
     }
 
-    subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void), error?: (error: any) => void, complete?: () => void): Subscription {
+    public subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void), error?: (error: any) => void, complete?: () => void): Subscription {
         return this.source.subscribe(observerOrNext, error, complete);
     }
-    getValue(): T {
+    public getValue(): T {
         return this.value;
     }
-    static createComputed<T>(source: Observable<T>): ComputedValue<T> {
+    public static createComputed<T>(source: Observable<T>): ComputedValue<T> {
         if ("call" in source && "source" in source) {
-            return <ComputedValue<T>>source;
+            return <ComputedValue<T>> source;
         }
         const accessor: any = function(): T {
             return accessor.getValue();
@@ -33,7 +33,7 @@ export class ComputedValueImpl<T> extends Observable<T> {
         accessor[Symbol.observable] = () => accessor;
         return accessor;
     }
-    toString(): string {
+    public toString(): string {
         return this.getValue().toString();
     }
 }
