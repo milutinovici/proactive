@@ -20,10 +20,7 @@ export class ComputedArrayImpl<T> extends ComputedValueImpl<T[]> {
         accessor[Symbol.observable] = () => accessor;
         return accessor;
     }
-    isEmpty(): boolean {
-        return this.value.length === 0;
-    }
-
+    
     mapArray<R>(fn: (x: T, ix?: number) => R): ComputedArray<R> {
         const obs: any = this.map(array => array.map(fn));
         return obs.toComputedArray();
