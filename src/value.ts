@@ -1,8 +1,8 @@
 import { BehaviorSubject, Symbol, Observer } from "rxjs/Rx";
-import { Property } from "./interfaces";
-import { ComputedObservable } from "./computed";
+import { ObservableValue } from "./interfaces";
+import { ComputedValueImpl } from "./computed";
 
-export class PropertyObservable<T> extends ComputedObservable<T> implements Observer<T> {
+export class ObservableValueImpl<T> extends ComputedValueImpl<T> implements Observer<T> {
     protected source: BehaviorSubject<T>;
 
     constructor(initial: T) {
@@ -23,7 +23,7 @@ export class PropertyObservable<T> extends ComputedObservable<T> implements Obse
         this.source.complete();
     }
     
-    static createProperty<T>(initial: T): Property<T> {
+    static createValue<T>(initial: T): ObservableValue<T> {
         const accessor: any = function<T>(value: T) {
             if (arguments.length > 0) {
                 accessor.setValue(value);
@@ -31,7 +31,7 @@ export class PropertyObservable<T> extends ComputedObservable<T> implements Obse
                 return accessor.getValue();
             }
         };
-        const observable = new PropertyObservable(initial);
+        const observable = new ObservableValueImpl(initial);
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }

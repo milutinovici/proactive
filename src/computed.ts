@@ -1,8 +1,8 @@
 import { Observable, Subscription, Symbol } from "rxjs/Rx";
 import { PartialObserver } from "rxjs/Observer";
-import { Func, Disposable, Computed } from "./interfaces";
+import { Func, Disposable, ComputedValue } from "./interfaces";
 
-export class ComputedObservable<T> extends Observable<T> {
+export class ComputedValueImpl<T> extends Observable<T> {
     protected source: Observable<T>;
     protected value: T;
 
@@ -18,14 +18,14 @@ export class ComputedObservable<T> extends Observable<T> {
     getValue(): T {
         return this.value;
     }
-    static createComputed<T>(source: Observable<T>): Computed<T> {
+    static createComputed<T>(source: Observable<T>): ComputedValue<T> {
         if ("call" in source && "source" in source) {
-            return <Computed<T>>source;
+            return <ComputedValue<T>>source;
         }
         const accessor: any = function(): T {
             return accessor.getValue();
         };
-        const observable = new ComputedObservable(source);
+        const observable = new ComputedValueImpl(source);
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }

@@ -3,39 +3,39 @@ import * as px from "../src/proactive";
 
 const suite = new Suite("Search");
 
-suite.add("ComputedList#filter", () => {
-        const list = px.list([]);
-        const even = list.filterList(x => x % 2 === 0);
+suite.add("ComputedArray#filter", () => {
+        const array = px.array([]);
+        const even = array.filterArray(x => x % 2 === 0);
         for (let i = 0; i < 100; i++) {
-            list.push(i);
+            array.push(i);
         }
     })
-     .add("ComputedList#map", () => {
-        const list = px.list([]);
-        const even = list.mapList(x => x % 2 === 0);
+     .add("ComputedArray#map", () => {
+        const array = px.array([]);
+        const even = array.mapArray(x => x % 2 === 0);
         for (let i = 0; i < 100; i++) {
-            list.push(i);
+            array.push(i);
         }
     })
-    .add("ComputedList#some", () => {
-        const list = px.list([]);
-        const even = list.someList(x => x % 2 === 0);
+    .add("ComputedArray#some", () => {
+        const array = px.array([]);
+        const even = array.someArray(x => x % 2 === 0);
         for (let i = 0; i < 100; i++) {
-            list.push(i);
+            array.push(i);
         }
     })
-    .add("ComputedList#every", () => {
-        const list = px.list([]);
-        const even = list.everyList(x => x % 2 === 0);
+    .add("ComputedArray#every", () => {
+        const array = px.array([]);
+        const even = array.everyArray(x => x % 2 === 0);
         for (let i = 0; i < 100; i++) {
-            list.push(i);
+            array.push(i);
         }
     })
-    .add("ComputedList#reduce", () => {
-        const list = px.list([]);
-        const max = list.reduceList((x, y) => x > y ? x : y, undefined);
+    .add("ComputedArray#reduce", () => {
+        const array = px.array([]);
+        const max = array.reduceArray((x, y) => x > y ? x : y, undefined);
         for (let i = 0; i < 100; i++) {
-            list.push(i);
+            array.push(i);
         }
     });
 

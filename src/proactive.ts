@@ -1,17 +1,17 @@
 import "./observableExtensions";
 import { Observable } from "rxjs";
-import { Property, Computed } from "./interfaces";
-import { PropertyObservable } from "./property";
-import { ListObservable, List } from "./list";
-import { ComputedListObservable, ComputedList } from "./computedList";
+import { ObservableValue, ComputedValue } from "./interfaces";
+import { ObservableValueImpl } from "./value";
+import { ArrayImpl, ObservableArray } from "./array";
+import { ComputedArrayImpl, ComputedArray } from "./computedArray";
 
-export function property<T>(initial: T = undefined): Property<T> {
-    return PropertyObservable.createProperty(initial);
+export function value<T>(initial: T = undefined): ObservableValue<T> {
+    return ObservableValueImpl.createValue(initial);
 }
-export function list<T>(initial: T[] = []): List<T> {
-    return ListObservable.createList(initial);
+export function array<T>(initial: T[] = []): ObservableArray<T> {
+    return ArrayImpl.createArray(initial);
 }
-export function whenAny<T>(observables: Observable<Observable<T>[]>): ComputedList<T> {
-    return ComputedListObservable.whenAny(observables);
+export function whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
+    return ComputedArrayImpl.whenAny(observables);
 }
-export { Computed, Property, List, ComputedList  }
+export { ComputedValue, ObservableValue, ObservableArray, ComputedArray  }

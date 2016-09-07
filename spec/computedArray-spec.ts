@@ -1,6 +1,6 @@
 import * as px from "../src/proactive";
 
-describe("Projected Observable List", () => {
+describe("Projected Observable Array", () => {
     let stringOrderer = (a: any, b: any) => {
         if (a.toString() < b.toString()) return -1;
         if (a.toString() > b.toString()) return 1;
@@ -21,8 +21,8 @@ describe("Projected Observable List", () => {
 
     it("should follow base collection", () => {
         const input = ["Foo", "Bar", "Baz", "Bamf"];
-        const origin = px.list(input);
-        const output = origin.mapList(x => x.toUpperCase());
+        const origin = px.array(input);
+        const output = origin.mapArray(x => x.toUpperCase());
 
         expect(input.length).toEqual(output().length);
 
@@ -44,8 +44,8 @@ describe("Projected Observable List", () => {
 
     it("should be filtered", () => {
         let input = ["Foo", "Bar", "Baz", "Bamf"];
-        let origin = px.list(input);
-        let output = origin.filterList(x => x.toUpperCase().indexOf("F") !== -1);
+        let origin = px.array(input);
+        let output = origin.filterArray(x => x.toUpperCase().indexOf("F") !== -1);
         expect(output()).toEqual(["Foo", "Bamf"]);
 
         origin.push("Boof");
@@ -63,9 +63,9 @@ describe("Projected Observable List", () => {
 
     it("should be sorted", () => {
         let input = ["Foo", "Bar", "Baz"];
-        let origin = px.list<string>(input);
+        let origin = px.array<string>(input);
 
-        let output = origin.sortList(stringOrderer);
+        let output = origin.sortArray(stringOrderer);
 
         expect(["Bar", "Baz", "Foo"]).toEqual(output());
 
@@ -78,8 +78,8 @@ describe("Projected Observable List", () => {
 
     it("chaining works", () => {
         let input = ["Foo", "Bar", "Baz", "Bamf"];
-        let origin = px.list(input);
-        let output = origin.mapList(x => x.toUpperCase()).filterList(x => x.indexOf("F") !== -1);
+        let origin = px.array(input);
+        let output = origin.mapArray(x => x.toUpperCase()).filterArray(x => x.indexOf("F") !== -1);
         expect(output()).toEqual(["FOO", "BAMF"]);
 
         origin.push("Boof");
@@ -97,8 +97,8 @@ describe("Projected Observable List", () => {
 
     it("should check if every element satisfies selector", () => {
         let input = [1, 2, 4, 6];
-        let origin = px.list(input);
-        let output = origin.everyList(x => x % 2 === 0);
+        let origin = px.array(input);
+        let output = origin.everyArray(x => x % 2 === 0);
         expect(output()).toBeFalsy();
 
         origin.push(8);
@@ -112,8 +112,8 @@ describe("Projected Observable List", () => {
     });
     it("should check if any element satisfies selector", () => {
         let input = [2, 3, 5, 7];
-        let origin = px.list(input);
-        let output = origin.someList(x => x % 2 === 0);
+        let origin = px.array(input);
+        let output = origin.someArray(x => x % 2 === 0);
         expect(output()).toBeTruthy();
 
         origin.push(9);
@@ -125,10 +125,10 @@ describe("Projected Observable List", () => {
         origin.push(4);
         expect(output()).toBeTruthy();
     });
-    it("should get max element of list using reduce", () => {
+    it("should get max element of Array using reduce", () => {
         let input = [2, 3, 5, 7, 1, 4];
-        let origin = px.list(input);
-        let output = origin.reduceList((x, y) => x > y ? x : y, undefined);
+        let origin = px.array(input);
+        let output = origin.reduceArray((x, y) => x > y ? x : y, undefined);
         expect(output()).toEqual(7);
 
         origin.push(9);
@@ -142,8 +142,8 @@ describe("Projected Observable List", () => {
     });
     it("should flatten elements using flatMap", () => {
         let input = [[2, 3], [5, 7]];
-        let origin = px.list(input);
-        let output = origin.flatMapList(x => x);
+        let origin = px.array(input);
+        let output = origin.flatMapArray(x => x);
         expect(output()).toEqual([2, 3, 5, 7]);
 
         origin.push([1, 4]);

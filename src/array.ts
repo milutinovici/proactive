@@ -1,8 +1,8 @@
 import { Observable, BehaviorSubject, Symbol, Observer } from "rxjs/Rx";
-import { ComputedListObservable } from "./computedList";
-import { Computed, Func, Action } from "./interfaces";
+import { ComputedArray, ComputedArrayImpl } from "./computedArray";
+import { ComputedValue, Func, Action } from "./interfaces";
 
-export class ListObservable<T> extends ComputedListObservable<T> implements Observer<T[]> {
+export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Observer<T[]> {
     protected source: BehaviorSubject<T[]>;
     
     constructor(initial: T[] = []) {
@@ -23,7 +23,7 @@ export class ListObservable<T> extends ComputedListObservable<T> implements Obse
         this.source.complete();
     }
     
-    static createList<T>(initial: T[]): List<T> {
+    static createArray<T>(initial: T[]): ObservableArray<T> {
         const accessor: any = function<T>(value: T[]) {
             if (arguments.length > 0) {
                 accessor.setValue(value);
@@ -31,7 +31,7 @@ export class ListObservable<T> extends ComputedListObservable<T> implements Obse
                 return accessor.getValue();
             }
         };
-        const observable = new ListObservable(initial);
+        const observable = new ArrayImpl(initial);
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }
@@ -105,6 +105,6 @@ export class ListObservable<T> extends ComputedListObservable<T> implements Obse
         return old;
     }
 }
-export interface List<T> extends ListObservable<T>, Func<T[]>, Action<T[]> {
+export interface ObservableArray<T> extends ArrayImpl<T>, Func<T[]>, Action<T[]> {
 }
 

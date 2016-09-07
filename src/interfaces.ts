@@ -10,8 +10,8 @@ export interface Disposable {
     subscription: Subscription;
 }
 
-export interface Computed<T> extends Observable<T>, Func<T>, Disposable {
+export interface ComputedValue<T> extends Observable<T>, Func<T>, Disposable {
 }
 
-export interface Property<T> extends Observable<T>, Func<T>, Action<T>, Observer<T> {
+export interface ObservableValue<T> extends Observable<T>, Func<T>, Action<T>, Observer<T> {
 }

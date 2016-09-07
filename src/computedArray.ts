@@ -1,18 +1,18 @@
 import { Observable, Subject, Symbol } from "rxjs/Rx";
-import { ComputedObservable } from "./computed";
-import { Func, Disposable, Computed } from "./interfaces";
+import { ComputedValueImpl } from "./computed";
+import { Func, Disposable, ComputedValue } from "./interfaces";
 
-export class ComputedListObservable<T> extends ComputedObservable<T[]> {
+export class ComputedArrayImpl<T> extends ComputedValueImpl<T[]> {
 
     constructor(source: Observable<T[]>, initial?: T[]) {
         super(source, initial);
     }
 
-    static createComputedList<T>(source: Observable<T[]>): ComputedList<T> {
+    static createComputedArray<T>(source: Observable<T[]>): ComputedArray<T> {
         const accessor: any = function<T>() {
             return accessor.getValue();
         };
-        const observable = new ComputedListObservable(source);
+        const observable = new ComputedArrayImpl(source);
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }
@@ -24,36 +24,36 @@ export class ComputedListObservable<T> extends ComputedObservable<T[]> {
         return this.value.length === 0;
     }
 
-    mapList<R>(fn: (x: T, ix?: number) => R): ComputedList<R> {
+    mapArray<R>(fn: (x: T, ix?: number) => R): ComputedArray<R> {
         const obs: any = this.map(array => array.map(fn));
-        return obs.toComputedList();
+        return obs.toComputedArray();
     }
-    filterList(fn: (x: T, ix?: number) => boolean): ComputedList<T> {
+    filterArray(fn: (x: T, ix?: number) => boolean): ComputedArray<T> {
         const obs: any = this.map(array => array.filter(fn));
-        return obs.toComputedList();
+        return obs.toComputedArray();
     }
-    sortList(fn: (x: T, y: T) => number): ComputedList<T> {
+    sortArray(fn: (x: T, y: T) => number): ComputedArray<T> {
         const obs: any = this.map(array => array.slice().sort(fn));
-        return obs.toComputedList();
+        return obs.toComputedArray();
     }
-    everyList(fn: (x: T, ix?: number) => boolean): Computed<boolean> {
+    everyArray(fn: (x: T, ix?: number) => boolean): ComputedValue<boolean> {
         return this.map(array => array.every(fn)).toComputed();
     }
-    someList(fn: (x: T, ix?: number) => boolean): Computed<boolean> {
+    someArray(fn: (x: T, ix?: number) => boolean): ComputedValue<boolean> {
         return this.map(array => array.some(fn)).toComputed();
     }
-    reduceList<R>(fn: (x: R, y: T) => R, initial: R): Computed<R> {
+    reduceArray<R>(fn: (x: R, y: T) => R, initial: R): ComputedValue<R> {
         return this.map(array => array.reduce(fn, initial)).toComputed();
     }
-    flatMapList<R>(fn: (x: T) => R[]): ComputedList<R> {
+    flatMapArray<R>(fn: (x: T) => R[]): ComputedArray<R> {
         const obs: any = this.map(array => array.reduce((cumulus: R[], next: T) => [...cumulus, ...fn(next)], <R[]> []));
-        return obs.toComputedList();
+        return obs.toComputedArray();
     }
-    static whenAny<T>(observables: Observable<Observable<T>[]>): ComputedList<T> {
+    static whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
         let obs: any = observables.mergeMap<T[]>(array => Observable.combineLatest<T[]>(array));
-        return obs.toComputedList();
+        return obs.toComputedArray();
     }
 }
 
-export interface ComputedList<T> extends ComputedListObservable<T>, Func<T[]>, Disposable {
+export interface ComputedArray<T> extends ComputedArrayImpl<T>, Func<T[]>, Disposable {
 }
