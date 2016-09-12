@@ -1,158 +1,152 @@
 import * as px from "../src/proactive";
+import * as it from "tape";
 
-describe("Projected Observable Array", () => {
-    let stringOrderer = (a: any, b: any) => {
+it("should follow base collection", expect => {
+    const input = ["Foo", "Bar", "Baz", "Bamf"];
+    const origin = px.array(input);
+    const output = origin.mapArray(x => x.toUpperCase());
+
+    expect.equal(input.length, output().length);
+
+    origin.push("Hello");
+    expect.equal(5, output().length);
+    expect.equal("Hello".toUpperCase(), output()[4]);
+
+    origin.pop();
+    expect.equal(4, output().length);
+
+    origin.unshift("Goodbye");
+    expect.equal(5, output().length);
+    expect.equal("Goodbye".toUpperCase(), output()[0]);
+
+    origin.clear();
+    expect.equal(0, output().length);
+    expect.end();
+});
+
+it("should be filtered", expect => {
+    const input = ["Foo", "Bar", "Baz", "Bamf"];
+    const origin = px.array(input);
+    const output = origin.filterArray(x => x.toUpperCase().indexOf("F") !== -1);
+    expect.isEquivalent(output(), ["Foo", "Bamf"]);
+
+    origin.push("Boof");
+    expect.isEquivalent(output(), ["Foo", "Bamf", "Boof"]);
+
+    origin.push("Car");
+    expect.isEquivalent(output(), ["Foo", "Bamf", "Boof"]);
+
+    const removed = origin.remove(x => x === "Bar"); // Remove "Bar"
+    expect.isEquivalent(output(), ["Foo", "Bamf", "Boof"]);
+
+    origin.shift(); // Remove "Foo"
+    expect.isEquivalent(output(), ["Bamf", "Boof"]);
+    expect.end();
+});
+
+it("should be sorted", expect => {
+    const input = ["Foo", "Bar", "Baz"];
+    const origin = px.array<string>(input);
+
+    const stringOrderer = (a: any, b: any) => {
         if (a.toString() < b.toString()) return -1;
         if (a.toString() > b.toString()) return 1;
         return 0;
     };
 
-    let stringOrdererAsc = (a: string, b: string) => {
-        if (a != null && b != null)
-            return b.localeCompare(a);
+    const output = origin.sortArray(stringOrderer);
 
-        return 0;
-    };
+    expect.isEquivalent(["Bar", "Baz", "Foo"], output());
 
-    let numberOrderer = (a: number, b: number) => {
-        return a - b;
-    };
+    origin.push("Roo");
+    expect.isEquivalent(["Bar", "Baz", "Foo", "Roo"], output());
 
+    origin.push("Bar");
+    expect.isEquivalent(["Bar", "Bar", "Baz", "Foo", "Roo"], output());
+    expect.end();
+});
 
-    it("should follow base collection", () => {
-        const input = ["Foo", "Bar", "Baz", "Bamf"];
-        const origin = px.array(input);
-        const output = origin.mapArray(x => x.toUpperCase());
+it("chaining works", expect => {
+    const input = ["Foo", "Bar", "Baz", "Bamf"];
+    const origin = px.array(input);
+    const output = origin.mapArray(x => x.toUpperCase()).filterArray(x => x.indexOf("F") !== -1);
+    expect.isEquivalent(output(), ["FOO", "BAMF"]);
 
-        expect(input.length).toEqual(output().length);
+    origin.push("Boof");
+    expect.isEquivalent(output(), ["FOO", "BAMF", "BOOF"]);
 
-        origin.push("Hello");
-        expect(5).toEqual(output().length);
-        expect("Hello".toUpperCase()).toEqual(output()[4]);
+    origin.push("Car");
+    expect.isEquivalent(output(), ["FOO", "BAMF", "BOOF"]);
 
-        origin.pop();
-        expect(4).toEqual(output().length);
+    origin.remove(x => x === "Bar"); // Remove "Bar"
+    expect.isEquivalent(output(), ["FOO", "BAMF", "BOOF"]);
 
-        origin.unshift("Goodbye");
-        expect(5).toEqual(output().length);
-        expect("Goodbye".toUpperCase()).toEqual(output()[0]);
+    origin.shift(); // Remove "Foo"
+    expect.isEquivalent(output(), ["BAMF", "BOOF"]);
+    expect.end();
+});
 
-        origin.clear();
-        expect(0).toEqual(output().length);
-    });
+it("should check if every element satisfies selector", expect => {
+    const input = [1, 2, 4, 6];
+    const origin = px.array(input);
+    const output = origin.everyArray(x => x % 2 === 0);
+    expect.false(output());
 
+    origin.push(8);
+    expect.false(output());
 
-    it("should be filtered", () => {
-        let input = ["Foo", "Bar", "Baz", "Bamf"];
-        let origin = px.array(input);
-        let output = origin.filterArray(x => x.toUpperCase().indexOf("F") !== -1);
-        expect(output()).toEqual(["Foo", "Bamf"]);
+    const removed = origin.shift(); // Remove 1
+    expect.true(output());
 
-        origin.push("Boof");
-        expect(output()).toEqual(["Foo", "Bamf", "Boof"]);
+    origin.push(3);
+    expect.false(output());
+    expect.end();
+});
+it("should check if any element satisfies selector", expect => {
+    const input = [2, 3, 5, 7];
+    const origin = px.array(input);
+    const output = origin.someArray(x => x % 2 === 0);
+    expect.true(output());
 
-        origin.push("Car");
-        expect(output()).toEqual(["Foo", "Bamf", "Boof"]);
+    origin.push(9);
+    expect.true(output());
 
-        const removed = origin.remove(x => x === "Bar"); // Remove "Bar"
-        expect(output()).toEqual(["Foo", "Bamf", "Boof"]);
+    const removed = origin.shift(); // Remove 2
+    expect.false(output());
 
-        origin.shift(); // Remove "Foo"
-        expect(output()).toEqual(["Bamf", "Boof"]);
-    });
+    origin.push(4);
+    expect.true(output());
+    expect.end();
+});
+it("should get max element of Array using reduce", expect => {
+    const input = [2, 3, 5, 7, 1, 4];
+    const origin = px.array(input);
+    const output = origin.reduceArray((x, y) => x > y ? x : y, undefined);
+    expect.equal(output(), 7);
 
-    it("should be sorted", () => {
-        let input = ["Foo", "Bar", "Baz"];
-        let origin = px.array<string>(input);
+    origin.push(9);
+    expect.equal(output(), 9);
 
-        let output = origin.sortArray(stringOrderer);
+    const removed = origin.pop();
+    expect.equal(output(), 7);
 
-        expect(["Bar", "Baz", "Foo"]).toEqual(output());
+    origin.push(4);
+    expect.equal(output(), 7);
+    expect.end();
+});
+it("should flatten elements using flatMap", expect => {
+    const input = [[2, 3], [5, 7]];
+    const origin = px.array(input);
+    const output = origin.flatMapArray(x => x);
+    expect.isEquivalent(output(), [2, 3, 5, 7]);
 
-        origin.push("Roo");
-        expect(["Bar", "Baz", "Foo", "Roo"]).toEqual(output());
+    origin.push([1, 4]);
+    expect.isEquivalent(output(), [2, 3, 5, 7, 1, 4]);
 
-        origin.push("Bar");
-        expect(["Bar", "Bar", "Baz", "Foo", "Roo"]).toEqual(output());
-    });
+    const removed = origin.shift();
+    expect.isEquivalent(output(), [5, 7, 1, 4]);
 
-    it("chaining works", () => {
-        let input = ["Foo", "Bar", "Baz", "Bamf"];
-        let origin = px.array(input);
-        let output = origin.mapArray(x => x.toUpperCase()).filterArray(x => x.indexOf("F") !== -1);
-        expect(output()).toEqual(["FOO", "BAMF"]);
-
-        origin.push("Boof");
-        expect(output()).toEqual(["FOO", "BAMF", "BOOF"]);
-
-        origin.push("Car");
-        expect(output()).toEqual(["FOO", "BAMF", "BOOF"]);
-
-        origin.remove(x => x === "Bar"); // Remove "Bar"
-        expect(output()).toEqual(["FOO", "BAMF", "BOOF"]);
-
-        origin.shift(); // Remove "Foo"
-        expect(output()).toEqual(["BAMF", "BOOF"]);
-    });
-
-    it("should check if every element satisfies selector", () => {
-        let input = [1, 2, 4, 6];
-        let origin = px.array(input);
-        let output = origin.everyArray(x => x % 2 === 0);
-        expect(output()).toBeFalsy();
-
-        origin.push(8);
-        expect(output()).toBeFalsy();
-
-        const removed = origin.shift(); // Remove 1
-        expect(output()).toBeTruthy();
-
-        origin.push(3);
-        expect(output()).toBeFalsy();
-    });
-    it("should check if any element satisfies selector", () => {
-        let input = [2, 3, 5, 7];
-        let origin = px.array(input);
-        let output = origin.someArray(x => x % 2 === 0);
-        expect(output()).toBeTruthy();
-
-        origin.push(9);
-        expect(output()).toBeTruthy();
-
-        const removed = origin.shift(); // Remove 2
-        expect(output()).toBeFalsy();
-
-        origin.push(4);
-        expect(output()).toBeTruthy();
-    });
-    it("should get max element of Array using reduce", () => {
-        let input = [2, 3, 5, 7, 1, 4];
-        let origin = px.array(input);
-        let output = origin.reduceArray((x, y) => x > y ? x : y, undefined);
-        expect(output()).toEqual(7);
-
-        origin.push(9);
-        expect(output()).toEqual(9);
-
-        const removed = origin.pop();
-        expect(output()).toEqual(7);
-
-        origin.push(4);
-        expect(output()).toEqual(7);
-    });
-    it("should flatten elements using flatMap", () => {
-        let input = [[2, 3], [5, 7]];
-        let origin = px.array(input);
-        let output = origin.flatMapArray(x => x);
-        expect(output()).toEqual([2, 3, 5, 7]);
-
-        origin.push([1, 4]);
-        expect(output()).toEqual([2, 3, 5, 7, 1, 4]);
-
-        const removed = origin.shift();
-        expect(output()).toEqual([5, 7, 1, 4]);
-
-        origin.pop();
-        expect(output()).toEqual([5, 7]);
-    });
+    origin.pop();
+    expect.isEquivalent(output(), [5, 7]);
+    expect.end();
 });

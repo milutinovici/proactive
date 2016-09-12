@@ -1,12 +1,12 @@
-import { BehaviorSubject, Symbol, Observer } from "rxjs/Rx";
+import * as Rx from "rxjs";
 import { ComputedArrayImpl } from "./computedArray";
 import { Func, Action } from "./interfaces";
 
-export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Observer<T[]> {
-    protected source: BehaviorSubject<T[]>;
+export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Rx.Observer<T[]> {
+    protected source: Rx.BehaviorSubject<T[]>;
 
     constructor(initial: T[] = []) {
-        super(new BehaviorSubject<T[]>(initial), initial);
+        super(new Rx.BehaviorSubject<T[]>(initial), initial);
     }
 
     public setValue(value: T[]) {
@@ -35,8 +35,8 @@ export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Observer<T[]> 
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }
-        accessor[Symbol.observable] = () => accessor;
-        accessor[Symbol.rxSubscriber] = () => accessor;
+        accessor[Rx.Symbol.observable] = () => accessor;
+        accessor[Rx.Symbol.rxSubscriber] = () => accessor;
         return accessor;
     }
 

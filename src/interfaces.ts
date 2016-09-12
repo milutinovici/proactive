@@ -1,4 +1,4 @@
-import { Observable, Subscription, Observer } from "rxjs/Rx";
+import { Observable, Subscription, Observer } from "rxjs";
 
 export interface Func<T> {
     (): T;

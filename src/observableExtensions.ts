@@ -1,4 +1,4 @@
-import { Observable } from "rxjs/Observable";
+import * as Rx from "rxjs";
 import { ComputedValue } from "./interfaces";
 import { ComputedValueImpl } from "./computed";
 import { ComputedArrayImpl, ComputedArray } from "./computedArray";
@@ -9,9 +9,9 @@ declare module "rxjs/Observable" {
     }
 }
 
-Observable.prototype.toComputed = function<T>(): ComputedValue<T> {
+Rx.Observable.prototype.toComputed = function<T>(): ComputedValue<T> {
     return ComputedValueImpl.createComputed<T>(this);
 };
-Observable.prototype["toComputedArray"] = function<T>(): ComputedArray<T> {
+Rx.Observable.prototype["toComputedArray"] = function<T>(): ComputedArray<T> {
     return ComputedArrayImpl.createComputedArray<T>(this);
 };

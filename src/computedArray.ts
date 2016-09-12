@@ -1,4 +1,4 @@
-import { Observable, Symbol } from "rxjs/Rx";
+import { Observable, Symbol } from "rxjs";
 import { ComputedValueImpl } from "./computed";
 import { Func, Disposable, ComputedValue } from "./interfaces";
 

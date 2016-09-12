@@ -1,24 +1,23 @@
-import { Observable, Subscription, Symbol } from "rxjs/Rx";
-import { PartialObserver } from "rxjs/Observer";
+import * as Rx from "rxjs";
 import { ComputedValue } from "./interfaces";
 
-export class ComputedValueImpl<T> extends Observable<T> {
-    protected source: Observable<T>;
+export class ComputedValueImpl<T> extends Rx.Observable<T> {
+    protected source: Rx.Observable<T>;
     protected value: T;
 
-    constructor(source: Observable<T>, initial?: T) {
+    constructor(source: Rx.Observable<T>, initial?: T) {
         super();
         this.value = initial;
         this.source = source.distinctUntilChanged();
     }
 
-    public subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void), error?: (error: any) => void, complete?: () => void): Subscription {
+    public subscribe(observerOrNext?: Rx.Observer<T> | ((value: T) => void), error?: (error: any) => void, complete?: () => void): Rx.Subscription {
         return this.source.subscribe(observerOrNext, error, complete);
     }
     public getValue(): T {
         return this.value;
     }
-    public static createComputed<T>(source: Observable<T>): ComputedValue<T> {
+    public static createComputed<T>(source: Rx.Observable<T>): ComputedValue<T> {
         if ("call" in source && "source" in source) {
             return <ComputedValue<T>> source;
         }
@@ -30,7 +29,7 @@ export class ComputedValueImpl<T> extends Observable<T> {
             accessor[attrname] = observable[attrname];
         }
         accessor.subscription = accessor.subscribe((val: T) => accessor.value = val, console.error);
-        accessor[Symbol.observable] = () => accessor;
+        accessor[Rx.Symbol.observable] = () => accessor;
         return accessor;
     }
     public toString(): string {

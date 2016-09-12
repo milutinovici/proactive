@@ -7,6 +7,12 @@
     ],
     "no-string-literal": false,
     "radix": false,
-    "jsdoc-format": false
+    "jsdoc-format": false,
+    "interface-name": [
+      false
+    ],
+    "member-ordering": [
+      false
+    ]
   }
 }
