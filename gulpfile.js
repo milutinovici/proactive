@@ -9,19 +9,19 @@ const typescript = require("typescript");
 const uglify = require("gulp-uglify");
 
 gulp.task("default",  () => {
-    const project = gulpTs.createProject("tsconfig.json");
+    const project = gulpTs.createProject("tsconfig.json", { typescript });
     return project.src().pipe(sourceMaps.init())
                         .pipe(gulpTs(project))
                         .pipe(sourceMaps.write())
                         .pipe(gulp.dest("./dist"));
 });
  
-gulp.task("test", ["default"], () => gulp.src("dist/spec/**/*.js").pipe(tape({ reporter: spec() })));
+gulp.task("test", ["default"], () => gulp.src("dist/spec/core/**/*.js").pipe(tape({ reporter: spec() })));
 
 gulp.task("bench",() => gulp.src("dist/perf/**/*.js", {read: false}).pipe(benchmark()));
 
 gulp.task("release",  () => {
-    const project = gulpTs.createProject({ outFile: "proactive.js", module: "amd", declaration: true, typescript: typescript });
+    const project = gulpTs.createProject("tsconfig.json", { outFile: "proactive.js", module: "amd", declaration: true, typescript: typescript });
     const result = gulp.src("src/**/*.ts").pipe(gulpTs(project));
     return merge([
 		result.dts

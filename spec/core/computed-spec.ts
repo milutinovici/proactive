@@ -1,5 +1,5 @@
 ﻿import * as Rx from "rxjs";
-import * as px from "../src/proactive";
+import * as px from "../../src/core/proactive";
 import * as it from "tape";
 
 it("can be created using factory method", expect => {

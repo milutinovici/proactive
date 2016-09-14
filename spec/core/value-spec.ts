@@ -1,5 +1,5 @@
 ﻿import * as Rx from "rxjs";
-import * as px from "../src/proactive";
+import * as px from "../../src/core/proactive";
 import * as it from "tape";
 
 it("can be created using factory method", expect => {
@@ -40,7 +40,7 @@ it("invoking it as a function with a parameter changes the valerty's value", exp
 });
 
 it("setting value to undefined works", expect => {
-    const val = px.value<number>();
+    const val = px.value<number | undefined>();
 
     val(3);
     expect.equal(val(), 3);

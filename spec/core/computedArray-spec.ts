@@ -1,4 +1,4 @@
-import * as px from "../src/proactive";
+import * as px from "../../src/core/proactive";
 import * as it from "tape";
 
 it("should follow base collection", expect => {
@@ -121,7 +121,7 @@ it("should check if any element satisfies selector", expect => {
 it("should get max element of Array using reduce", expect => {
     const input = [2, 3, 5, 7, 1, 4];
     const origin = px.array(input);
-    const output = origin.reduceArray((x, y) => x > y ? x : y, undefined);
+    const output = origin.reduceArray((x, y) => x > y ? x : y, 0);
     expect.equal(output(), 7);
 
     origin.push(9);

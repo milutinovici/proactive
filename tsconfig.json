@@ -7,16 +7,16 @@
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es5",
-    "outDir": "dist",
-    "module": "commonjs"
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strictNullChecks": false,
+    "lib": ["es5", "dom", "es2015.promise", "es2015.collection"]
   },
   "formatCodeOptions": {
     "indentSize": 2,
     "tabSize": 2
   },
    "exclude": [
-       "node_modules",
-       "typings/browser",
-       "typings/browser.d.ts"
+       "node_modules"
    ]
 }

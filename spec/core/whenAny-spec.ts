@@ -1,4 +1,4 @@
-import * as px from "../src/proactive";
+import * as px from "../../src/core/proactive";
 import * as it from "tape";
 
 it("map array of observables", expect => {

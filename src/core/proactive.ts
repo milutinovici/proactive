@@ -14,4 +14,4 @@ export function array<T>(initial: T[] = []): ObservableArray<T> {
 export function whenAny<T>(observables: Rx.Observable<Rx.Observable<T>[]>): ComputedArray<T> {
     return ComputedArrayImpl.whenAny(observables);
 }
-export { ComputedValue, ObservableValue, ObservableArray, ComputedArray }
+export { ComputedValue, ObservableValue, ObservableArray, ComputedArray };
