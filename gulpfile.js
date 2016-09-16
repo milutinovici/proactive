@@ -7,6 +7,12 @@ const sourceMaps = require("gulp-sourcemaps");
 const benchmark = require("gulp-benchmark");
 const typescript = require("typescript");
 const uglify = require("gulp-uglify");
+const browserify = require("browserify");
+const source = require("vinyl-source-stream");
+const buffer = require("vinyl-buffer");
+const tsify = require("tsify");
+const stringify = require("stringify");
+const vendors = ["rxjs"];
 
 gulp.task("default",  () => {
     const project = gulpTs.createProject("tsconfig.json", { typescript });
@@ -20,9 +26,9 @@ gulp.task("test", ["default"], () => gulp.src("dist/spec/core/**/*.js").pipe(tap
 
 gulp.task("bench",() => gulp.src("dist/perf/**/*.js", {read: false}).pipe(benchmark()));
 
-gulp.task("release",  () => {
+gulp.task("core",  () => {
     const project = gulpTs.createProject("tsconfig.json", { outFile: "proactive.js", module: "amd", declaration: true, typescript: typescript });
-    const result = gulp.src("src/**/*.ts").pipe(gulpTs(project));
+    const result = gulp.src("src/core/**/*.ts").pipe(gulpTs(project));
     return merge([
 		result.dts
                       .pipe(gulp.dest("./dist")),
@@ -31,3 +37,24 @@ gulp.task("release",  () => {
                       .pipe(gulp.dest("./dist"))
 	]);
 });
+gulp.task("ui",  () => {
+    const project = gulpTs.createProject("tsconfig.json", { outFile: "app.js", module: "amd", declaration: true, typescript: typescript });
+    const result = gulp.src("src/ui/**/*.ts").pipe(gulpTs(project));
+    return merge([
+		result.dts
+                      .pipe(gulp.dest("./dist")),
+		result.js
+                      .pipe(uglify())
+                      .pipe(gulp.dest("./dist"))
+	]);
+});
+
+gulp.task("uispec", () => browserify({ debug: true })
+                         .transform(stringify, { appliesTo: { includeExtensions: [".html"] }, minify: true })
+                        .add("spec/ui/bindings/binding-specs.ts")
+                        .plugin(tsify).bundle()
+                        .pipe(source("spec.js"))
+                        .pipe(buffer())
+                        //.pipe(uglify())
+                        .pipe(gulp.dest("./dist/"))
+                        );

@@ -1,0 +1,5 @@
+<label bind-text="selected"></label>
+<select bind-value="selected">
+    <option value="">Select value...</option>
+    <option bind-repeat="options" bind-text="$data" bind-value="$data"></option>
+</select>
