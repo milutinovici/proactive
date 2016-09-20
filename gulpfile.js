@@ -51,7 +51,7 @@ gulp.task("ui",  () => {
 
 gulp.task("uispec", () => browserify({ debug: true })
                          .transform(stringify, { appliesTo: { includeExtensions: [".html"] }, minify: true })
-                        .add("spec/ui/bindings/binding-specs.ts")
+                        .add("spec/ui/spec.ts")
                         .plugin(tsify).bundle()
                         .pipe(source("spec.js"))
                         .pipe(buffer())

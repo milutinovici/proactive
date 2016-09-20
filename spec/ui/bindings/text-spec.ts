@@ -80,7 +80,7 @@ it("binding to a observable model value", expect => {
     expect.end();
 });
 
-it("binding to a computed observable", expect => {
+it("binding to a view computed observable", expect => {
     const template = `<span bind-text="'hello ' + observableString">invalid</span>`;
     const el = <HTMLElement> util.parse(template)[0];
 
