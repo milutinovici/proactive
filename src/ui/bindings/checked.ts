@@ -12,9 +12,9 @@ export default class CheckedBinding extends BindingBase<boolean> {
     }
 
     public applyBindingInternal(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, ctx: IDataContext, state: INodeState<boolean>): void {
-        let tag = el.tagName.toLowerCase();
-        let isCheckBox = el.type === "checkbox";
-        let isRadioButton = el.type === "radio";
+        const tag = el.tagName.toLowerCase();
+        const isCheckBox = el.type === "checkbox";
+        const isRadioButton = el.type === "radio";
 
         if (tag !== "input" || (!isCheckBox && !isRadioButton)) {
             throw Error("checked-binding only operates on checkboxes and radio-buttons");

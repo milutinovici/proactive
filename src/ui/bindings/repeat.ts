@@ -19,7 +19,7 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
 
         // hook into getDataContext() to map state["index"] to ctx["$index"]
         this.domManager.registerDataContextExtension((node: Node, ctx: IForEachDataContext) => {
-            let state = <ForEachNodeState<T>> this.domManager.nodeState.get<T>(node);
+            const state = <ForEachNodeState<T>> this.domManager.nodeState.get<T>(node);
             if (state.index !== undefined) {
                 ctx.$index = state.index;
             }
@@ -27,18 +27,12 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
     }
 
     public applyBindingInternal(node: HTMLElement, obs: Rx.Observable<T[]>, ctx: IDataContext, state: INodeState<T[]>): void {
-        let placeholder = document.createComment("placeholder");
-
-        let elements: Node[] = [placeholder];
-
+        const placeholder = document.createComment("placeholder");
+        const elements: Node[] = [placeholder];
         let oldArray: T[] = [];
-        // add own disposables
-        state.cleanup.add(() => {
-            oldArray = null;
-        });
 
         // backup inner HTML
-        let parent = node.parentElement;
+        const parent = node.parentElement;
         parent.insertBefore(placeholder, node);
         parent.removeChild(node);
 

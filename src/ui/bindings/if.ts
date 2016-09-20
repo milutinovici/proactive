@@ -15,10 +15,8 @@ export class IfBinding extends BindingBase<boolean> {
     }
 
     protected applyBindingInternal(el: HTMLElement, observable: Rx.Observable<boolean>, ctx: IDataContext, state: INodeState<boolean>) {
-        let self = this;
-
         // backup inner HTML
-        let template = new Array<Node>();
+        const template = new Array<Node>();
         // template
         while (el.firstChild) {
             template.push(el.removeChild(el.firstChild));
@@ -26,20 +24,14 @@ export class IfBinding extends BindingBase<boolean> {
         const visibility = observable.map(x => !!x).distinctUntilChanged();
         // subscribe
         state.cleanup.add(visibility.subscribe(tryCatch<boolean>(x => {
-            self.applyValue(el, x, template, ctx);
+            this.applyValue(el, x, template, ctx);
         })));
-
-        // release closure references to GC
-        state.cleanup.add(new Rx.Subscription(() => {
-            self = null;
-            template = null;
-        }));
     }
 
     protected applyValue(el: HTMLElement, value: boolean, template: Array<Node>, ctx: IDataContext) {
 
         if (value) {
-            let nodes = template.map(x => x.cloneNode(true));
+            const nodes = template.map(x => x.cloneNode(true));
             for (let i = 0; i < template.length; i++) {
                 el.appendChild(nodes[i]);
             }
@@ -50,7 +42,7 @@ export class IfBinding extends BindingBase<boolean> {
 
     }
     private removeChildren(el: HTMLElement) {
-        let oldElements = nodeListToArray(el.childNodes);
+        const oldElements = nodeListToArray(el.childNodes);
         oldElements.forEach(x => {
             this.domManager.cleanNode(<HTMLElement> x);
             el.removeChild(x);

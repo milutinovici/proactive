@@ -33,6 +33,6 @@ export class ComputedValueImpl<T> extends Rx.Observable<T> {
         return accessor;
     }
     public toString(): string {
-        return this.getValue().toString();
+        return `${this.getValue()}`;
     }
 }

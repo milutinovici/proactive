@@ -14,10 +14,8 @@ export class CssBinding extends OneWayBindingBase<string> {
     }
 
     protected applyValue(el: HTMLElement, value: string, className: string): void {
-        let classes: Array<string>;
-
         if (className) {
-            classes = className.split(/\s+/).map(x => x.trim()).filter(x => <any> x);
+            const classes = className.split(/\s+/).map(x => x.trim()).filter(x => <any> x);
 
             if (classes.length) {
                 toggleCssClass.apply(null, [el, !!value].concat(<any> classes));
@@ -39,7 +37,7 @@ export class AttrBinding extends OneWayBindingBase<string | number | boolean> {
         // To cover cases like "attr: { checked:someProp }", we want to remove the attribute entirely
         // when someProp is a "no value"-like value (strictly null, false, or undefined)
         // (because the absence of the "checked" attr is how to mark an element as not checked, etc.)
-        let toRemove = (value === false) || (value === null) || (value === undefined);
+        const toRemove = (value === false) || (value === null) || (value === undefined);
         if (toRemove) {
             el.removeAttribute(attributeName);
         } else {

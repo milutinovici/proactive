@@ -40,7 +40,7 @@ export class NodeStateManager {
     }
 
     public isBound(node: Node): boolean {
-        let state = this.nodeState.get(node);
+        const state = this.nodeState.get(node);
 
         return state != null && !!state.isBound;
     }
@@ -54,12 +54,11 @@ export class NodeStateManager {
     }
 
     public clear(node: Node) {
-        let state = this.nodeState.get(node);
+        const state = this.nodeState.get(node);
 
         if (state != null) {
             if (state.cleanup != null) {
                 state.cleanup.unsubscribe();
-                state.cleanup = undefined;
             }
             state.model = undefined;
             // delete state itself

@@ -23,7 +23,7 @@ export class ObservableValueImpl<T> extends ComputedValueImpl<T> implements Rx.O
         this.source.complete();
     }
 
-    public static createValue<T>(initial: T): ObservableValue<T> {
+    public static createValue<T>(initial?: T): ObservableValue<T> {
         const accessor: any = function<T>(value: T) {
             if (arguments.length > 0) {
                 accessor.setValue(value);

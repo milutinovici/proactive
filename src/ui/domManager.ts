@@ -1,7 +1,7 @@
 import { DataContext, NodeStateManager } from "./nodeState";
 import { isElement } from "./utils";
 import { BindingProvider } from "./bindingProvider";
-import { IDataContext } from "./interfaces";
+import { IDataContext, INodeState } from "./interfaces";
 
 export class DomManager {
     public nodeState: NodeStateManager;
@@ -66,7 +66,7 @@ export class DomManager {
 
     public getDataContext(node: Node): IDataContext {
         let models: any[] = [];
-        let state = this.nodeState.get<any>(node);
+        let state: INodeState<any> | null = this.nodeState.get<any>(node);
 
         // collect model hierarchy
         let currentNode = node;

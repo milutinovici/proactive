@@ -25,7 +25,7 @@ export interface IBindingHandler<T> {
         * of the element such binding is encountered on. Instead
         * the handler will be responsible for that.
         **/
-        controlsDescendants?: boolean;
+        controlsDescendants: boolean;
        /**
         * Applies the binding to the specified element
         * @param {Node} node The target node
@@ -53,7 +53,7 @@ export interface INodeState<T> {
 }
 
 export interface IComponentDescriptor<T> {
-    template?: Node[] | string;
+    template: Node[] | string;
     viewModel?: T|(new (params: any) => T);
 }
 

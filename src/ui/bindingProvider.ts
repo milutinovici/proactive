@@ -10,8 +10,8 @@ export class BindingProvider {
 
     public getBindingHandlers(bindings: IBindingAttribute[]) {
         // lookup handlers
-        let pairs = bindings.map(x => {
-            let handler = app.bindings.getHandler<any>(x.name);
+        const pairs = bindings.map(x => {
+            const handler = app.bindings.getHandler<any>(x.name);
 
             if (!handler) {
                 throw Error(`binding '${x.name}' has not been registered.`);
@@ -22,7 +22,7 @@ export class BindingProvider {
         pairs.sort((a, b) => b.handler.priority - a.handler.priority);
 
         // check if there's binding-handler competition for descendants (which is illegal)
-        let hd = pairs.filter(x => x.handler.controlsDescendants).map(x => `'${x.binding.name}'`);
+        const hd = pairs.filter(x => x.handler.controlsDescendants).map(x => `'${x.binding.name}'`);
         if (hd.length > 1) {
             throw Error(`bindings ${hd.join(", ")} are competing for descendants of target element!`);
         }
@@ -38,7 +38,7 @@ export class BindingProvider {
             throw new Error("Only html elements can have bindings");
         }
         const bindings = this.getAttributeValues(element, bindingPrefix);
-        let tagName = element.tagName.toLowerCase();
+        const tagName = element.tagName.toLowerCase();
         if (app.components.isRegistered(tagName)) {
             return bindings.concat([this.customElementToBinding(element)]);
         }
@@ -57,7 +57,7 @@ export class BindingProvider {
 
     private customElementToBinding(element: HTMLElement): IBindingAttribute {
         // when a component is referenced as custom-element, apply a virtual 'component' binding
-        let tagName = element.tagName.toLowerCase();
+        const tagName = element.tagName.toLowerCase();
         const expression = compileBindingExpression<any>(`'${tagName}'`);
         return { expression: expression, name: "component" };
     }

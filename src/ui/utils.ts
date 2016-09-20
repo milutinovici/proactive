@@ -9,7 +9,7 @@ const regexCssClassName = /\S+/g;
 */
 export function unsubscribeMembers<T>(target: any): void {
     Object.keys(target).filter(propertyName => {
-        let disp = target[propertyName];
+        const disp = target[propertyName];
         return disp != null && isFunction(disp.unsubscribe);
     })
     .map(propertyName => target[propertyName])
@@ -19,7 +19,7 @@ export function unsubscribeMembers<T>(target: any): void {
 * Extracts the values of a Set by invoking its forEach method and capturing the output
 */
 export function setToArray<T>(src: any): Array<T> {
-    let result = new Array<T>();
+    const result = new Array<T>();
     src.forEach((x: T) => result.push(x));
     return result;
 }
@@ -70,7 +70,7 @@ export function isInputElement(target: Node): target is HTMLInputElement {
 */
 export function toggleCssClass(node: HTMLElement, shouldHaveClass: boolean, ...classNames: string[]): void {
     if (classNames) {
-        let currentClassNames: string[] = node.className.match(regexCssClassName) || [];
+        const currentClassNames: string[] = node.className.match(regexCssClassName) || [];
         let index: number;
         let className: string;
 
@@ -101,7 +101,7 @@ export function toggleCssClass(node: HTMLElement, shouldHaveClass: boolean, ...c
 * @param {string} className The classe to check
 */
 export function hasCssClass(node: HTMLElement, className: string): boolean {
-    let currentClassNames: string[] = node.className.match(regexCssClassName) || [];
+    const currentClassNames: string[] = node.className.match(regexCssClassName) || [];
     return currentClassNames.indexOf(className) !== -1;
 }
 
@@ -148,7 +148,7 @@ declare function require(modules: string[], successCB: (s: any) => any, errCB: (
 /**
 * Turns an AMD-Style require call into an observable
 * @param {string} Module The module to load
-* @return {Rx.Observable<any>} An observable that yields a value and completes as soon as the module has been loaded
+* @return {Rx.Observable<any>} An observable that yields a value and compconstes as soon as the module has been loaded
 */
 export function observableRequire<T>(module: string): Rx.Observable<T> {
     const requireFunc = require || (window != null ? window["require"] : null);

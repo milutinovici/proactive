@@ -15,18 +15,17 @@ export default class ComponentBinding<T> extends BindingBase<string> {
     }
 
     protected applyBindingInternal(element: HTMLElement, componentName: Rx.Observable<string>, ctx: IDataContext, state: INodeState<string>): void {
-        let componentParams = this.getParams(element, ctx, state);
+        const componentParams = this.getParams(element, ctx, state);
         let internal: Rx.Subscription;
 
         function doCleanup() {
             if (internal) {
                 internal.unsubscribe();
-                internal = null;
             }
         }
 
-        let obs = componentName.mergeMap(name => {
-            let component = app.components.load<T>(name, componentParams);
+        const obs = componentName.mergeMap(name => {
+            const component = app.components.load<T>(name, componentParams);
             if (component == null) {
                 exception.next(new Error(`component '${componentName}' is not registered with current module-context`));
             }
@@ -39,13 +38,13 @@ export default class ComponentBinding<T> extends BindingBase<string> {
             internal = new Rx.Subscription();
             // isolated nodestate and ctx
             if (component.viewModel) {
-                let componentState = this.domManager.nodeState.get<T>(element);
+                const componentState = this.domManager.nodeState.get<T>(element);
                 componentState["isolate"] = true;
                 componentState.model = component.viewModel;
                 ctx = this.domManager.getDataContext(element);
                 // auto-dispose view-model
                 if (isDisposable(component.viewModel)) {
-                    let sub = <Rx.Subscription> <any> component.viewModel;
+                    const sub = <Rx.Subscription> <any> component.viewModel;
                     internal.add(sub);
                 }
             }
@@ -64,7 +63,7 @@ export default class ComponentBinding<T> extends BindingBase<string> {
             }
             // clone template and inject
             for (let i = 0; i < template.length; i++) {
-                let node = template[i].cloneNode(true);
+                const node = template[i].cloneNode(true);
                 element.appendChild(node);
             }
         }

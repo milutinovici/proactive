@@ -132,17 +132,17 @@ import { isRxObservable, setToArray } from "./utils";
 //     }
 // }
 
-export function compileBindingExpression<T>(expression: string): ICompiledExpression<T> | null {
+export function compileBindingExpression<T>(expression: string): ICompiledExpression<T | null> {
     expression = expression.trim();
     if (expression === "") {
-        return null;
+        return ($context?, $element?) => null;
     }
 
     let functionBody = "with($context){with($data||{}){return " + expression + "}}";
     return <any> new Function("$context", "$element", functionBody);
 }
 
-export function evaluateExpression<T>(exp: ICompiledExpression<T>, ctx: IDataContext, element: Element): T {
+export function evaluateExpression<T>(exp: ICompiledExpression<T>, ctx: IDataContext, element: Element): T | null {
     try {
         // let locals = createLocals<T>(undefined, ctx);
         let result = exp(ctx, element);
@@ -153,41 +153,17 @@ export function evaluateExpression<T>(exp: ICompiledExpression<T>, ctx: IDataCon
     return null;
 }
 
-function createLocals<T>(captured: Set<Rx.Observable<T>>, ctx: IDataContext) {
-    let locals = {};
-    // let hooks = new RuntimeHooks<T>(captured);
-
-    // install property interceptor hooks
-    // locals["__hooks"] = hooks;
-
-    // injected context members into locals
-    let keys = Object.keys(ctx);
-    let length = keys.length;
-    for (let i = 0; i < length; i++) {
-        let key = keys[i];
-        locals[key] = ctx[key];
-    }
-    return locals;
-}
-
-export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDataContext, element: Element, evalObs?: Rx.Observer<boolean>): Rx.Observable<T> {
+export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDataContext, element: Element): Rx.Observable<T | null> {
     let captured = new Set<Rx.Observable<T>>();
     let locals: any;
     let result: T | Rx.Observable<T>;
 
     // initial evaluation
     try {
-        locals = createLocals(captured, ctx);
         result = exp(ctx, locals);
-
-        // diagnostics
-        if (evalObs) {
-            evalObs.next(true);
-        }
     } catch (e) {
         exception.next(e);
-
-        return Rx.Observable.of(undefined);
+        return Rx.Observable.of(null);
     }
 
     // Optimization: If the initial evaluation didn't touch any observables, treat it as constant expression
@@ -212,14 +188,13 @@ export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDat
 
     for (let i = 0; i < length; i++) {
         o = arr[i];
-        subs.set(o, o.publishReplay(null, 1).refCount().subscribe(allSeeingEye));
+        subs.set(o, o.publishReplay(undefined, 1).refCount().subscribe(allSeeingEye));
     }
 
     let obs: Rx.Observable<Rx.Observable<T>> = Rx.Observable.create((observer: Rx.Observer<Rx.Observable<T>>) => {
         let innerDisp = allSeeingEye.subscribe(trigger => {
             try {
                 let capturedNew = new Set<Rx.Observable<T>>();
-                locals = createLocals(capturedNew, ctx);
 
                 // evaluate and produce next value
                 result = exp(ctx.$data, locals);
@@ -249,7 +224,7 @@ export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDat
                     captured.add(o);
 
                     if (!subs.has(o)) {
-                        subs.set(o, o.publishReplay(null, 1).refCount().subscribe(allSeeingEye));
+                        subs.set(o, o.publishReplay(undefined, 1).refCount().subscribe(allSeeingEye));
                     }
                 }
 
@@ -261,10 +236,6 @@ export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDat
                     observer.next(result);
                 }
 
-                // diagnostics
-                if (evalObs) {
-                    evalObs.next(true);
-                }
             } catch (e) {
                 exception.next(e);
             }
@@ -282,13 +253,8 @@ export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDat
 
             // cleanup
             subs.clear();
-            subs = null;
-
             captured.clear();
-            captured = null;
-
             allSeeingEye.unsubscribe();
-            allSeeingEye = null;
 
             locals = null;
         });

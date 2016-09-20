@@ -7,3 +7,4 @@ if (typeof(window) === "object") {
 }
 
 import "./bindingProvider-spec";
+import "./expressionCompiler-spec";

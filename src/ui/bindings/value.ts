@@ -12,7 +12,7 @@ export default class ValueBinding<T> extends BindingBase<T> {
     }
 
     protected applyBindingInternal(element: HTMLInputElement, observable: Rx.Observable<T> | Rx.Subject<T>, ctx: IDataContext, state: INodeState<T>, eventName = "change"): void {
-        let tag = element.tagName.toLowerCase();
+        const tag = element.tagName.toLowerCase();
         if (!isInputElement(element)) {
             throw Error("value-binding only operates on checkboxes and radio-buttons");
         }
@@ -31,7 +31,7 @@ export default class ValueBinding<T> extends BindingBase<T> {
         }));
 
         if (isRxObserver(observable)) {
-            let events = Rx.Observable.fromEvent(element, eventName);
+            const events = Rx.Observable.fromEvent(element, eventName);
             state.cleanup.add(events.subscribe(tryCatch<Event>(e => {
                 if (storeValueInNodeState) {
                     observable.next(getNodeValue<T>(element, this.domManager));
@@ -52,7 +52,7 @@ export default class ValueBinding<T> extends BindingBase<T> {
  * @param {IDomManager} domManager
  */
 export function getNodeValue<T>(node: HTMLInputElement, domManager: DomManager): T {
-    let state = domManager.nodeState.get<T>(node);
+    const state = domManager.nodeState.get<T>(node);
     if (state != null && state[hasValueBindingValue]) {
         return state[valueBindingValue];
     }

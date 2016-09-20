@@ -11,7 +11,7 @@ export class ComponentRegistry {
     constructor(templateEngine: HtmlTemplateEngine) {
         this.templateEngine = templateEngine;
     }
-
+    // component is either a descriptor or a require string
     public register<T>(name: string, component: IComponentDescriptor<T> | string) {
         if (name.indexOf("-") === -1) {
             throw new Error(`Component name "${name}" must contain a dash (-)` );
@@ -24,26 +24,24 @@ export class ComponentRegistry {
     }
 
     public load<T>(name: string, params?: Object): Rx.Observable<IComponent<T>> {
-        let cd = this.components[name];
-        let result: Rx.Observable<IComponentDescriptor<T>> = undefined;
-        // if the component has been registered as resource, resolve it now and update registry
-        if (cd != null) {
-            if (isRxObservable(cd)) {
-                result = cd;
-            } else {
-                if (typeof cd === "string") {
-                    result = observableRequire<IComponentDescriptor<T>>(cd);
-                } else {
-                    result = Rx.Observable.of<IComponentDescriptor<T>>(cd);
-                }
-            }
-        } else {
-            result = Rx.Observable.of<IComponentDescriptor<T>>(undefined);
-        }
+        let result = this.getDescriptor<T>(name);
         result = result.map(x => <IComponentDescriptor<T>> { template: this.compileTemplate(x.template), viewModel: x.viewModel });
         result.do(x => this.components[name] = x ); // cache descriptor
 
         return this.initialize<T>(result, params);
+    }
+
+    private getDescriptor<T>(name: string): Rx.Observable<IComponentDescriptor<T>> {
+        const descriptor = this.components[name];
+        if (descriptor != null) {
+            if (typeof descriptor === "string") {
+                return observableRequire<IComponentDescriptor<T>>(descriptor);
+            } else {
+                return Rx.Observable.of<IComponentDescriptor<T>>(descriptor);
+            }
+        } else {
+            throw new Error(`No component with name '${name}' is registered`);
+        }
     }
 
     private initialize<T>(obs: Rx.Observable<IComponentDescriptor<T>>, params?: Object): Rx.Observable<IComponent<T>> {

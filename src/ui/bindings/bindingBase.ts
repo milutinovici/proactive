@@ -12,6 +12,7 @@ import { exception } from "../exceptionHandlers";
  */
 export class BindingBase<T> implements IBindingHandler<T> {
     public priority = 0;
+    public controlsDescendants = false;
     protected domManager: DomManager;
 
     constructor(domManager: DomManager) {
@@ -29,7 +30,7 @@ export class BindingBase<T> implements IBindingHandler<T> {
         if (isRxObservable(obs) || isRxObserver(obs)) {
             obs = obs;
         } else if (isFunction(obs)) {
-            let fn: (t: T, e: HTMLElement, ctx: IDataContext) => void = obs.bind(ctx.$data);
+            const fn: (t: T, e: HTMLElement, ctx: IDataContext) => void = obs.bind(ctx.$data);
             obs = new Rx.Subscriber<T>(x => fn(x, node, ctx), exception.error);
         } else {
             obs = expressionToObservable(expression, ctx, node);

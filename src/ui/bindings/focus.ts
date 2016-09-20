@@ -13,7 +13,7 @@ export default class HasFocusBinding extends BindingBase<boolean> {
     }
 
     protected applyBindingInternal(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, ctx: IDataContext, state: INodeState<boolean>, parameter?: string): INodeState<boolean> {
-        let delay = parseInt(parameter || "0");
+        const delay = parseInt(parameter || "0");
 
         state.cleanup.add(observable.subscribe(x => {
             this.updateElement(el, x, delay);
@@ -49,7 +49,7 @@ export default class HasFocusBinding extends BindingBase<boolean> {
     private handleElementFocusChange(el: HTMLElement, observer: Rx.Observer<boolean>, isFocused: boolean) {
         // If possible, ignore which event was raised and determine focus state using activeElement,
         // as this avoids phantom focus/blur events raised when changing tabs in modern browsers.
-        let ownerDoc = el.ownerDocument;
+        const ownerDoc = el.ownerDocument;
 
         if ("activeElement" in ownerDoc) {
             let active: Element;

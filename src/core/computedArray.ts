@@ -47,7 +47,7 @@ export class ComputedArrayImpl<T> extends ComputedValueImpl<T[]> {
         return obs.toComputedArray();
     }
     public static whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
-        let obs: any = observables.mergeMap<T[]>(array => Observable.combineLatest<T[]>(array));
+        const obs: any = observables.mergeMap<T[]>(array => Observable.combineLatest<T[]>(array));
         return obs.toComputedArray();
     }
 }

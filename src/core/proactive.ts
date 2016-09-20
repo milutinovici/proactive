@@ -5,7 +5,7 @@ import { ObservableValueImpl } from "./value";
 import { ArrayImpl, ObservableArray } from "./array";
 import { ComputedArrayImpl, ComputedArray } from "./computedArray";
 
-export function value<T>(initial: T = undefined): ObservableValue<T> {
+export function value<T>(initial?: T): ObservableValue<T> {
     return ObservableValueImpl.createValue(initial);
 }
 export function array<T>(initial: T[] = []): ObservableArray<T> {
