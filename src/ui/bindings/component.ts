@@ -44,7 +44,7 @@ export default class ComponentBinding<T> extends BindingBase<string> {
                 ctx = this.domManager.getDataContext(element);
                 // auto-dispose view-model
                 if (isDisposable(component.viewModel)) {
-                    const sub = <Rx.Subscription> <any> component.viewModel;
+                    const sub = <Rx.Subscription> component.viewModel;
                     internal.add(sub);
                 }
             }

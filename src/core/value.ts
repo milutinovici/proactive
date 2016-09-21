@@ -16,7 +16,7 @@ export class ObservableValueImpl<T> extends ComputedValueImpl<T> implements Rx.O
     public next(value: T) {
         this.source.next(value);
     }
-    public error(err?: any) {
+    public error(err: Error) {
         this.source.error(err);
     }
     public complete() {

@@ -24,7 +24,7 @@ export class BindingRegistry {
     public getHandler<T>(name: string): IBindingHandler<T> {
         return this.bindingHandlers[name];
     }
-    public registerHandler<T>(name: string, handler: IBindingHandler<T>, controlsDescendants?: any) {
+    public registerHandler<T>(name: string, handler: IBindingHandler<T>, controlsDescendants?: boolean) {
         this.bindingHandlers[name] = handler;
     }
 

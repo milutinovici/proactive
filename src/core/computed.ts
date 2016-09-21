@@ -11,7 +11,7 @@ export class ComputedValueImpl<T> extends Rx.Observable<T> {
         this.source = source.distinctUntilChanged();
     }
 
-    public subscribe(observerOrNext?: Rx.Observer<T> | ((value: T) => void), error?: (error: any) => void, complete?: () => void): Rx.Subscription {
+    public subscribe(observerOrNext?: Rx.Observer<T> | ((value: T) => void), error?: (error: Error) => void, complete?: () => void): Rx.Subscription {
         return this.source.subscribe(observerOrNext, error, complete);
     }
     public getValue(): T {

@@ -14,9 +14,8 @@ export default class EventBinding extends BindingBase<Event> {
 
     protected applyBindingInternal(el: HTMLElement, observer: Rx.Observer<Event>, ctx: IDataContext, state: INodeState<Event>, eventName: string) {
         const events = Rx.Observable.fromEvent<Event>(el, eventName);
-        const handler: any = observer;
-        if (isRxObserver(handler)) {
-            state.cleanup.add(events.subscribe(handler));
+        if (isRxObserver(observer)) {
+            state.cleanup.add(events.subscribe(observer));
         } else {
             throw Error("invalid binding options");
         }

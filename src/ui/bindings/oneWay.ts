@@ -15,10 +15,10 @@ export class CssBinding extends OneWayBindingBase<string> {
 
     protected applyValue(el: HTMLElement, value: string, className: string): void {
         if (className) {
-            const classes = className.split(/\s+/).map(x => x.trim()).filter(x => <any> x);
+            const classes = className.split(/\s+/).map(x => x.trim()).filter(x => x);
 
             if (classes.length) {
-                toggleCssClass.apply(null, [el, !!value].concat(<any> classes));
+                toggleCssClass(el, !!value, ...classes);
             }
         } else {
             throw new Error("Class name undefined");

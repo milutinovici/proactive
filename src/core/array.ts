@@ -16,7 +16,7 @@ export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Rx.Observer<T[
     public next(value: T[]) {
         this.source.next(value);
     }
-    public error(err?: any) {
+    public error(err: Error) {
         this.source.error(err);
     }
     public complete() {

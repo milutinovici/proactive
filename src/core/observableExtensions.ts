@@ -9,9 +9,9 @@ declare module "rxjs/Observable" {
     }
 }
 
-Rx.Observable.prototype.toComputed = function<T>(): ComputedValue<T> {
+Rx.Observable.prototype.toComputed = function<T>(this: Rx.Observable<T>): ComputedValue<T> {
     return ComputedValueImpl.createComputed<T>(this);
 };
-Rx.Observable.prototype["toComputedArray"] = function<T>(): ComputedArray<T> {
+Rx.Observable.prototype["toComputedArray"] = function<T>(this: Rx.Observable<T[]>): ComputedArray<T> {
     return ComputedArrayImpl.createComputedArray<T>(this);
 };

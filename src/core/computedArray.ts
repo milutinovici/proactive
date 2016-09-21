@@ -1,6 +1,7 @@
 import { Observable, Symbol } from "rxjs";
 import { ComputedValueImpl } from "./computed";
 import { Func, Disposable, ComputedValue } from "./interfaces";
+import "./observableExtensions";
 
 export class ComputedArrayImpl<T> extends ComputedValueImpl<T[]> {
 
