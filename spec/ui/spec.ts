@@ -6,6 +6,6 @@ if (typeof(window) === "object") {
     tapeDom.stream(it);
 }
 
-import "./bindingProvider-spec";
-import "./expressionCompiler-spec";
-import "./bindings/css-spec";
+// import "./bindingProvider-spec";
+// import "./expressionCompiler-spec";
+import "./bindings/value-spec";

@@ -132,19 +132,39 @@ import { isRxObservable, setToArray } from "./utils";
 //     }
 // }
 
+
+
+function canWrite(expression: string): boolean {
+    const javaScriptReservedWords = ["true", "false", "null", "undefined"];
+
+    // Matches something that can be assigned to--either an isolated identifier or something ending with a property accessor
+    // This is designed to be simple and avoid false negatives, but could produce false positives (e.g., a+b.c).
+    // This also will not properly handle nested brackets (e.g., obj1[obj2['prop']]; see #911).
+    const javaScriptAssignmentTarget = /^(?:[$_a-z][$\w]*|(.+)(\.\s*[$_a-z][$\w]*|\[.+\]))$/i;
+    if (javaScriptReservedWords.indexOf(expression) >= 0) {
+        return false;
+    }
+    const match = expression.match(javaScriptAssignmentTarget);
+    return match !== null;
+}
+
 export function compileBindingExpression<T>(expression: string): ICompiledExpression<T | null> {
     expression = expression.trim();
+    let fn: ICompiledExpression<T | null>;
     if (expression === "") {
-        return ($context?, $element?) => null;
+        fn = ($context?, $element?) => null;
     }
-
-    let functionBody = "with($context){with($data||{}){return " + expression + "}}";
-    return <any> new Function("$context", "$element", functionBody);
+    const readBody = `with($context){with($data||{}){return ${expression};}}`;
+    fn = <any> new Function("$context", "$element", readBody);
+    if (canWrite(expression)) {
+        const writeBody = `with($context){with($data||{}){return function(_z){ ${expression} = _z;}}}`;
+        fn.write = <any> new Function("$context", "$element", writeBody);
+    }
+    return fn;
 }
 
 export function evaluateExpression<T>(exp: ICompiledExpression<T>, ctx: IDataContext, element: Element): T | null {
     try {
-        // let locals = createLocals<T>(undefined, ctx);
         let result = exp(ctx, element);
         return result;
     } catch (e) {
@@ -153,7 +173,7 @@ export function evaluateExpression<T>(exp: ICompiledExpression<T>, ctx: IDataCon
     return null;
 }
 
-export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDataContext, element: Element): Rx.Observable<T | null> {
+export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDataContext): Rx.Observable<T | null> {
     let captured = new Set<Rx.Observable<T>>();
     let locals: any;
     let result: T | Rx.Observable<T>;

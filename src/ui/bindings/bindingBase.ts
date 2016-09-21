@@ -33,7 +33,10 @@ export class BindingBase<T> implements IBindingHandler<T> {
             const fn: (t: T, e: HTMLElement, ctx: IDataContext) => void = obs.bind(ctx.$data);
             obs = new Rx.Subscriber<T>(x => fn(x, node, ctx), exception.error);
         } else {
-            obs = expressionToObservable(expression, ctx, node);
+            obs = expressionToObservable(expression, ctx);
+            if (expression.write !== undefined) {
+                obs.write = expression.write(ctx, node);
+            }
         }
 
         this.applyBindingInternal(node, obs, ctx, state, parameter);

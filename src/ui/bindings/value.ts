@@ -39,6 +39,15 @@ export default class ValueBinding<T> extends BindingBase<T> {
                     observable.next(<any> element.value);
                 }
             })));
+        } else if (observable["write"] !== undefined) {
+            const events = Rx.Observable.fromEvent(element, eventName);
+            state.cleanup.add(events.subscribe(tryCatch<Event>(e => {
+                if (storeValueInNodeState) {
+                    observable["write"](getNodeValue<T>(element, this.domManager));
+                } else {
+                    observable["write"](<any> element.value);
+                }
+            })));
         }
     }
 

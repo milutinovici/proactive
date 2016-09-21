@@ -67,7 +67,7 @@ it("setting a value fires change notifications", expect => {
     const val = px.value<number>();
     let changedFired = false;
 
-    val.subscribe(x => changedFired = true);
+    val.subscribe(() => changedFired = true);
     val(10);
 
     expect.true(changedFired);
@@ -76,7 +76,7 @@ it("setting a value fires change notifications", expect => {
 it("subscribers are notified of initial value", expect => {
     const val = px.value<number>(5);
     let changed = 0;
-    val.subscribe(x => changed = 5);
+    val.subscribe(() => changed = 5);
 
     expect.equal(changed, 5);
     expect.end();
@@ -98,10 +98,10 @@ it("multiple subscribers receive notifications, initial value, then subsequent",
     let changingFiredCount = 0;
 
     // subscribe
-    val.subscribe(x => changingFiredCount++);
+    val.subscribe(() => changingFiredCount++);
 
     // subscribe again
-    val.subscribe(x => changingFiredCount++);
+    val.subscribe(() => changingFiredCount++);
 
     val(10);
 
@@ -113,7 +113,7 @@ it("consecutively assigning the same value does not result in duplicate change n
     const val = px.value<number>(1);
     let changedFiredCount = 0;
 
-    val.subscribe(x => changedFiredCount++);
+    val.subscribe(() => changedFiredCount++);
     val(1);
     val(2);
     val(2);

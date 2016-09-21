@@ -10,7 +10,7 @@ export interface ICompiledExpression<T> {
 
     literal?: boolean;
     constant?: boolean;
-    assign?: (self: any, value: any, locals: any) => T;
+    write?: (scope?: IDataContext, element?: Element) => (value: T) => void;
 }
 
 export interface IBindingHandler<T> {
