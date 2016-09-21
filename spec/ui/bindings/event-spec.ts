@@ -116,8 +116,8 @@ it("event: binds multiple events to observers", expect => {
         inputObserver: new Rx.Subscriber<Event>((x) => { inputSubject.next(x); }),
     };
 
-    clickSubject.subscribe(x => clickCallCount++);
-    inputSubject.subscribe(x => inputCallCount++);
+    clickSubject.subscribe(() => clickCallCount++);
+    inputSubject.subscribe(() => inputCallCount++);
 
     expect.doesNotThrow(() => app.applyBindings(model, el));
 

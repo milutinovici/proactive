@@ -12,7 +12,7 @@ it("checked: Triggering a click should toggle a checkbox's checked state before 
     let clickHandlerFireCount = 0;
     let expectedCheckedStateInHandler: boolean;
 
-    Rx.Observable.fromEvent(testNode, "click").subscribe (x => {
+    Rx.Observable.fromEvent(testNode, "click").subscribe (() => {
         clickHandlerFireCount++;
         expect.equal(testNode.checked, expectedCheckedStateInHandler);
     });

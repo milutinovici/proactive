@@ -12,6 +12,8 @@
     "strictNullChecks": false,
     "noImplicitThis": false,
     "noImplicitReturns": true,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false,
     "lib": ["es5", "dom", "es2015.promise", "es2015.collection"]
   },
   "formatCodeOptions": {

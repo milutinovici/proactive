@@ -18,7 +18,7 @@ export class ProactiveWebApp {
         this.components = new ComponentRegistry(templateEngine);
         this.bindings = new BindingRegistry(domManager);
 
-        Rx.Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(x => {
+        Rx.Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
             this.domManager.cleanDescendants(document.documentElement);
         });
     }

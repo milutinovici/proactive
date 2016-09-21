@@ -128,6 +128,13 @@ export function isFunction(obj: any): obj is Function {
     return typeof obj === "function";
 }
 /**
+ * Returns true if param is an object.
+ * @param obj
+ */
+export function isObject(obj: any): obj is Object {
+    return typeof obj === "object";
+}
+/**
  * Returns true if object is a Disposable
  * @param obj
  */

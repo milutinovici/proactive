@@ -114,7 +114,4 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
         }
     }
 
-    private getRepeatedElements(parent: HTMLElement, query: string) {
-        return parent.querySelectorAll(`[bind-repeat="${query}"]`);
-    }
 }

@@ -1,12 +1,6 @@
 import { DomManager } from "../domManager";
-import { INodeState } from "../interfaces";
 import { toggleCssClass } from "../utils";
 import { OneWayBindingBase } from "./bindingBase";
-
-// Binding contributions to node-state
-interface ICssNodeState extends INodeState<string> {
-    cssBindingPreviousDynamicClasses: string[];
-}
 
 export class CssBinding extends OneWayBindingBase<string> {
     constructor(domManager: DomManager) {

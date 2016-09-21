@@ -1,6 +1,6 @@
 import * as Rx from "rxjs";
 import { IComponentDescriptor, IComponent } from "../interfaces";
-import { observableRequire, isFunction, isRxObservable, nodeListToArray } from "../utils";
+import { observableRequire, isFunction, nodeListToArray } from "../utils";
 import HtmlTemplateEngine from "../templateEngines";
 
 export class ComponentRegistry {

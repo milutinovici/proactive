@@ -1,6 +1,6 @@
 import { DomManager } from "../domManager";
 import { isDisposable } from "../utils";
-import { INodeState, IDataContext, IComponentDescriptor } from "../interfaces";
+import { INodeState, IDataContext } from "../interfaces";
 import { BindingBase } from "./bindingBase";
 import * as Rx from "rxjs";
 import { app } from "../app";
@@ -49,12 +49,12 @@ export default class ComponentBinding<T> extends BindingBase<string> {
                 }
             }
             // done
-            this.applyTemplate(component, element, ctx, state.cleanup, component.template, component.viewModel);
+            this.applyTemplate(element, ctx, state.cleanup, component.template, component.viewModel);
         }));
         state.cleanup.add(doCleanup);
     }
 
-    protected applyTemplate(component: IComponentDescriptor<T>, element: HTMLElement, ctx: IDataContext, cleanup: Rx.Subscription, template: Node[], vm?: T) {
+    protected applyTemplate(element: HTMLElement, ctx: IDataContext, cleanup: Rx.Subscription, template: Node[], vm?: T) {
         if (template) {
             // clear
             while (element.firstChild) {
@@ -82,7 +82,7 @@ export default class ComponentBinding<T> extends BindingBase<string> {
         }
     }
 
-    private getParams(element: HTMLElement, ctx: IDataContext, state: INodeState<string>): any {
+    private getParams(element: HTMLElement, ctx: IDataContext, state: INodeState<string>): Object {
         const attributes = state.params;
         const params = {};
         attributes.forEach(x => {
