@@ -22,12 +22,12 @@ gulp.task("default",  () => {
                         .pipe(gulp.dest("./dist"));
 });
  
-gulp.task("test", ["default"], () => gulp.src("dist/spec/core/**/*.js").pipe(tape({ reporter: spec() })));
+gulp.task("test", ["default"], () => gulp.src("./dist/spec/core/**/*.js").pipe(tape({ reporter: spec() })));
 
-gulp.task("bench",() => gulp.src("dist/perf/**/*.js", {read: false}).pipe(benchmark()));
+gulp.task("bench",() => gulp.src("./dist/perf/**/*.js", {read: false}).pipe(benchmark()));
 
 gulp.task("core",  () => {
-    const project = gulpTs.createProject("tsconfig.json", { outFile: "proactive.js", module: "amd", declaration: true, typescript: typescript });
+    const project = gulpTs.createProject("tsconfig.json", { outFile: "proactive.js", module: "amd", declaration: true, typescript: typescript, outDir: null });
     const result = gulp.src("src/core/**/*.ts").pipe(gulpTs(project));
     return merge([
 		result.dts
@@ -38,7 +38,7 @@ gulp.task("core",  () => {
 	]);
 });
 gulp.task("ui",  () => {
-    const project = gulpTs.createProject("tsconfig.json", { outFile: "ui.js", module: "amd", declaration: true, typescript: typescript });
+    const project = gulpTs.createProject("tsconfig.json", { outFile: "ui.js", module: "amd", declaration: true, typescript: typescript, outDir: null });
     const result = gulp.src("src/ui/**/*.ts").pipe(gulpTs(project));
     return merge([
 		result.dts
