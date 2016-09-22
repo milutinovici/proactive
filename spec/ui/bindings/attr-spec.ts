@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as px from "../../../src/core/proactive";
-import { app } from "../../../src/ui/app";
+import * as ui from "../../../src/ui/ui";
 import * as util from "../spec-utils";
 
 it("attr: binding to a string constant", expect => {
@@ -9,7 +9,7 @@ it("attr: binding to a string constant", expect => {
 
     let model = {};
     expect.false(hasAttr(el, "data-foo"));
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasAttr(el, "data-foo", "true"));
     expect.end();
 });
@@ -22,7 +22,7 @@ it("attr: binding to a non-observable model value", expect => {
     model.constantString = "data-foo";
 
     expect.false(hasAttr(el, "data-foo"));
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasAttr(el, "data-foo"));
     expect.end();
 });
@@ -34,7 +34,7 @@ it("attr: binding to a observable model value", expect => {
     let model = createCssModel();
 
     expect.false(hasAttr(el, "data-foo"));
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasAttr(el, "data-foo"));
 
     // should reflect value changes
@@ -42,7 +42,7 @@ it("attr: binding to a observable model value", expect => {
     expect.true(hasAttr(el, "data-foo"));
 
     // binding should stop updating after getting disposed
-    app.cleanNode(el);
+    ui.cleanNode(el);
     model.observableString("voodoo");
     expect.true(hasAttr(el, "data-foo", ""));
     expect.end();
@@ -56,7 +56,7 @@ it("attr: binding multiple attr classes to multiple observable model properties"
 
     expect.false(hasAttr(el, "data-foo"));
     expect.false(hasAttr(el, "data-bar"));
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasAttr(el, "data-foo", "voodoo"));
     expect.true(hasAttr(el, "data-foo", "magic"));
 
@@ -77,7 +77,7 @@ it("attr: binding multiple attr classes to multiple observable model properties"
     expect.true(hasAttr(el, "data-foo", "magic"));
 
     // binding should stop updating after getting disposed
-    app.cleanNode(el);
+    ui.cleanNode(el);
     model.observableString("");
     model.observableString2("");
     expect.true(hasAttr(el, "data-foo", "voodoo"));

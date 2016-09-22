@@ -5,7 +5,7 @@ import { ComponentRegistry } from "./components/registry";
 import { DomManager } from "./domManager";
 import { IDataContext } from "./interfaces";
 
-export class ProactiveWebApp {
+export class ProactiveUI {
 
     public components: ComponentRegistry;
     public bindings: BindingRegistry;
@@ -52,4 +52,3 @@ export class ProactiveWebApp {
     }
 }
 
-export const app = new ProactiveWebApp(new DomManager(), new HtmlTemplateEngine());

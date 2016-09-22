@@ -1,7 +1,7 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
 import * as px from "../../../src/core/proactive";
-import { app } from "../../../src/ui/app";
+import * as ui from "../../../src/ui/ui";
 import * as util from "../spec-utils";
 
 it("event: this is bound to $data", expect => {
@@ -10,11 +10,11 @@ it("event: this is bound to $data", expect => {
 
     let model = new TestVM();
 
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(model.constant = "hello");
     util.triggerEvent(el, "click");
     expect.true(model.constant = "world");
-    app.cleanNode(el);
+    ui.cleanNode(el);
     expect.end();
 });
 
@@ -43,7 +43,7 @@ it("event: binds a single event to a handler function", expect => {
         },
     };
 
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
 
     util.triggerEvent(el, "click");
 
@@ -52,7 +52,7 @@ it("event: binds a single event to a handler function", expect => {
     expect.true(calledWithValidContext, "valid context was passed as parameter");
     expect.true(calledWithValidEvent, "event passed is instance of window['Event']");
 
-    app.cleanNode(el);
+    ui.cleanNode(el);
     called = false;
 
     // should no longer fire
@@ -78,7 +78,7 @@ it("event: binds multiple events to handler functions", expect => {
         },
     };
 
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
 
     util.triggerEvent(el, "click");
     expect.equal(clickCallCount, 1, "click handler was called 1 time");
@@ -87,7 +87,7 @@ it("event: binds multiple events to handler functions", expect => {
     util.triggerEvent(el, "input");
     expect.equal(inputCallCount, 1, "input handler was called 1 time");
 
-    app.cleanNode(el);
+    ui.cleanNode(el);
     clickCallCount = 0;
     inputCallCount = 0;
 
@@ -119,7 +119,7 @@ it("event: binds multiple events to observers", expect => {
     clickSubject.subscribe(() => clickCallCount++);
     inputSubject.subscribe(() => inputCallCount++);
 
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
 
     util.triggerEvent(el, "click");
     expect.equal(clickCallCount, 1, "click observer was called 1 time");
@@ -128,7 +128,7 @@ it("event: binds multiple events to observers", expect => {
     util.triggerEvent(el, "input");
     expect.equal(inputCallCount, 1, "input observer was called 1 time");
 
-    app.cleanNode(el);
+    ui.cleanNode(el);
     clickCallCount = 0;
     inputCallCount = 0;
 
@@ -159,7 +159,7 @@ it("event: binds a single key to a handler function", expect => {
         },
     };
 
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(callCount === 0, "call count is initially 0");
 
     util.triggerEvent(el, "keydown", 13);
@@ -170,7 +170,7 @@ it("event: binds a single key to a handler function", expect => {
     util.triggerEvent(el, "keydown", 14);
     expect.true(callCount === 1, "call count is still 1 after pressing another key");
 
-    app.cleanNode(el);
+    ui.cleanNode(el);
     callCount = 0;
 
     // should no longer fire
@@ -196,7 +196,7 @@ it("event: binds multiple keys to handler functions", expect => {
         },
     };
 
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
 
     expect.equal(clickCallCount, 0);
     expect.equal(inputCallCount, 0);
@@ -208,7 +208,7 @@ it("event: binds multiple keys to handler functions", expect => {
     util.triggerEvent(el, "keydown", 13);
     expect.equal(inputCallCount, 1);
 
-    app.cleanNode(el);
+    ui.cleanNode(el);
     clickCallCount = 0;
     inputCallCount = 0;
 

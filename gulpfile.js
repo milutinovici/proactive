@@ -38,7 +38,7 @@ gulp.task("core",  () => {
 	]);
 });
 gulp.task("ui",  () => {
-    const project = gulpTs.createProject("tsconfig.json", { outFile: "app.js", module: "amd", declaration: true, typescript: typescript });
+    const project = gulpTs.createProject("tsconfig.json", { outFile: "ui.js", module: "amd", declaration: true, typescript: typescript });
     const result = gulp.src("src/ui/**/*.ts").pipe(gulpTs(project));
     return merge([
 		result.dts

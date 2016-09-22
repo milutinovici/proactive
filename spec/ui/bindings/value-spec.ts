@@ -1,14 +1,14 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
 import * as px from "../../../src/core/proactive";
-import { app } from "../../../src/ui/app";
+import * as ui from "../../../src/ui/ui";
 import * as util from "../spec-utils";
 
 it("value: Should treat null values as empty strings", expect => {
     const template = `<input type="text" bind-value="myProp" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
-    app.applyBindings({ myProp: px.value(0) }, el);
+    ui.applyBindings({ myProp: px.value(0) }, el);
     expect.equal(el.value, "0");
     expect.end();
 });
@@ -17,7 +17,7 @@ it("value: Should assign an empty string as value if the model value is undefine
     const template = `<input type="text" bind-value="undefined" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
-    app.applyBindings(null, el);
+    ui.applyBindings(null, el);
     expect.equal(el.value, "");
     expect.end();
 });
@@ -27,7 +27,7 @@ it("value: For observable values, should unwrap the value and update on change",
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(123);
-    app.applyBindings({ someProp: myobservable }, el);
+    ui.applyBindings({ someProp: myobservable }, el);
     expect.equal(el.value, "123");
     myobservable(456);
     expect.equal(el.value, "456");
@@ -39,7 +39,7 @@ it("value: For observable values, should update on change if new value is 'stric
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value<string | number>("+123");
-    app.applyBindings({ someProp: myobservable }, el);
+    ui.applyBindings({ someProp: myobservable }, el);
     expect.equal(el.value, "+123");
     myobservable(123);
     expect.equal(el.value, "123");
@@ -51,7 +51,7 @@ it("value: For writeable observable values, should catch the node's onchange and
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(123);
-    app.applyBindings({ someProp: myobservable }, el);
+    ui.applyBindings({ someProp: myobservable }, el);
     el.value = "some user-entered value";
     util.triggerEvent(el, "change");
 
@@ -69,7 +69,7 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
     let computedValue = Rx.Observable.of("zzz").toComputed();
     let vm = { prop: computedValue };
 
-    app.applyBindings(vm, el);
+    ui.applyBindings(vm, el);
     expect.equal(el.value, "zzz");
 
     // Change the input value and trigger change event; verify that the view model wasn't changed
@@ -90,7 +90,7 @@ it("value: Should be able to write to observable subproperties of an observable,
     let newSubproperty = px.value<string>();
     let model = { myprop: px.value<any>({ subproperty: originalSubproperty }) };
 
-    app.applyBindings(model, el);
+    ui.applyBindings(model, el);
     expect.equal(el.value, "original value");
 
     model.myprop({ subproperty: newSubproperty }); // Note that myprop (and hence its subproperty) is changed *after* the bindings are applied
@@ -112,7 +112,7 @@ it("value: Should only register one single onchange handler", expect => {
     myobservable.subscribe(value => { notifiedValues.push(value); });
     expect.equal(notifiedValues.length, 1);
 
-    app.applyBindings({ someProp: myobservable }, el);
+    ui.applyBindings({ someProp: myobservable }, el);
 
     // Implicitly observe the number of handlers by seeing how many times "myobservable"
     // receives a new value for each onchange on the text box. If there's just one handler,
@@ -131,7 +131,7 @@ it("value: should update non observable values", expect => {
     const template = `<input type="text" bind-value="someProp" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
     const viewModel = { someProp: "ABC" };
-    app.applyBindings(viewModel, el);
+    ui.applyBindings(viewModel, el);
 
     el.value = "DEF";
     util.triggerEvent(el, "change");

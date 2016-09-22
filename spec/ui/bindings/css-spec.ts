@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as px from "../../../src/core/proactive";
-import { app } from "../../../src/ui/app";
+import * as ui from "../../../src/ui/ui";
 import * as util from "../spec-utils";
 
 it("css: binding to a string constant", expect => {
@@ -9,7 +9,7 @@ it("css: binding to a string constant", expect => {
 
     let model = {};
     expect.false(hasClass(el, "foo"));
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasClass(el, "foo"));
     expect.end();
 });
@@ -22,7 +22,7 @@ it("css: binding to a non-observable model value", expect => {
     model.constantString = "foo";
 
     expect.false(hasClass(el, "foo"));
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasClass(el, "foo"));
     expect.end();
 });
@@ -34,7 +34,7 @@ it("css: binding to a observable model value", expect => {
     let model = createCssModel();
 
     expect.false(hasClass(el, "foo"));
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasClass(el, "foo"));
 
     // should reflect value changes
@@ -42,7 +42,7 @@ it("css: binding to a observable model value", expect => {
     expect.false(hasClass(el, "foo"));
 
     // binding should stop updating after getting disposed
-    app.cleanNode(el);
+    ui.cleanNode(el);
     model.observableBool(true);
     expect.false(hasClass(el, "foo"));
     expect.end();
@@ -56,7 +56,7 @@ it("css: binding multiple css classes to multiple observable model properties", 
 
     expect.false(hasClass(el, "foo"));
     expect.false(hasClass(el, "bar"));
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasClass(el, "foo"));
     expect.false(hasClass(el, "bar"));
 
@@ -77,7 +77,7 @@ it("css: binding multiple css classes to multiple observable model properties", 
     expect.true(hasClass(el, "bar"));
 
     // binding should stop updating after getting disposed
-    app.cleanNode(el);
+    ui.cleanNode(el);
     model.observableBool(false);
     model.observableBool2(false);
     expect.true(hasClass(el, "foo"));
@@ -91,7 +91,7 @@ it("css: When class is not defined, error is thrown", expect => {
 
     let model = createCssModel();
     model.constantString = "foo";
-    expect.throws(() => app.applyBindings(model, el));
+    expect.throws(() => ui.applyBindings(model, el));
     expect.end();
 });
 

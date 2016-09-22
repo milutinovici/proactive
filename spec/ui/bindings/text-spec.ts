@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as px from "../../../src/core/proactive";
-import { app } from "../../../src/ui/app";
+import * as ui from "../../../src/ui/ui";
 import * as util from "../spec-utils";
 
 it("binding to a string constant", expect => {
@@ -9,7 +9,7 @@ it("binding to a string constant", expect => {
     let model = {};
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.equal(el.textContent, "foo");
     expect.end();
 });
@@ -20,7 +20,7 @@ it("binding to a numeric constant", expect => {
     let model = {};
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.equal(el.textContent, "42");
     expect.end();
 });
@@ -31,7 +31,7 @@ it("binding to a falsy numeric model value", expect => {
     let model = 0;
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.equal(el.textContent, "0");
     expect.end();
 });
@@ -42,7 +42,7 @@ it("binding to a boolean constant", expect => {
     let model = {};
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.equal(el.textContent, "true");
     expect.end();
 });
@@ -53,7 +53,7 @@ it("binding to a non-observable model value", expect => {
     let model = { constantString: "foo" };
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.equal(el.textContent, model.constantString);
     expect.end();
 });
@@ -65,7 +65,7 @@ it("binding to a observable model value", expect => {
     let model = { observableString: px.value("foo") };
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.equal(el.textContent, model.observableString());
 
     // should reflect value changes
@@ -74,7 +74,7 @@ it("binding to a observable model value", expect => {
 
     // binding should stop updating after getting disposed
     let oldValue = model.observableString();
-    app.cleanNode(el);
+    ui.cleanNode(el);
     model.observableString("nope");
     expect.equal(el.textContent, oldValue);
     expect.end();
@@ -87,7 +87,7 @@ it("binding to a view computed observable", expect => {
     let model = { observableString: px.value("foo") };
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => app.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.equal(el.textContent, "hello " + model.observableString());
     model.observableString("bar");
     expect.equal(el.textContent, "hello " + model.observableString());

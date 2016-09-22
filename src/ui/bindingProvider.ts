@@ -1,7 +1,7 @@
 import { IBindingAttribute, IBindingHandler } from "./interfaces";
 import { compileBindingExpression } from "./expressionCompiler";
 import { isElement } from "./utils";
-import { app } from "./app";
+import * as app from "./ui";
 
 const bindingPrefix = /^bind-/;
 const parameterPrefix = /^param-/;

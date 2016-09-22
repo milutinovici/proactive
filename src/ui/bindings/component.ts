@@ -3,7 +3,7 @@ import { isDisposable } from "../utils";
 import { INodeState, IDataContext } from "../interfaces";
 import { BindingBase } from "./bindingBase";
 import * as Rx from "rxjs";
-import { app } from "../app";
+import * as ui from "../ui";
 import { exception } from "../exceptionHandlers";
 
 export default class ComponentBinding<T> extends BindingBase<string> {
@@ -25,7 +25,7 @@ export default class ComponentBinding<T> extends BindingBase<string> {
         }
 
         const obs = componentName.mergeMap(name => {
-            const component = app.components.load<T>(name, componentParams);
+            const component = ui.components.load<T>(name, componentParams);
             if (component == null) {
                 exception.next(new Error(`component '${componentName}' is not registered with current module-context`));
             }

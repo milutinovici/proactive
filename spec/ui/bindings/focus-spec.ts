@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as px from "../../../src/core/proactive";
-import { app } from "../../../src/ui/app";
+import * as ui from "../../../src/ui/ui";
 import * as util from "../spec-utils";
 
 let focusInEvent = "focusin";
@@ -15,7 +15,7 @@ it("focus: Should respond to changes on an observable value by blurring or focus
     let currentState = false;
     let model = { myVal: px.value() };
 
-    app.applyBindings(model, el);
+    ui.applyBindings(model, el);
 
     input.addEventListener(focusInEvent, () => {
         currentState = true;
@@ -41,7 +41,7 @@ it("focus: Should set an observable value to be true on focus and false on blur"
     document.body.appendChild(el);
     let model = { myVal: px.value() };
 
-    app.applyBindings(model, el);
+    ui.applyBindings(model, el);
 
     // Need to raise focusInEvent and focusOutEvent manually, because simply calling ".focus()" and ".blur()"
     // in IE doesn't reliably trigger the "focus" and "blur" events synchronously
@@ -72,7 +72,7 @@ it("focus: Should not unnecessarily focus or blur an element that is already foc
     // This is the closest we can get to representing issue #698 as a spec
     let model = { isFocused: px.value<Object | null>({}) };
 
-    app.applyBindings(model, el);
+    ui.applyBindings(model, el);
 
     // The elem is already focused, so changing the model value to a different truthy value
     // shouldn't cause any additional focus events
