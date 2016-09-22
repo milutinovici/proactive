@@ -127,3 +127,15 @@ it("checked: Should only notify observable properties on the model once even if 
     expect.equal(timesNotified, 2);
     expect.end();
 });
+
+it("chedked: should update non observable values", expect => {
+    const template = `<input type="checkbox" bind-checked="someProp" />`;
+    const el = <HTMLInputElement> util.parse(template)[0];
+    const viewModel = { someProp: false };
+    app.applyBindings(viewModel, el);
+
+    util.triggerEvent(el, "click");
+    expect.equal(viewModel.someProp, true);
+
+    expect.end();
+});

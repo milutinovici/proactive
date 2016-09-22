@@ -23,10 +23,14 @@ export default class CheckedBinding extends BindingBase<boolean> {
             el.checked = value;
         })));
 
-        if (isRxObserver(observable)) {
+        if (isRxObserver(observable) || observable["write"] !== undefined) {
             const events = this.getCheckedEventObservables(el);
             const values = events.map(e => (<HTMLInputElement> e.target).checked).distinctUntilChanged();
-            state.cleanup.add(values.subscribe(observable));
+            if (isRxObserver(observable)) {
+                state.cleanup.add(values.subscribe(observable));
+            } else {
+                state.cleanup.add(values.subscribe(x => observable["write"](x)));
+            }
         }
     }
 
