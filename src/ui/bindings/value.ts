@@ -30,27 +30,30 @@ export default class ValueBinding<T> extends BindingBase<T> {
             updateElement(this.domManager, x);
         }));
 
-        if (isRxObserver(observable)) {
-            const events = Rx.Observable.fromEvent(element, eventName);
-            state.cleanup.add(events.subscribe(tryCatch<Event>(e => {
-                if (storeValueInNodeState) {
+        if (isRxObserver(observable) || observable["write"] !== undefined) {
+            state.cleanup.add(
+                this.updateValue(element, observable, storeValueInNodeState, eventName)
+            );
+        }
+    }
+    public updateValue(element: HTMLInputElement, observable: Rx.Observable<T> | Rx.Subject<T>, storeValueInNodeState: boolean,  eventName: string): Rx.Subscription {
+        const events = Rx.Observable.fromEvent(element, eventName);
+        return events.subscribe(tryCatch<Event>(e => {
+            if (storeValueInNodeState) {
+                if (isRxObserver(observable)) {
                     observable.next(getNodeValue<T>(element, this.domManager));
                 } else {
-                    observable.next(<any> element.value);
-                }
-            })));
-        } else if (observable["write"] !== undefined) {
-            const events = Rx.Observable.fromEvent(element, eventName);
-            state.cleanup.add(events.subscribe(tryCatch<Event>(e => {
-                if (storeValueInNodeState) {
                     observable["write"](getNodeValue<T>(element, this.domManager));
+                }
+            } else {
+                if (isRxObserver(observable)) {
+                    observable.next(<any> element.value);
                 } else {
                     observable["write"](<any> element.value);
                 }
-            })));
-        }
+            }
+        }));
     }
-
 }
 
 /**
