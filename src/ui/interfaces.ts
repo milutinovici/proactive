@@ -1,9 +1,9 @@
 import * as Rx from "rxjs";
 
 export interface IBindingAttribute {
-    name: string;
-    parameter?: string;
-    expression: ICompiledExpression<any>;
+    readonly name: string;
+    readonly parameter?: string;
+    readonly expression: ICompiledExpression<any>;
 }
 export interface ICompiledExpression<T> {
     (scope?: IDataContext, element?: Element): T;
@@ -18,14 +18,14 @@ export interface IBindingHandler<T> {
         * When there are multiple bindings defined on a single DOM element,
         * sometimes it is necessary to specify the order in which the bindings are applied.
         */
-        priority: number;
+        readonly priority: number;
 
        /**
         * If set to true then bindings won't be applied to children
         * of the element such binding is encountered on. Instead
         * the handler will be responsible for that.
         **/
-        controlsDescendants: boolean;
+        readonly controlsDescendants: boolean;
        /**
         * Applies the binding to the specified element
         * @param {Node} node The target node
@@ -39,10 +39,10 @@ export interface IBindingHandler<T> {
 }
 
 export interface IDataContext {
-    $data: any;
-    $root: any;
-    $parent: any;
-    $parents: any[];
+    readonly $data: any;
+    readonly $root: any;
+    readonly $parent: any;
+    readonly $parents: any[];
 }
 export interface INodeState<T> {
     cleanup: Rx.Subscription;

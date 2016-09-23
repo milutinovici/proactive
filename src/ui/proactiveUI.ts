@@ -1,22 +1,16 @@
 import * as Rx from "rxjs";
-import HtmlTemplateEngine from "./templateEngines";
-import { BindingRegistry } from "./bindings/registry";
-import { ComponentRegistry } from "./components/registry";
+import { components, ComponentRegistry } from "./components/registry";
 import { DomManager } from "./domManager";
 import { IDataContext } from "./interfaces";
 
 export class ProactiveUI {
 
-    public components: ComponentRegistry;
-    public bindings: BindingRegistry;
-    public domManager: DomManager;
-    public templateEngine: HtmlTemplateEngine;
+    public readonly components: ComponentRegistry;
+    private readonly domManager: DomManager;
 
-    constructor(domManager: DomManager, templateEngine: HtmlTemplateEngine) {
+    constructor(domManager: DomManager) {
         this.domManager = domManager;
-        this.templateEngine = templateEngine;
-        this.components = new ComponentRegistry(templateEngine);
-        this.bindings = new BindingRegistry(domManager);
+        this.components = components;
 
         Rx.Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
             this.domManager.cleanDescendants(document.documentElement);
@@ -40,15 +34,12 @@ export class ProactiveUI {
     }
 
     public contextFor(node: HTMLElement): IDataContext {
-        return this.domManager.getDataContext(node);
+        return this.domManager.nodeState.getDataContext(node);
     }
 
     public dataFor(node: HTMLElement): any {
         return this.domManager.nodeState.get(node).model;
     }
 
-    public parseTemplate(template: string): Node[] {
-        return this.templateEngine.parse(template);
-    }
 }
 

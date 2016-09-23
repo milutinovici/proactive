@@ -1,10 +1,10 @@
+import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { isDisposable } from "../utils";
-import { INodeState, IDataContext } from "../interfaces";
+import { INodeState, IDataContext, IComponent } from "../interfaces";
 import { BindingBase } from "./bindingBase";
-import * as Rx from "rxjs";
-import * as ui from "../ui";
 import { exception } from "../exceptionHandlers";
+import { components } from "../components/registry";
 
 export default class ComponentBinding<T> extends BindingBase<string> {
     public priority = 30;
@@ -24,10 +24,10 @@ export default class ComponentBinding<T> extends BindingBase<string> {
             }
         }
 
-        const obs = componentName.mergeMap(name => {
-            const component = ui.components.load<T>(name, componentParams);
+        const obs = componentName.mergeMap<IComponent<T>>(name => {
+            const component: Rx.Observable<IComponent<T>> = components.load<T>(name, componentParams);
             if (component == null) {
-                exception.next(new Error(`component '${componentName}' is not registered with current module-context`));
+                exception.next(new Error(`component '${name}' is not registered with current module-context`));
             }
             return component;
         });
@@ -41,7 +41,7 @@ export default class ComponentBinding<T> extends BindingBase<string> {
                 const componentState = this.domManager.nodeState.get<T>(element);
                 componentState["isolate"] = true;
                 componentState.model = component.viewModel;
-                ctx = this.domManager.getDataContext(element);
+                ctx = this.domManager.nodeState.getDataContext(element);
                 // auto-dispose view-model
                 if (isDisposable(component.viewModel)) {
                     const sub = <Rx.Subscription> component.viewModel;

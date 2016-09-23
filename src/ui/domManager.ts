@@ -1,15 +1,27 @@
-import { DataContext, NodeStateManager } from "./nodeState";
+import { NodeStateManager } from "./nodeState";
 import { isElement } from "./utils";
 import { BindingProvider } from "./bindingProvider";
-import { IDataContext, INodeState } from "./interfaces";
+import { IDataContext, IBindingHandler, IBindingAttribute } from "./interfaces";
+import EventBinding from "./bindings/event";
+import { IfBinding } from "./bindings/if";
+import { AttrBinding, CssBinding, StyleBinding, HtmlBinding, TextBinding } from "./bindings/oneWay";
+import RepeatBinding from "./bindings/repeat";
+import ValueBinding from "./bindings/value";
+import WithBinding from "./bindings/with";
+import CheckedBinding from "./bindings/checked";
+import ComponentBinding from "./bindings/component";
+import KeyPressBinding from "./bindings/keypress";
+import FocusBinding from "./bindings/focus";
 
 export class DomManager {
-    public nodeState: NodeStateManager;
-    private dataContextExtensions = new Set<(node: Node, ctx: IDataContext) => void>();
-    private ignore = ["SCRIPT", "TEXTAREA", "TEMPLATE"];
+    public readonly nodeState: NodeStateManager;
 
-    constructor() {
-        this.nodeState = new NodeStateManager();
+    private readonly ignore = ["SCRIPT", "TEXTAREA", "TEMPLATE"];
+    private readonly bindingHandlers: { [name: string]: IBindingHandler<any> } = {};
+
+    constructor(nodeState: NodeStateManager) {
+        this.nodeState = nodeState;
+        this.registerCoreBindings();
     }
 
     public applyBindings(model: any, rootNode: Node): void {
@@ -29,7 +41,7 @@ export class DomManager {
         }
 
         // calculate resulting data-context and apply bindings
-        let ctx = this.getDataContext(rootNode);
+        let ctx = this.nodeState.getDataContext(rootNode);
         this.applyBindingsRecursive(ctx, <HTMLElement> rootNode);
     }
 
@@ -58,39 +70,6 @@ export class DomManager {
                 this.nodeState.clear(child);
             }
         }
-    }
-
-    public registerDataContextExtension(extension: (node: Node, ctx: IDataContext) => void) {
-        this.dataContextExtensions.add(extension);
-    }
-
-    public getDataContext(node: Node): IDataContext {
-        let models: any[] = [];
-        let state: INodeState<any> | null = this.nodeState.get<any>(node);
-
-        // collect model hierarchy
-        let currentNode = node;
-        while (currentNode) {
-            state = state != null ? state : this.nodeState.get(currentNode);
-            if (state != null) {
-                if (state.model != null) {
-                    models.push(state.model);
-                }
-            }
-            // component isolation
-            if (state && state["isolate"]) {
-                break;
-            }
-            state = null;
-            currentNode = currentNode.parentNode;
-        }
-
-        let ctx: IDataContext = new DataContext(models);
-
-        // extensions
-        this.dataContextExtensions.forEach(ext => ext(node, ctx));
-
-        return ctx;
     }
 
     private applyBindingsRecursive(ctx: IDataContext, el: HTMLElement): void {
@@ -142,7 +121,7 @@ export class DomManager {
         state.bindings = bindings;
         state.params = params;
 
-        let pairs = bindingProvider.getBindingHandlers(state.bindings);
+        let pairs = this.getBindingHandlers(state.bindings);
         controlsDescendants = pairs.some(x => x.handler.controlsDescendants);
 
         // apply all bindings
@@ -167,6 +146,55 @@ export class DomManager {
 
     private shouldBind(el: Element): boolean {
         return !this.ignore.some(x => x === el.tagName);
+    }
+
+    public getHandler<T>(name: string): IBindingHandler<T> {
+        return this.bindingHandlers[name];
+    }
+    public registerHandler<T>(name: string, handler: IBindingHandler<T>) {
+        this.bindingHandlers[name] = handler;
+    }
+    public getBindingHandler<T>(attribute: IBindingAttribute): IBindingHandler<T> {
+        const handler = this.getHandler<any>(attribute.name);
+        if (!handler) {
+            throw Error(`binding '${attribute.name}' has not been registered.`);
+        }
+        return handler;
+    }
+    public getBindingHandlers(bindings: IBindingAttribute[]) {
+        // lookup handlers
+        const pairs = bindings.map(x => {
+            const handler = this.getBindingHandler(x);
+            return { binding: x, handler: handler };
+        });
+        // sort by priority
+        pairs.sort((a, b) => b.handler.priority - a.handler.priority);
+
+        // check if there's binding-handler competition for descendants (which is illegal)
+        const hd = pairs.filter(x => x.handler.controlsDescendants).map(x => `'${x.binding.name}'`);
+        if (hd.length > 1) {
+            throw Error(`bindings ${hd.join(", ")} are competing for descendants of target element!`);
+        }
+        return pairs;
+    }
+
+    private registerCoreBindings() {
+        this.registerHandler("css", new CssBinding(this));
+        this.registerHandler("attr", new AttrBinding(this));
+        this.registerHandler("style", new StyleBinding(this));
+        this.registerHandler("evt", new EventBinding(this));
+        this.registerHandler("key", new KeyPressBinding(this));
+        this.registerHandler("if", new IfBinding(this));
+        this.registerHandler("with", new WithBinding(this));
+        this.registerHandler("text", new TextBinding(this));
+        this.registerHandler("html", new HtmlBinding(this));
+        this.registerHandler("repeat", new RepeatBinding(this));
+
+        this.registerHandler("checked", new CheckedBinding(this));
+        // this.registerBinding("selectedValue", "bindings.selectedValue");
+        this.registerHandler("component", new ComponentBinding(this));
+        this.registerHandler("value", new ValueBinding(this));
+        this.registerHandler("focus", new FocusBinding(this));
     }
 
 }

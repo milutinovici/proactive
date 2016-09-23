@@ -1,33 +1,12 @@
-import { IBindingAttribute, IBindingHandler } from "./interfaces";
+import { IBindingAttribute } from "./interfaces";
 import { compileBindingExpression } from "./expressionCompiler";
 import { isElement } from "./utils";
-import * as app from "./ui";
+import { components } from "./components/registry";
 
 const bindingPrefix = /^bind-/;
 const parameterPrefix = /^param-/;
 
 export class BindingProvider {
-
-    public getBindingHandlers(bindings: IBindingAttribute[]) {
-        // lookup handlers
-        const pairs = bindings.map(x => {
-            const handler = app.bindings.getHandler<any>(x.name);
-
-            if (!handler) {
-                throw Error(`binding '${x.name}' has not been registered.`);
-            }
-            return { binding: x, handler: handler };
-        });
-        // sort by priority
-        pairs.sort((a, b) => b.handler.priority - a.handler.priority);
-
-        // check if there's binding-handler competition for descendants (which is illegal)
-        const hd = pairs.filter(x => x.handler.controlsDescendants).map(x => `'${x.binding.name}'`);
-        if (hd.length > 1) {
-            throw Error(`bindings ${hd.join(", ")} are competing for descendants of target element!`);
-        }
-        return pairs;
-    }
 
     public getParameters(element: HTMLElement): IBindingAttribute[] {
         return this.getAttributeValues(element, parameterPrefix);
@@ -39,7 +18,8 @@ export class BindingProvider {
         }
         const bindings = this.getAttributeValues(element, bindingPrefix);
         const tagName = element.tagName.toLowerCase();
-        if (app.components.isRegistered(tagName)) {
+        // check if element is custom element (component)
+        if (tagName.indexOf("-") !== -1 && components.isRegistered(tagName)) {
             return bindings.concat([this.customElementToBinding(element)]);
         }
         return bindings;

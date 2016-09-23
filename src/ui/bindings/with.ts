@@ -22,7 +22,7 @@ export default class WithBinding<T> extends BindingBase<T> {
 
     protected applyValue(el: HTMLElement, value: T, state: INodeState<T>): void {
         state.model = value;
-        const ctx = this.domManager.getDataContext(el);
+        const ctx = this.domManager.nodeState.getDataContext(el);
 
         this.domManager.cleanDescendants(el);
         this.domManager.applyBindingsToDescendants(ctx, el);

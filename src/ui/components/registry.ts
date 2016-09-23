@@ -1,16 +1,12 @@
 import * as Rx from "rxjs";
 import { IComponentDescriptor, IComponent } from "../interfaces";
 import { observableRequire, isFunction, nodeListToArray } from "../utils";
-import HtmlTemplateEngine from "../templateEngines";
+import { html } from "../templateEngines";
 
 export class ComponentRegistry {
 
-    private templateEngine: HtmlTemplateEngine;
-    private components: { [name: string]: IComponentDescriptor<any> | string } = {};
+    private readonly components: { [name: string]: IComponentDescriptor<any> | string } = {};
 
-    constructor(templateEngine: HtmlTemplateEngine) {
-        this.templateEngine = templateEngine;
-    }
     // component is either a descriptor or a require string
     public register<T>(name: string, component: IComponentDescriptor<T> | string) {
         if (name.indexOf("-") === -1) {
@@ -65,7 +61,7 @@ export class ComponentRegistry {
                     throw Error(`No template with id: "${template}" found`);
                 }
             } else {
-                return this.templateEngine.parse(template);
+                return html.parse(template);
             }
         } else if (Array.isArray(template)) {
             return <Node[]> template;
@@ -74,3 +70,5 @@ export class ComponentRegistry {
     }
 
 }
+
+export const components: ComponentRegistry = new ComponentRegistry();

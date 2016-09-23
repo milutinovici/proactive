@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as px from "../../../src/core/proactive";
-import * as ui from "../../../src/ui/ui";
+import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("component: Loads a component using simple string options", expect => {
@@ -67,7 +67,7 @@ it("component: Loads a template from a node-array", expect => {
 
     const template = "<span>foo</span>";
     ui.components.register("test-component", {
-        template: ui.templateEngine.parse(template),
+        template: util.parse(template),
     });
 
     expect.doesNotThrow(() => ui.applyBindings(undefined, el));

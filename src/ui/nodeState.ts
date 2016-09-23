@@ -4,7 +4,7 @@ import { IBindingAttribute, IDataContext, INodeState } from "./interfaces";
 export class NodeState<T> {
     public model: T;        // scope model
     public cleanup: Rx.Subscription;
-    public isBound: boolean;   // true of this node has been touched by applyBindings
+    public isBound: boolean;   // true if this node has been touched by applyBindings
     public bindings: IBindingAttribute[] = [];
     public params: IBindingAttribute[] = [];
 
@@ -20,7 +20,7 @@ export class NodeState<T> {
 }
 
 export class ForEachNodeState<T> extends NodeState<T> {
-    public index: Rx.BehaviorSubject<number>;
+    public readonly index: Rx.BehaviorSubject<number>;
 
     constructor(model: T, index: number) {
         super(model);
@@ -30,7 +30,8 @@ export class ForEachNodeState<T> extends NodeState<T> {
 }
 
 export class NodeStateManager {
-    private nodeState: WeakMap<Node, INodeState<any>>;
+    private readonly dataContextExtensions = new Set<(node: Node, ctx: IDataContext) => void>();
+    private readonly nodeState: WeakMap<Node, INodeState<any>>;
 
     constructor() {
         this.nodeState = new WeakMap<Node, INodeState<any>>();
@@ -67,13 +68,45 @@ export class NodeStateManager {
         // support external per-node cleanup
         // env.cleanExternalData(node);
     }
+
+    public getDataContext(node: Node): IDataContext {
+        let models: any[] = [];
+        let state: INodeState<any> | null = this.get<any>(node);
+
+        // collect model hierarchy
+        let currentNode = node;
+        while (currentNode) {
+            state = state != null ? state : this.nodeState.get(currentNode);
+            if (state != null) {
+                if (state.model != null) {
+                    models.push(state.model);
+                }
+            }
+            // component isolation
+            if (state && state["isolate"]) {
+                break;
+            }
+            state = null;
+            currentNode = currentNode.parentNode;
+        }
+
+        let ctx: IDataContext = new DataContext(models);
+
+        // extensions
+        this.dataContextExtensions.forEach(ext => ext(node, ctx));
+
+        return ctx;
+    }
+    public registerDataContextExtension(extension: (node: Node, ctx: IDataContext) => void) {
+        this.dataContextExtensions.add(extension);
+    }
 }
 
 export class DataContext implements IDataContext {
-    public $data: any = null;
-    public $root: any= null;
-    public $parent: any= null;
-    public $parents: any[]= [];
+    public readonly $data: any = null;
+    public readonly $root: any= null;
+    public readonly $parent: any= null;
+    public readonly $parents: any[]= [];
 
     constructor(models: any[]) {
         if (models.length > 0) {

@@ -8,4 +8,4 @@ if (typeof(window) === "object") {
 
 // import "./bindingProvider-spec";
 // import "./expressionCompiler-spec";
-import "./bindings/value-spec";
+import "./bindings/checked-spec";

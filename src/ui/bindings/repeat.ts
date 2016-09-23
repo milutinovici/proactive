@@ -18,7 +18,7 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
         super(domManager);
 
         // hook into getDataContext() to map state["index"] to ctx["$index"]
-        this.domManager.registerDataContextExtension((node: Node, ctx: IForEachDataContext) => {
+        this.domManager.nodeState.registerDataContextExtension((node: Node, ctx: IForEachDataContext) => {
             const state = <ForEachNodeState<T>> this.domManager.nodeState.get<T>(node);
             if (state.index !== undefined) {
                 ctx.$index = state.index;
@@ -109,8 +109,8 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
         let state = <ForEachNodeState<T>> this.domManager.nodeState.get(node);
         state.index.next(newIndex);
         for (let i = Math.min(oldIndex, newIndex); i < Math.max(oldIndex, newIndex); i++) {
-            let state  = <ForEachNodeState<T>> this.domManager.nodeState.get<T>(elements[i]);
-            state.index.next(state.index.getValue() + 1);
+            let elementState  = <ForEachNodeState<T>> this.domManager.nodeState.get<T>(elements[i]);
+            elementState.index.next(elementState.index.getValue() + 1);
         }
     }
 

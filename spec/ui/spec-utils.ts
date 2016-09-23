@@ -1,9 +1,7 @@
-import HtmlTemplateEngine from "../../src/ui/templateEngines";
+import { html } from "../../src/ui/templateEngines";
 
 export function parse(template: string): Node[] {
-    const engine = new HtmlTemplateEngine();
-    const nodes = engine.parse(template);
-    return nodes;
+    return html.parse(template);
 }
 
 let knownEvents = {};

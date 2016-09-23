@@ -1,12 +1,14 @@
 
-export default class HtmlTemplateEngine {
+export class HtmlTemplateEngine {
     public parse(data: string): Node[] {
-        const context = document.implementation.createHTMLDocument("");
-        context.documentElement.insertAdjacentHTML("afterbegin", data);
+        const container = document.createElement("div");
+        container.insertAdjacentHTML("afterbegin", data);
         const arr: Node[] = [];
-        for (let i = 0, n: Node; n = context.body.childNodes[i]; ++i) {
+        for (let i = 0, n: Node; n = container.childNodes[i]; ++i) {
             arr.push(n);
         }
         return arr;
     }
 }
+
+export const html = new HtmlTemplateEngine();
