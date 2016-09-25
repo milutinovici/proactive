@@ -10,7 +10,7 @@ import { exception } from "../exceptionHandlers";
  * Base class for bindings that takes a single expression and applies the result to one or more target elements
  * @class
  */
-export class BindingBase<T> implements IBindingHandler<T> {
+export abstract class BindingBase<T> implements IBindingHandler<T> {
     public priority = 0;
     public controlsDescendants = false;
     protected domManager: DomManager;
@@ -42,16 +42,14 @@ export class BindingBase<T> implements IBindingHandler<T> {
         this.applyBindingInternal(node, obs, ctx, state, parameter);
     }
 
-    protected applyBindingInternal(el: Element, obs: Rx.Observable<T> | Rx.Observer<T>, ctx: IDataContext, state: NodeState<T>, parameter?: string): void {
-        throw Error("you need to override this method!");
-    }
+    protected abstract applyBindingInternal(el: Element, obs: Rx.Observable<T> | Rx.Observer<T>, ctx: IDataContext, state: NodeState<T>, parameter?: string): void ;
 }
 
 /**
 * Base class for one-way bindings that take a single expression and apply the result to one or more target elements
 * @class
 */
-export class OneWayBindingBase<T> extends BindingBase<T> {
+export abstract class OneWayBindingBase<T> extends BindingBase<T> {
     constructor(domManager: DomManager) {
         super(domManager);
     }
@@ -62,7 +60,5 @@ export class OneWayBindingBase<T> extends BindingBase<T> {
         })));
     }
 
-    protected applyValue(el: Element, value: T, parameter?: string): void {
-        throw Error("you need to override this method!");
-    }
+    protected abstract applyValue(el: Element, value: T, parameter?: string): void;
 }

@@ -10,7 +10,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "strictNullChecks": false,
-    "noImplicitThis": false,
+    "noImplicitThis": true,
     "noImplicitReturns": true,
     "noUnusedParameters": false,
     "noUnusedLocals": false,

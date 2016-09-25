@@ -125,7 +125,7 @@ it("component: Params get passed to view-model constructor", expect => {
     const template = `<span bind-text="foo">invalid</span>`;
 
     // constructor 
-    function constr(params: any) {
+    function constr(this: any, params: any) {
         this.foo = params.foo;
     }
     ui.components.register("test-component", { template: template, viewModel: constr });
@@ -146,7 +146,7 @@ it("component: Invokes preBindingInit", expect => {
     let vm: any;
 
     vm = {
-        preInit: function (element: HTMLElement) {  // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
+        preInit: function (this: any, element: HTMLElement) {  // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
             invoked = true;
             __this = this;
             elementArg = element instanceof HTMLElement;
@@ -177,7 +177,7 @@ it("component: Invokes postBindingInit", expect => {
     let vm: any;
 
     vm = {
-        postInit: function(element: HTMLElement) {   // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
+        postInit: function(this: any, element: HTMLElement) {   // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
             invoked = true;
             __this = this;
             elementArg = element instanceof HTMLElement;
@@ -204,7 +204,7 @@ it("component: Unsubscribes a component's viewmodel if has unsubscribe fn", expe
     const template = "<span>foo</span>";
     let unsubscribed = false;
 
-    function vm() {
+    function vm(this: any) {
         this.unsubscribe = () => unsubscribed = true;
     }
 

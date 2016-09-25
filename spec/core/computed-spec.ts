@@ -43,7 +43,7 @@ it("adding data to the underlying observable results in change notifications on 
     const value = subject.toComputed();
     let changedFired = false;
 
-    value.subscribe(x => changedFired = true);
+    value.subscribe(() => changedFired = true);
     subject.next(10);
 
     expect.true(changedFired);
@@ -56,10 +56,10 @@ it("multiple subscribers receive notifications", expect => {
     let changedFiredCount = 0;
 
     // subscribe
-    value.subscribe(x => changedFiredCount++);
+    value.subscribe(() => changedFiredCount++);
 
     // subscribe again
-    value.subscribe(x => changedFiredCount++);
+    value.subscribe(() => changedFiredCount++);
 
     subject.next(10);
 
@@ -73,7 +73,7 @@ it("notifications for changes in absence of any subscribers do not get buffered"
     let changedFired = false;
 
     subject.next(10);
-    value.subscribe(x => changedFired = true);
+    value.subscribe(() => changedFired = true);
 
     expect.false(changedFired);
     expect.end();
@@ -84,7 +84,7 @@ it("consecutively assigning the same value does not result in duplicate change n
     const value = subject.toComputed();
     let changedFiredCount = 0;
 
-    value.subscribe(x => changedFiredCount++);
+    value.subscribe(() => changedFiredCount++);
     subject.next(1);
     subject.next(2);
     subject.next(2);
@@ -98,7 +98,7 @@ it("captures errors in the observable source", expect => {
     const value = subject.toComputed();
     let errorCount = 0;
 
-    value.subscribe(x => {}, error => errorCount++);
+    value.subscribe(() => {}, () => errorCount++);
     subject.error("error");
 
     expect.equal(errorCount, 1);
@@ -108,7 +108,7 @@ it("captures errors in the observable source", expect => {
 it("allows connecting an error handler at construction", expect => {
     const subject = new Rx.Subject<number>();
     let errorCount = 0;
-    const value = subject.toComputed().subscribe(x => {}, error => errorCount++);
+    subject.toComputed().subscribe(() => {}, () => errorCount++);
 
     subject.error("error");
 

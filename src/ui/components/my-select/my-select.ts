@@ -2,8 +2,8 @@ import * as Rx from "rxjs";
 import "./my-select.html";
 
 export class Select {
-    options: Rx.Observable<string[]>;
-    selected: Rx.Observable<number>;
+    public readonly options: Rx.Observable<string[]>;
+    public readonly selected: Rx.Observable<number>;
     constructor(options?: Rx.Observable<number[]>) {
         this.options = Rx.Observable.of([ "one", "two"]);
         this.selected = Rx.Observable.of(-1);

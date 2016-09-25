@@ -38,6 +38,7 @@ it("should be filtered", expect => {
 
     const removed = origin.remove(x => x === "Bar"); // Remove "Bar"
     expect.isEquivalent(output(), ["Foo", "Bamf", "Boof"]);
+    expect.isEquivalent(removed, ["Bar"]);
 
     origin.shift(); // Remove "Foo"
     expect.isEquivalent(output(), ["Bamf", "Boof"]);
@@ -96,6 +97,7 @@ it("should check if every element satisfies selector", expect => {
     expect.false(output());
 
     const removed = origin.shift(); // Remove 1
+    expect.equal(removed, 1);
     expect.true(output());
 
     origin.push(3);
@@ -112,6 +114,7 @@ it("should check if any element satisfies selector", expect => {
     expect.true(output());
 
     const removed = origin.shift(); // Remove 2
+    expect.equal(removed, 2);
     expect.false(output());
 
     origin.push(4);
@@ -128,6 +131,7 @@ it("should get max element of Array using reduce", expect => {
     expect.equal(output(), 9);
 
     const removed = origin.pop();
+    expect.equal(removed, 9);
     expect.equal(output(), 7);
 
     origin.push(4);
@@ -144,6 +148,7 @@ it("should flatten elements using flatMap", expect => {
     expect.isEquivalent(output(), [2, 3, 5, 7, 1, 4]);
 
     const removed = origin.shift();
+    expect.isEquivalent(removed, [2, 3]);
     expect.isEquivalent(output(), [5, 7, 1, 4]);
 
     origin.pop();

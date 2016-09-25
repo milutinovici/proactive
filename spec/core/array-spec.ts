@@ -41,7 +41,7 @@ it("shift should remove 1st item", expect => {
 });
 it("unshift should insert item at the begining of a Array", expect => {
     const items = px.array([1, 2, 3]);
-    const removed = items.unshift(0);
+    items.unshift(0);
     expect.isEquivalent(items(), [0, 1, 2, 3]);
     expect.end();
 });
