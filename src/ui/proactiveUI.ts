@@ -22,22 +22,22 @@ export class ProactiveUI {
     * @param {any} model The model to bind to
     * @param {Node} rootNode The node to be bound
     */
-    public applyBindings(model: any, node?: Node) {
+    public applyBindings(model: any, node?: Element) {
         this.domManager.applyBindings(model, node || document.documentElement);
     }
     /**
     * Removes and cleans up any binding-related state from the specified node and its descendants.
     * @param {Node} rootNode The node to be cleaned
     */
-    public cleanNode(node: HTMLElement) {
+    public cleanNode(node: Element) {
         this.domManager.cleanNode(node);
     }
 
-    public contextFor(node: HTMLElement): IDataContext {
+    public contextFor(node: Element): IDataContext {
         return this.domManager.nodeState.getDataContext(node);
     }
 
-    public dataFor(node: HTMLElement): any {
+    public dataFor(node: Element): any {
         return this.domManager.nodeState.get(node).model;
     }
 

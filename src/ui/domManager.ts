@@ -24,7 +24,7 @@ export class DomManager {
         this.registerCoreBindings();
     }
 
-    public applyBindings(model: any, rootNode: Node): void {
+    public applyBindings(model: any, rootNode: Element): void {
         if (rootNode === undefined || !isElement(rootNode)) {
             throw Error("first parameter should be your model, second parameter should be a DOM node!");
         }
@@ -42,65 +42,60 @@ export class DomManager {
 
         // calculate resulting data-context and apply bindings
         let ctx = this.nodeState.getDataContext(rootNode);
-        this.applyBindingsRecursive(ctx, <HTMLElement> rootNode);
+        this.applyBindingsRecursive(ctx, rootNode);
     }
 
-    public applyBindingsToDescendants(ctx: IDataContext, node: HTMLElement): void {
+    public applyBindingsToDescendants(ctx: IDataContext, node: Element): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.children.length; i++) {
-                let child = node.children[i];
-                this.applyBindingsRecursive(ctx, <HTMLElement> child);
+                this.applyBindingsRecursive(ctx, node.children[i]);
             }
         }
     }
 
-    public cleanNode(rootNode: HTMLElement): void {
+    public cleanNode(rootNode: Element): void {
         if (!isElement(rootNode)) {
             return;
         }
         this.cleanNodeRecursive(rootNode);
     }
 
-    public cleanDescendants(node: HTMLElement): void {
+    public cleanDescendants(node: Element): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.children.length; i++) {
-                let child = <HTMLElement> node.children[i];
-
-                this.cleanNodeRecursive(child);
-                this.nodeState.clear(child);
+                this.cleanNodeRecursive(node.children[i]);
+                this.nodeState.clear(node.children[i]);
             }
         }
     }
 
-    private applyBindingsRecursive(ctx: IDataContext, el: HTMLElement): void {
+    private applyBindingsRecursive(ctx: IDataContext, el: Element): void {
         if (this.shouldBind(el) && !this.applyBindingsInternal(ctx, el) && el.hasChildNodes()) {
             let child = el.firstElementChild;
             // iterate over descendants
             while (child) {
-                this.applyBindingsRecursive(ctx, <HTMLElement> child);
+                this.applyBindingsRecursive(ctx, child);
                 child = child.nextElementSibling;
             }
         }
     }
 
-    private cleanNodeRecursive(node: HTMLElement): void {
+    private cleanNodeRecursive(node: Element): void {
         if (node.hasChildNodes()) {
             let length = node.children.length;
-
             for (let i = 0; i < length; i++) {
-                let child = <HTMLElement> node.children[i];
                 // only elements
-                if (!isElement(child)) {
+                if (!isElement(node.children[i])) {
                     continue;
                 }
-                this.cleanNodeRecursive(child);
+                this.cleanNodeRecursive(node.children[i]);
             }
         }
         // clear parent after childs
         this.nodeState.clear(node);
     }
 
-    private applyBindingsInternal(ctx: IDataContext, el: HTMLElement): boolean {
+    private applyBindingsInternal(ctx: IDataContext, el: Element): boolean {
         let controlsDescendants = false;
         let bindingProvider = new BindingProvider();
         let bindings = bindingProvider.getBindings(el);
@@ -125,18 +120,17 @@ export class DomManager {
         controlsDescendants = pairs.some(x => x.handler.controlsDescendants);
 
         // apply all bindings
-        for (let i = 0; i < pairs.length; i++) {
-            const binding = pairs[i].binding;
-            const handler = pairs[i].handler;
+        for (const p of pairs) {
             // prevent recursive applying of repeat
-            if (binding.name === "repeat" && state["index"] !== undefined) {
+            if (p.binding.name === "repeat" && state["index"] !== undefined) {
                 continue;
             }
-            if (binding.name === "repeat" && state["index"] === undefined) {
-                handler.applyBinding(el, binding.expression, ctx, state, binding.parameter);
+            // apply repeat before anything else, then imediately return
+            if (p.binding.name === "repeat" && state["index"] === undefined) {
+                p.handler.applyBinding(el, p.binding.expression, ctx, state, p.binding.parameter);
                 return true;
             }
-            handler.applyBinding(el, binding.expression, ctx, state, binding.parameter);
+            p.handler.applyBinding(el, p.binding.expression, ctx, state, p.binding.parameter);
         }
         // mark bound
         state.isBound = true;
@@ -161,7 +155,7 @@ export class DomManager {
         }
         return handler;
     }
-    public getBindingHandlers(bindings: IBindingAttribute[]) {
+    private getBindingHandlers(bindings: IBindingAttribute[]) {
         // lookup handlers
         const pairs = bindings.map(x => {
             const handler = this.getBindingHandler(x);

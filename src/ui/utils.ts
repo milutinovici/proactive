@@ -68,24 +68,20 @@ export function isInputElement(target: Node): target is HTMLInputElement {
 * @param {boolean} shouldHaveClass True if the classes should be added to the element, false if they should be removed
 * @param {string[]} classNames The list of classes to process
 */
-export function toggleCssClass(node: HTMLElement, shouldHaveClass: boolean, ...classNames: string[]): void {
+export function toggleCssClass(node: Element, shouldHaveClass: boolean, ...classNames: string[]): void {
     if (classNames) {
         const currentClassNames: string[] = node.className.match(regexCssClassName) || [];
         let index: number;
-        let className: string;
 
         if (shouldHaveClass) {
-            for (let i = 0; i < classNames.length; i++) {
-                className = classNames[i];
-
+            for (const className of classNames) {
                 index = currentClassNames.indexOf(className);
                 if (index === -1) {
                     currentClassNames.push(className);
                 }
             }
         } else {
-            for (let i = 0; i < classNames.length; i++) {
-                className = classNames[i];
+            for (const className of classNames) {
                 index = currentClassNames.indexOf(className);
                 if (index !== -1) {
                     currentClassNames.splice(index, 1);
@@ -109,7 +105,7 @@ export function hasCssClass(node: HTMLElement, className: string): boolean {
  * Returns true if the specified element may be disabled
  * @param {HTMLElement} el
  */
-export function elementCanBeDisabled(el: HTMLElement): boolean {
+export function elementCanBeDisabled(el: Element): boolean {
     return el instanceof HTMLButtonElement ||
         el instanceof HTMLAnchorElement ||
         el instanceof HTMLInputElement ||

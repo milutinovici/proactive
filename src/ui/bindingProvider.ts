@@ -8,11 +8,11 @@ const parameterPrefix = /^param-/;
 
 export class BindingProvider {
 
-    public getParameters(element: HTMLElement): IBindingAttribute[] {
+    public getParameters(element: Element): IBindingAttribute[] {
         return this.getAttributeValues(element, parameterPrefix);
     }
 
-    public getBindings(element: HTMLElement): IBindingAttribute[] {
+    public getBindings(element: Element): IBindingAttribute[] {
         if (!isElement(element)) {
             throw new Error("Only html elements can have bindings");
         }
@@ -25,7 +25,7 @@ export class BindingProvider {
         return bindings;
     }
 
-    private getAttributeValues(element: HTMLElement, prefix: RegExp): IBindingAttribute[] {
+    private getAttributeValues(element: Element, prefix: RegExp): IBindingAttribute[] {
 
         const attributes: Attr[] = [].filter.call(element.attributes, (at: Attr) => prefix.test(at.name));
         return attributes.map(x => {
@@ -35,7 +35,7 @@ export class BindingProvider {
         });
     }
 
-    private customElementToBinding(element: HTMLElement): IBindingAttribute {
+    private customElementToBinding(element: Element): IBindingAttribute {
         // when a component is referenced as custom-element, apply a virtual 'component' binding
         const tagName = element.tagName.toLowerCase();
         const expression = compileBindingExpression<any>(`'${tagName}'`);

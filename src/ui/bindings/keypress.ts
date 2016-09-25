@@ -87,8 +87,8 @@ export default class KeyPressBinding extends BindingBase<KeyboardEvent> {
     }
 
     private testCombinations(combinations: KeyCombination[], event: KeyboardEvent): boolean {
-        for (let i = 0; i < combinations.length; i++) {
-            if (this.testCombination(combinations[i], event)) {
+        for (const combi of combinations) {
+            if (this.testCombination(combi, event)) {
                 return true;
             }
         }

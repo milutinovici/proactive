@@ -29,11 +29,10 @@ export class IfBinding extends BindingBase<boolean> {
     }
 
     protected applyValue(el: HTMLElement, value: boolean, template: Array<Node>, ctx: IDataContext) {
-
         if (value) {
             const nodes = template.map(x => x.cloneNode(true));
-            for (let i = 0; i < template.length; i++) {
-                el.appendChild(nodes[i]);
+            for (const node of nodes) {
+                el.appendChild(node);
             }
             this.domManager.applyBindingsToDescendants(ctx, el);
         } else {

@@ -45,18 +45,16 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
     }
 
     protected applyValue(elements: Node[], template: HTMLElement, newArray: T[], oldArray: T[], placeholder: Node): void {
-
-        let test = compareLists(oldArray, newArray);
-        for (let i = 0; i < test.length; i++) {
-            if (test[i].status === "added") {
-                this.addRow(elements, template, test[i].value, test[i].index, placeholder);
-            } else if (test[i].status === "deleted") {
-                this.removeRow(elements, test[i].index, placeholder);
-            } else if (test[i].status === "moved") {
-                this.moveRow(elements, test[i].index, test[i].index);
+        let changes = compareLists(oldArray, newArray);
+        for (const change of changes) {
+            if (change.status === "added") {
+                this.addRow(elements, template, change.value, change.index, placeholder);
+            } else if (change.status === "deleted") {
+                this.removeRow(elements, change.index, placeholder);
+            } else if (change.status === "moved") {
+                this.moveRow(elements, change.index, change.index);
             }
         }
-
     }
 
     private addRow(elements: Node[], template: HTMLElement, item: T, index: number, placeholder: Node): INodeState<T> {

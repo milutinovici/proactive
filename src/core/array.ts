@@ -71,8 +71,7 @@ export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Rx.Observer<T[
         const old = this.getValue();
         const removed: T[] = [];
         const retained: T[] = [];
-        for (let i = 0; i < old.length; i++) {
-            const value = old[i];
+        for (const value of old) {
             if (fn(value)) {
                 removed.push(value);
             } else {

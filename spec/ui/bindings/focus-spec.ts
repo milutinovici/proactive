@@ -8,7 +8,7 @@ let focusOutEvent = "focusout";
 
 it("focus: Should respond to changes on an observable value by blurring or focusing the element", expect => {
     const template = `<div><input bind-focus="myVal" /><input /></div>`;
-    const el = util.parse(template)[0];
+    const el = <Element> util.parse(template)[0];
     let input = <HTMLInputElement> el.childNodes[0];
     document.body.appendChild(el);
 
@@ -37,7 +37,7 @@ it("focus: Should respond to changes on an observable value by blurring or focus
 
 it("focus: Should set an observable value to be true on focus and false on blur", expect => {
     const template = `<div><input bind-focus="myVal" /><input /><p bind-text="myVal"></p></div>`;
-    const el = util.parse(template)[0];
+    const el = <Element> util.parse(template)[0];
     document.body.appendChild(el);
     let model = { myVal: px.value() };
 

@@ -1,12 +1,12 @@
 import * as Rx from "rxjs";
 import { IBindingAttribute, IDataContext, INodeState } from "./interfaces";
 
-export class NodeState<T> {
-    public model: T;        // scope model
-    public cleanup: Rx.Subscription;
+export class NodeState<T> implements INodeState<T> {
+    public  model: T;        // scope model
+    public readonly cleanup: Rx.Subscription;
     public isBound: boolean;   // true if this node has been touched by applyBindings
-    public bindings: IBindingAttribute[] = [];
-    public params: IBindingAttribute[] = [];
+    public readonly bindings: IBindingAttribute[] = [];
+    public readonly params: IBindingAttribute[] = [];
 
     constructor(model?: T) {
         this.model = model;
@@ -14,8 +14,8 @@ export class NodeState<T> {
         this.isBound = false;
     }
 
-    public getBinding(name: string) {
-        return this.bindings.filter(x => x.name === name);
+    public getBinding(name: string): IBindingAttribute {
+        return this.bindings.filter(x => x.name === name)[0];
     }
 }
 

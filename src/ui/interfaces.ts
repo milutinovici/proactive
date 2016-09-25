@@ -45,7 +45,7 @@ export interface IDataContext {
     readonly $parents: any[];
 }
 export interface INodeState<T> {
-    cleanup: Rx.Subscription;
+    readonly cleanup: Rx.Subscription;
     isBound: boolean;   // true of this node has been touched by applyBindings
     model?: T;        // scope model
     bindings: IBindingAttribute[];

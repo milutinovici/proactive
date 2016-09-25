@@ -58,13 +58,12 @@ export default class ComponentBinding<T> extends BindingBase<string> {
         if (template) {
             // clear
             while (element.firstChild) {
-                this.domManager.cleanNode(<HTMLElement> element.firstChild);
+                this.domManager.cleanNode(<Element> element.firstChild);
                 element.removeChild(element.firstChild);
             }
             // clone template and inject
-            for (let i = 0; i < template.length; i++) {
-                const node = template[i].cloneNode(true);
-                element.appendChild(node);
+            for (const node of template) {
+                element.appendChild(node.cloneNode(true));
             }
         }
 

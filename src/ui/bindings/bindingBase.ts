@@ -19,7 +19,7 @@ export class BindingBase<T> implements IBindingHandler<T> {
         this.domManager = domManager;
     }
 
-    public applyBinding(node: HTMLElement, expression: ICompiledExpression<T>, ctx: IDataContext, state: NodeState<T>, parameter?: string): void {
+    public applyBinding(node: Element, expression: ICompiledExpression<T>, ctx: IDataContext, state: NodeState<T>, parameter?: string): void {
         if (!isElement(node)) {
             throw Error("binding only operates on elements!");
         }
@@ -30,7 +30,7 @@ export class BindingBase<T> implements IBindingHandler<T> {
         if (isRxObservable(obs) || isRxObserver(obs)) {
             obs = obs;
         } else if (isFunction(obs)) {
-            const fn: (t: T, e: HTMLElement, ctx: IDataContext) => void = obs.bind(ctx.$data);
+            const fn: (t: T, e: Element, ctx: IDataContext) => void = obs.bind(ctx.$data);
             obs = new Rx.Subscriber<T>(x => fn(x, node, ctx), exception.error);
         } else {
             obs = expressionToObservable(expression, ctx, node);
@@ -42,7 +42,7 @@ export class BindingBase<T> implements IBindingHandler<T> {
         this.applyBindingInternal(node, obs, ctx, state, parameter);
     }
 
-    protected applyBindingInternal(el: HTMLElement, obs: Rx.Observable<T> | Rx.Observer<T>, ctx: IDataContext, state: NodeState<T>, parameter?: string): void {
+    protected applyBindingInternal(el: Element, obs: Rx.Observable<T> | Rx.Observer<T>, ctx: IDataContext, state: NodeState<T>, parameter?: string): void {
         throw Error("you need to override this method!");
     }
 }
@@ -56,13 +56,13 @@ export class OneWayBindingBase<T> extends BindingBase<T> {
         super(domManager);
     }
 
-    protected applyBindingInternal(el: HTMLElement, observable: Rx.Observable<T>, ctx: IDataContext, state: NodeState<T>, parameter: string): void {
+    protected applyBindingInternal(el: Element, observable: Rx.Observable<T>, ctx: IDataContext, state: NodeState<T>, parameter: string): void {
         state.cleanup.add(observable.subscribe(tryCatch<T>(x => {
             this.applyValue(el, x, parameter);
         })));
     }
 
-    protected applyValue(el: HTMLElement, value: T, parameter?: string): void {
+    protected applyValue(el: Element, value: T, parameter?: string): void {
         throw Error("you need to override this method!");
     }
 }
