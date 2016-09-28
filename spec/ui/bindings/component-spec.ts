@@ -1,5 +1,4 @@
 import * as it from "tape";
-import * as px from "../../../src/core/proactive";
 import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
@@ -141,14 +140,14 @@ it("component: Invokes preBindingInit", expect => {
 
     const template = "<span>foo</span>";
     let invoked = false;
-    let __this: any;
+    let self: any;
     let elementArg = false;
     let vm: any;
 
     vm = {
         preInit: function (this: any, element: HTMLElement) {  // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
             invoked = true;
-            __this = this;
+            self = this;
             elementArg = element instanceof HTMLElement;
         },
     };
@@ -160,7 +159,7 @@ it("component: Invokes preBindingInit", expect => {
 
     expect.doesNotThrow(() => ui.applyBindings(undefined, el));
     expect.true(invoked);
-    expect.equal(__this, vm);
+    expect.equal(self, vm);
     expect.true(elementArg);
     expect.end();
 });
@@ -171,7 +170,7 @@ it("component: Invokes postBindingInit", expect => {
 
     const template = "<span>foo</span>";
     let invoked = false;
-    let __this: any;
+    let self: any;
     let elementArg = false;
 
     let vm: any;
@@ -179,7 +178,7 @@ it("component: Invokes postBindingInit", expect => {
     vm = {
         postInit: function(this: any, element: HTMLElement) {   // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
             invoked = true;
-            __this = this;
+            self = this;
             elementArg = element instanceof HTMLElement;
         },
     };
@@ -192,7 +191,7 @@ it("component: Invokes postBindingInit", expect => {
     expect.doesNotThrow(() => ui.applyBindings(undefined, el));
 
     expect.true(invoked);
-    expect.equal(__this, vm);
+    expect.equal(self, vm);
     expect.true(elementArg);
     expect.end();
 });

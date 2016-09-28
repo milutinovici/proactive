@@ -2,7 +2,7 @@ import * as Rx from "rxjs";
 import { IBindingAttribute, IDataContext, INodeState } from "./interfaces";
 
 export class NodeState<T> implements INodeState<T> {
-    public  model: T;        // scope model
+    public  model?: T;        // scope model
     public readonly cleanup: Rx.Subscription;
     public isBound: boolean;   // true if this node has been touched by applyBindings
     public readonly bindings: IBindingAttribute[] = [];
@@ -31,31 +31,31 @@ export class ForEachNodeState<T> extends NodeState<T> {
 
 export class NodeStateManager {
     private readonly dataContextExtensions = new Set<(node: Node, ctx: IDataContext) => void>();
-    private readonly nodeState: WeakMap<Node, INodeState<any>>;
+    private readonly weakMap: WeakMap<Node, INodeState<any>>;
 
     constructor() {
-        this.nodeState = new WeakMap<Node, INodeState<any>>();
+        this.weakMap = new WeakMap<Node, INodeState<any>>();
     }
     public create<T>(model?: T): NodeState<T> {
         return new NodeState(model);
     }
 
     public isBound(node: Node): boolean {
-        const state = this.nodeState.get(node);
+        const state = this.weakMap.get(node);
 
         return state != null && !!state.isBound;
     }
 
     public set<T>(node: Node, state: INodeState<T>): void {
-        this.nodeState.set(node, state);
+        this.weakMap.set(node, state);
     }
 
-    public get<T>(node: Node): INodeState<T> {
-        return this.nodeState.get(node);
+    public get<T>(node: Node): INodeState<T> | undefined {
+        return this.weakMap.get(node);
     }
 
     public clear(node: Node) {
-        const state = this.nodeState.get(node);
+        const state = this.weakMap.get(node);
 
         if (state != null) {
             if (state.cleanup != null) {
@@ -63,7 +63,7 @@ export class NodeStateManager {
             }
             state.model = undefined;
             // delete state itself
-            this.nodeState.delete(node);
+            this.weakMap.delete(node);
         }
         // support external per-node cleanup
         // env.cleanExternalData(node);
@@ -71,12 +71,12 @@ export class NodeStateManager {
 
     public getDataContext(node: Node): IDataContext {
         let models: any[] = [];
-        let state: INodeState<any> | null = this.get<any>(node);
+        let state: INodeState<any> | undefined = this.get<any>(node);
 
         // collect model hierarchy
         let currentNode = node;
         while (currentNode) {
-            state = state != null ? state : this.nodeState.get(currentNode);
+            state = state != null ? state : this.weakMap.get(currentNode);
             if (state != null) {
                 if (state.model != null) {
                     models.push(state.model);
@@ -86,7 +86,7 @@ export class NodeStateManager {
             if (state && state["isolate"]) {
                 break;
             }
-            state = null;
+            state = undefined;
             currentNode = currentNode.parentNode;
         }
 

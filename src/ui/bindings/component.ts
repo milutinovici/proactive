@@ -38,18 +38,18 @@ export default class ComponentBinding<T> extends BindingBase<string> {
             internal = new Rx.Subscription();
             // isolated nodestate and ctx
             if (component.viewModel) {
-                const componentState = this.domManager.nodeState.get<T>(element);
+                const componentState = this.domManager.nodeState.get<T>(element) || this.domManager.nodeState.create();
                 componentState["isolate"] = true;
                 componentState.model = component.viewModel;
+                this.domManager.nodeState.set(element, componentState);
                 ctx = this.domManager.nodeState.getDataContext(element);
                 // auto-dispose view-model
                 if (isDisposable(component.viewModel)) {
-                    const sub = <Rx.Subscription> component.viewModel;
-                    internal.add(sub);
+                    internal.add(component.viewModel);
                 }
             }
             // done
-            this.applyTemplate(element, ctx, state.cleanup, component.template, component.viewModel);
+            this.applyTemplate(element, ctx, state.cleanup, component.template, <T | undefined> component.viewModel);
         }));
         state.cleanup.add(doCleanup);
     }

@@ -100,7 +100,7 @@ export function setNodeValue<T>(node: HTMLInputElement, value: T, domManager: Do
     } else {
         // get or create state
         if (state == null) {
-            state = domManager.nodeState.create<T>();
+            state = domManager.nodeState.create<T>(value);
             domManager.nodeState.set(node, state);
         }
 

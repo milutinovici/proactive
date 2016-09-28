@@ -5,13 +5,13 @@ import "./observableExtensions";
 
 export class ComputedArrayImpl<T> extends ComputedValueImpl<T[]> {
 
-    constructor(source: Observable<T[]>, initial?: T[]) {
+    constructor(source: Observable<T[]>, initial: T[] = []) {
         super(source, initial);
     }
 
     public static createComputedArray<T>(source: Observable<T[]>): ComputedArray<T> {
         const accessor: any = function<T>() {
-            return accessor.getValue();
+            return <T> accessor.getValue();
         };
         const observable = new ComputedArrayImpl(source);
         for (const attrname in observable) {

@@ -38,7 +38,11 @@ export class ProactiveUI {
     }
 
     public dataFor(node: Element): any {
-        return this.domManager.nodeState.get(node).model;
+        const state = this.domManager.nodeState.get<any>(node);
+        if (state !== undefined) {
+            return state.model;
+        }
+        return undefined;
     }
 
 }

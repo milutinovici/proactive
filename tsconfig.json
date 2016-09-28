@@ -9,11 +9,11 @@
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
     "noUnusedParameters": false,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "outDir": "./dist",
     "lib": ["es5", "dom", "es2015.promise", "es2015.collection"]
   },

@@ -58,6 +58,6 @@ export interface IComponentDescriptor<T> {
 }
 
 export interface IComponent<T> {
-    template?: Node[];
+    template: Node[];
     viewModel?: T;
 }

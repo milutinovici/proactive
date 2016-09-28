@@ -7,7 +7,7 @@ const regexCssClassName = /\S+/g;
 * Unsubscribes all subscrition members of an object
 * @param {any} target
 */
-export function unsubscribeMembers<T>(target: any): void {
+export function unsubscribeMembers(target: any): void {
     Object.keys(target).filter(propertyName => {
         const disp = target[propertyName];
         return disp != null && isFunction(disp.unsubscribe);

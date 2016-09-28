@@ -5,7 +5,7 @@ export class ComputedValueImpl<T> extends Rx.Observable<T> {
     protected source: Rx.Observable<T>;
     protected value: T;
 
-    constructor(source: Rx.Observable<T>, initial?: T) {
+    constructor(source: Rx.Observable<T>, initial: T) {
         super();
         this.value = initial;
         this.source = source.distinctUntilChanged();
@@ -17,14 +17,14 @@ export class ComputedValueImpl<T> extends Rx.Observable<T> {
     public getValue(): T {
         return this.value;
     }
-    public static createComputed<T>(source: Rx.Observable<T>): ComputedValue<T> {
+    public static createComputed<T>(source: Rx.Observable<T>, initial: T): ComputedValue<T> {
         if ("call" in source && "source" in source) {
             return <ComputedValue<T>> source;
         }
         const accessor: any = function(): T {
             return accessor.getValue();
         };
-        const observable = new ComputedValueImpl(source);
+        const observable = new ComputedValueImpl(source, initial);
         for (const attrname in observable) {
             accessor[attrname] = observable[attrname];
         }
