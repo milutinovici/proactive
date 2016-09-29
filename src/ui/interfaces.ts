@@ -40,9 +40,9 @@ export interface IBindingHandler<T> {
 
 export interface IDataContext {
     readonly $data: any;
-    readonly $root: any;
-    readonly $parent: any;
-    readonly $parents: any[];
+    readonly $root?: Object;
+    readonly $parent?: Object;
+    readonly $parents: Object[];
 }
 export interface INodeState<T> {
     readonly cleanup: Rx.Subscription;

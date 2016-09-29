@@ -1,4 +1,5 @@
 // import * as Rx from "rxjs";
+// import { Delta } from "./compareLists";
 // import { DomManager } from "../domManager";
 // import { INodeState, IDataContext } from "../interfaces";
 // import { isRxObserver, isRxObservable } from "../utils";
@@ -13,13 +14,14 @@
 
 // // Get a copy of the child nodes of the given element,
 // // put them into a container, then empty the given node.
-// function makeTemplateNode(sourceNode: Element) {
+// function makeTemplateNode(sourceNode: Element ) {
 //   const container = document.createElement("div");
 //   let parentNode: Element;
-//   if (sourceNode.content) {
+//   if (sourceNode instanceof HTMLTemplateElement) {
 //     // For e.g. <template> tags
-//     parentNode = sourceNode.content;
-//   } else if (sourceNode.tagName === "SCRIPT") {
+//     parentNode = document.createElement("div");
+//     parentNode.appendChild(sourceNode.content);
+//   } else if (sourceNode instanceof HTMLScriptElement) {
 //     parentNode = document.createElement("div");
 //     parentNode.innerHTML = sourceNode.text;
 //   } else {
@@ -38,7 +40,7 @@
 // }
 
 // // Mimic a KO change item 'add'
-// function valueToChangeAddItem<T>(value: T, index: number) {
+// function valueToChangeAddItem<T>(value: T, index: number): Delta<T> {
 //   return {
 //     status: "added",
 //     value: value,
@@ -54,7 +56,12 @@
 // // store a symbol for caching the pending delete info index in the data item objects
 // const PENDING_DELETE_INDEX_KEY = createSymbolOrString("_ko_ffe_pending_delete_index");
 
-// class FastForEach {
+// interface FirstLastNode {
+//     first: Node;
+//     last: Node;
+// }
+
+// class FastForEach<T> {
 //     public element: Element;
 //     public container: Element;
 //     public $context: IDataContext;
@@ -62,10 +69,10 @@
 //     public templateNode: Element;
 //     public noIndex: boolean;
 //     public noContext: boolean;
-//     public changeQueue: any[];
-//     public firstLastNodesList: any[];
+//     public changeQueue: Delta<T>[];
+//     public firstLastNodesList: FirstLastNode[];
 //     public indexesToDelete: number[];
-//     public pendingDeletes: any[];
+//     public pendingDeletes: Delta<T>[];
 //     public rendering_queued = false;
 
 //     constructor(spec: any) {
@@ -73,7 +80,6 @@
 //         this.container = this.element;
 //         this.$context = spec.$context;
 //         this.data = spec.data;
-//         this.as = spec.as;
 //         this.noContext = spec.noContext;
 //         this.noIndex = spec.noIndex;
 //         this.afterAdd = spec.afterAdd;
@@ -106,7 +112,6 @@
 //             this.changeSubs = this.data.subscribe(this.onArrayChange, this, "arrayChange");
 //         }
 //     }
-//     private static PENDING_DELETE_INDEX_KEY = PENDING_DELETE_INDEX_KEY;
 
 //     public static animateFrame = window.requestAnimationFrame || function (cb: Function) { return window.setTimeout(cb, 1000 / 60); };
 
@@ -117,11 +122,11 @@
 //         this.flushPendingDeletes();
 //     }
 //     // If the array changes we register the change.
-//     public onArrayChange(changeSet, isInitial: boolean) {
+//     public onArrayChange(changeSet: Delta<T>[], isInitial: boolean) {
 //         let self = this;
 //         let changeMap = {
-//             added: [],
-//             deleted: [],
+//             added: <Delta<T>[]> [],
+//             deleted: <Delta<T>[]> [],
 //         };
 //         // array change notification index handling:
 //         // - sends the original array indexes for deletes
@@ -199,9 +204,9 @@
 //         this.changeQueue = [];
 //     }
 //     // Process a changeItem with {status: 'added', ...}
-//     public added(changeItem) {
+//     public added(changeItem: Delta<T>) {
 //         let index = changeItem.index;
-//         let valuesToAdd = changeItem.isBatch ? changeItem.values : [changeItem.value];
+//         let valuesToAdd: T[] = changeItem.isBatch ? changeItem.values : [changeItem.value];
 //         let referenceElement = this.getLastNodeBeforeIndex(index);
 //         // gather all childnodes for a possible batch insertion
 //         let allChildNodes: Element[] = [];
@@ -220,7 +225,7 @@
 //             if (this.noContext) {
 //                 childContext = this.$context.extend({
 //                 $item: valuesToAdd[i],
-//                 $index: this.noIndex ? undefined : ko.observable(),
+//                 $index: this.noIndex ? undefined : new Rx.BehaviorSubject(0),
 //                 });
 //             } else {
 //                 childContext = this.$context.createChildContext(valuesToAdd[i], this.as || null, this.noIndex ? undefined : extendWithIndex);
@@ -229,7 +234,7 @@
 //             // apply bindings first, and then process child nodes, because bindings can add childnodes
 //             ko.applyBindingsToDescendants(childContext, templateClone);
 
-//             childNodes = ko.virtualElements.childNodes(templateClone);
+//             childNodes = templateClone.childNodes;
 //             }
 
 //             // Note discussion at https://github.com/angular/angular.js/issues/7851
@@ -248,10 +253,10 @@
 //         }
 //     }
 
-//     public getNodesForIndex(index: number) {
-//         let result = [],
-//             ptr = this.firstLastNodesList[index].first,
-//             last = this.firstLastNodesList[index].last;
+//     public getNodesForIndex(index: number): Node[] {
+//         let result: Node[] = [];
+//         let ptr = this.firstLastNodesList[index].first;
+//         let last = this.firstLastNodesList[index].last;
 //         result.push(ptr);
 //         while (ptr && ptr !== last) {
 //             ptr = ptr.nextSibling;
@@ -259,15 +264,18 @@
 //         }
 //         return result;
 //     }
-//     public getLastNodeBeforeIndex(index: number) {
-//         if (index < 1 || index - 1 >= this.firstLastNodesList.length)
+//     public getLastNodeBeforeIndex(index: number): Node | null {
+//         if (index < 1 || index - 1 >= this.firstLastNodesList.length) {
 //             return null;
+//         }
 //         return this.firstLastNodesList[index - 1].last;
 //     }
 
-//     public insertAllAfter(nodeOrNodeArrayToInsert, insertAfterNode) {
-//         let frag: DocumentFragment, len: number, i: number,
-//             containerNode = this.element;
+//     public insertAllAfter(nodeOrNodeArrayToInsert: Node | Node[], insertAfterNode: Node) {
+//         let frag: DocumentFragment;
+//         let len: number;
+//         let i: number;
+//         let containerNode = this.element;
 
 //         // poor man's node and array check, should be enough for this
 //         if (nodeOrNodeArrayToInsert.nodeType === undefined && nodeOrNodeArrayToInsert.length === undefined) {

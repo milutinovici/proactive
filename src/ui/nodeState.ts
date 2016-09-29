@@ -103,10 +103,10 @@ export class NodeStateManager {
 }
 
 export class DataContext implements IDataContext {
-    public readonly $data: any = null;
-    public readonly $root: any= null;
-    public readonly $parent: any= null;
-    public readonly $parents: any[]= [];
+    public readonly $data: any;
+    public readonly $root?: Object;
+    public readonly $parent?: Object;
+    public readonly $parents: Object[];
 
     constructor(models: any[]) {
         if (models.length > 0) {
@@ -117,7 +117,7 @@ export class DataContext implements IDataContext {
         }
     }
 
-    public extend(model: any): IDataContext {
+    public createChildContext(model: any): IDataContext {
         return new DataContext(this.$parents.concat(this.$data).concat[model]);
     }
 }

@@ -28,7 +28,7 @@ gulp.task("bench",() => gulp.src("./dist/perf/**/*.js", {read: false}).pipe(benc
 
 gulp.task("core",  () => {
     const project = gulpTs.createProject("tsconfig.json", { outFile: "proactive.js", module: "amd", declaration: true, typescript: typescript, outDir: null });
-    const result = gulp.src("src/core/**/*.ts").pipe(gulpTs(project));
+    const result = gulp.src("src/core/**/*.ts").pipe(project());
     return merge([
 		result.dts
                       .pipe(gulp.dest("./dist")),
@@ -39,7 +39,7 @@ gulp.task("core",  () => {
 });
 gulp.task("ui",  () => {
     const project = gulpTs.createProject("tsconfig.json", { outFile: "ui.js", module: "amd", declaration: true, typescript: typescript, outDir: null });
-    const result = gulp.src("src/ui/**/*.ts").pipe(gulpTs(project));
+    const result = gulp.src("src/ui/**/*.ts").pipe(project());
     return merge([
 		result.dts
                       .pipe(gulp.dest("./dist")),
