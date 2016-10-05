@@ -9,7 +9,7 @@ it("component: Loads a component using simple string options", expect => {
     const template = "<span>foo</span>";
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings(undefined, el));
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.equal(el.innerHTML, template);
     expect.end();
 });
@@ -29,7 +29,7 @@ it("component: Loads a component using its name as tag", expect => {
 it("component: Loads a component through an AMD module loader", expect => {
     const str = `<div bind-component="'test-component'" param-foo="42"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
-    ui.components.register("test-component", "templates/AMD/component1");
+    ui.components.register("test-component", "src/ui/components/my-select");
 
     window["vmHook"] = (params: any) => {
         expect.isNotEqual(params, undefined);
@@ -44,7 +44,7 @@ it("component: Loads a component through an AMD module loader", expect => {
         };
     };
 
-    expect.doesNotThrow(() => ui.applyBindings(undefined, el));
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.end();
 });
 
@@ -55,7 +55,7 @@ it("component: Loads a template from a string", expect => {
     const template = "<span>foo</span>";
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings(undefined, el));
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.equal(el.innerHTML, template);
     expect.end();
 });
@@ -69,7 +69,7 @@ it("component: Loads a template from a node-array", expect => {
         template: util.parse(template),
     });
 
-    expect.doesNotThrow(() => ui.applyBindings(undefined, el));
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.equal(el.innerHTML, template);
     expect.end();
 });
@@ -82,7 +82,7 @@ it("component: Loads a template from a selector", expect => {
 
     ui.components.register("test-component", { template: "#template1" });
 
-    expect.doesNotThrow(() => ui.applyBindings(undefined, el));
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.equal(el.innerHTML, "bar");
     expect.end();
 });
@@ -98,7 +98,7 @@ it("component: Loads a template through an AMD module loader", expect => {
         },
     };
 
-    ui.components.register("test-component", "text!templates/AMD/template1.html");
+    ui.components.register("test-component", "text!src/ui/components/my-select.html");
 
     expect.doesNotThrow(() => ui.applyBindings(vm, el));
     expect.end();
@@ -129,7 +129,7 @@ it("component: Params get passed to view-model constructor", expect => {
     }
     ui.components.register("test-component", { template: template, viewModel: constr });
 
-    expect.doesNotThrow(() => ui.applyBindings(undefined, el));
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.equal(el.childNodes[0].textContent, "42");
     expect.end();
 });
@@ -157,7 +157,7 @@ it("component: Invokes preBindingInit", expect => {
         viewModel:  vm,
     });
 
-    expect.doesNotThrow(() => ui.applyBindings(undefined, el));
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.true(invoked);
     expect.equal(self, vm);
     expect.true(elementArg);
@@ -188,7 +188,7 @@ it("component: Invokes postBindingInit", expect => {
         viewModel: vm,
     });
 
-    expect.doesNotThrow(() => ui.applyBindings(undefined, el));
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
 
     expect.true(invoked);
     expect.equal(self, vm);
@@ -213,7 +213,7 @@ it("component: Unsubscribes a component's viewmodel if has unsubscribe fn", expe
     });
 
     expect.false(unsubscribed);
-    expect.doesNotThrow(() => ui.applyBindings(undefined, el));
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
     ui.cleanNode(el);
     expect.true(unsubscribed);
     expect.end();

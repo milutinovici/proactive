@@ -17,7 +17,7 @@ it("value: Should assign an empty string as value if the model value is undefine
     const template = `<input type="text" bind-value="undefined" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
-    ui.applyBindings(null, el);
+    ui.applyBindings({ }, el);
     expect.equal(el.value, "");
     expect.end();
 });

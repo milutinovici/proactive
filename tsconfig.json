@@ -3,11 +3,10 @@
     "removeComments": false,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "declaration": true,
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es5",
-    "module": "commonjs",
+    "module": "amd",
     "moduleResolution": "node",
     "strictNullChecks": true,
     "noImplicitThis": true,
@@ -21,8 +20,9 @@
     "indentSize": 2,
     "tabSize": 2
   },
-   "exclude": [
-       "node_modules",
-       "dist"
+   "include": [
+       "src/**/*",
+       "spec/**/*",
+       "perf/**/*"
    ]
 }

@@ -55,7 +55,9 @@ export class ComponentRegistry {
         if (typeof template === "string") {
             if (template[0] === "#") {
                 const tmp = document.getElementById(template.slice(1, template.length));
-                if (tmp !== null) {
+                if (tmp instanceof HTMLTemplateElement) {
+                    return nodeListToArray(tmp.content.childNodes);
+                } else if (tmp !== null) {
                     return nodeListToArray(tmp.childNodes);
                 } else {
                     throw Error(`No template with id: "${template}" found`);

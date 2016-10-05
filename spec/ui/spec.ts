@@ -1,7 +1,7 @@
 import * as it from "tape";
+import * as tapeDom from "tape-dom";
 
-if (typeof(window) === "object") {
-    const tapeDom = require("tape-dom");
+if (tapeDom) {
     tapeDom.installCSS();
     tapeDom.stream(it);
 }

@@ -19,10 +19,10 @@ export class ProactiveUI {
 
     /**
     * Applies bindings to the specified node and all of its children using the specified data context.
-    * @param {any} model The model to bind to
+    * @param {Object} model The model to bind to
     * @param {Node} rootNode The node to be bound
     */
-    public applyBindings(model: any, node?: Element) {
+    public applyBindings(model: Object, node?: Element) {
         this.domManager.applyBindings(model, node || document.documentElement);
     }
     /**
