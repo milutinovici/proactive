@@ -17,6 +17,7 @@
     "object-literal-sort-keys": false,
     "variable-name": [
       false
-    ]
+    ],
+    "forin": false
   }
 }

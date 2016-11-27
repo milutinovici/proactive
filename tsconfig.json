@@ -6,7 +6,7 @@
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es5",
-    "module": "amd",
+    "module": "commonjs",
     "moduleResolution": "node",
     "strictNullChecks": true,
     "noImplicitThis": true,
@@ -20,9 +20,8 @@
     "indentSize": 2,
     "tabSize": 2
   },
-   "include": [
-       "src/**/*",
-       "spec/**/*",
-       "perf/**/*"
+   "exclude": [
+       "node_modules",
+       "dist"
    ]
 }

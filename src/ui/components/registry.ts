@@ -41,7 +41,7 @@ export class ComponentRegistry {
     }
 
     private initialize<T>(obs: Rx.Observable<IComponentDescriptor<T>>, params?: Object): Rx.Observable<IComponent<T>> {
-        return obs.take(1).map<IComponent<T>>(descriptor => {
+        return obs.take(1).map(descriptor => {
                 let vm: any = descriptor.viewModel;
                 if (isFunction(vm)) {
                     vm = new vm(params);

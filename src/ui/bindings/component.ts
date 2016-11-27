@@ -24,7 +24,7 @@ export default class ComponentBinding<T> extends BindingBase<string> {
             }
         }
 
-        const obs = componentName.mergeMap<IComponent<T>>(name => {
+        const obs = componentName.mergeMap(name => {
             const component: Rx.Observable<IComponent<T>> = components.load<T>(name, componentParams);
             if (component == null) {
                 exception.next(new Error(`component '${name}' is not registered with current module-context`));
