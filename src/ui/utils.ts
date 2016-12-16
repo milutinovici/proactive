@@ -186,5 +186,19 @@ export function tryCatch<T>(action: (val: T) => void): (val: T) => void {
 }
 
 export function nodeIndex(node: Node) {
-    return Array.prototype.indexOf.call(node.parentElement.children, node);
+    return node.parentElement ? Array.prototype.indexOf.call(node.parentElement.children, node) : -1;
 }
+
+export type Group<T> = { [name: string]: T[] };
+
+export function groupBy<T>(array: T[], selector: (x: T) => any): Group<T>  {
+    const groups: Group<T> = { };
+    for (const element of array) {
+        const key: string = selector(element).toString();
+        if (!groups[key]) {
+            groups[key] = [];
+        }
+        groups[key].push(element);
+    }
+    return groups;
+};

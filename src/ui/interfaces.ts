@@ -34,7 +34,7 @@ export interface IBindingHandler<T> {
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
-        applyBinding(node: Node, expression: ICompiledExpression<T>, ctx: IDataContext, state: INodeState<T>, parameter?: string): void;
+        applyBinding(node: Node, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T>): void;
 
 }
 
@@ -48,8 +48,6 @@ export interface INodeState<T> {
     readonly cleanup: Rx.Subscription;
     isBound: boolean;   // true of this node has been touched by applyBindings
     model?: T;        // scope model
-    bindings: IBindingAttribute[];
-    params: IBindingAttribute[];
 }
 
 export interface IComponentDescriptor<T> {

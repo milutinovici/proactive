@@ -1,6 +1,6 @@
 import * as Rx from "rxjs";
 import { BindingBase } from "./bindingBase";
-import { IDataContext, INodeState } from "../interfaces";
+import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
 import { DomManager } from "../domManager";
 import { isRxObserver, tryCatch } from "../utils";
 
@@ -11,14 +11,15 @@ export default class CheckedBinding extends BindingBase<boolean> {
         super(domManager);
     }
 
-    public applyBindingInternal(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, ctx: IDataContext, state: INodeState<boolean>): void {
+    public applyBinding(el: HTMLInputElement, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<boolean>): void {
         const tag = el.tagName.toLowerCase();
         const isCheckBox = el.type === "checkbox";
         const isRadioButton = el.type === "radio";
-
         if (tag !== "input" || (!isCheckBox && !isRadioButton)) {
             throw Error("checked-binding only operates on checkboxes and radio-buttons");
         }
+
+        const observable = this.evaluateBinding<boolean>(bindings[0].expression, ctx, el) as Rx.Observable<boolean>;
         state.cleanup.add(observable.subscribe(tryCatch<boolean>(value => {
             el.checked = value;
         })));

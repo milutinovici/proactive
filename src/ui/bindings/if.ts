@@ -1,10 +1,10 @@
 import * as Rx from "rxjs";
-import { BindingBase } from "./bindingBase";
+import { SingleBindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
 import { IDataContext, INodeState } from "../interfaces";
 import { nodeListToArray, tryCatch } from "../utils";
 
-export class IfBinding extends BindingBase<boolean> {
+export class IfBinding extends SingleBindingBase<boolean> {
 
     public priority = 50;
     public controlsDescendants = true;

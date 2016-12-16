@@ -4,13 +4,8 @@ import { isElement } from "./utils";
 import { components } from "./components/registry";
 
 const bindingPrefix = /^bind-/;
-const parameterPrefix = /^param-/;
 
 export class BindingProvider {
-
-    public getParameters(element: Element): IBindingAttribute[] {
-        return this.getAttributeValues(element, parameterPrefix);
-    }
 
     public getBindings(element: Element): IBindingAttribute[] {
         if (!isElement(element)) {
@@ -20,7 +15,7 @@ export class BindingProvider {
         const tagName = element.tagName.toLowerCase();
         // check if element is custom element (component)
         if (tagName.indexOf("-") !== -1 && components.isRegistered(tagName)) {
-            return bindings.concat([this.customElementToBinding(element)]);
+            bindings.push(this.customElementToBinding(element));
         }
         return bindings;
     }

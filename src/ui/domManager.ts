@@ -1,5 +1,5 @@
 import { NodeStateManager } from "./nodeState";
-import { isElement } from "./utils";
+import { isElement, groupBy } from "./utils";
 import { BindingProvider } from "./bindingProvider";
 import { IDataContext, IBindingHandler, IBindingAttribute } from "./interfaces";
 import EventBinding from "./bindings/event";
@@ -96,10 +96,8 @@ export class DomManager {
     }
 
     private applyBindingsInternal(ctx: IDataContext, el: Element): boolean {
-        let controlsDescendants = false;
-        let bindingProvider = new BindingProvider();
-        let bindings = bindingProvider.getBindings(el);
-        let params = bindingProvider.getParameters(el);
+        const bindingProvider = new BindingProvider();
+        const bindings = bindingProvider.getBindings(el);
 
         // get or create elment-state
         let state = this.nodeState.get<any>(el);
@@ -113,24 +111,21 @@ export class DomManager {
             // return false;
         }
 
-        state.bindings = bindings;
-        state.params = params;
-
-        let pairs = this.getBindingHandlers(state.bindings);
-        controlsDescendants = pairs.some(x => x.handler.controlsDescendants);
+        const handlers = this.getBindingHandlers(bindings);
+        const controlsDescendants = handlers.some(x => x.handler.controlsDescendants);
 
         // apply all bindings
-        for (const p of pairs) {
+        for (const group of handlers) {
             // prevent recursive applying of repeat
-            if (p.binding.name === "repeat" && state["index"] !== undefined) {
+            if (group.name === "repeat" && state["index"] !== undefined) {
                 continue;
             }
             // apply repeat before anything else, then imediately return
-            if (p.binding.name === "repeat" && state["index"] === undefined) {
-                p.handler.applyBinding(el, p.binding.expression, ctx, state, p.binding.parameter);
+            if (group.name === "repeat" && state["index"] === undefined) {
+                group.handler.applyBinding(el, group.bindings, ctx, state);
                 return true;
             }
-            p.handler.applyBinding(el, p.binding.expression, ctx, state, p.binding.parameter);
+            group.handler.applyBinding(el, group.bindings, ctx, state);
         }
         // mark bound
         state.isBound = true;
@@ -143,33 +138,34 @@ export class DomManager {
     }
 
     public getHandler<T>(name: string): IBindingHandler<T> {
-        return this.bindingHandlers[name];
+        const handler = this.bindingHandlers[name];
+        if (!handler) {
+            throw Error(`binding '${name}' has not been registered.`);
+        }
+        return handler;
     }
     public registerHandler<T>(name: string, handler: IBindingHandler<T>) {
         this.bindingHandlers[name] = handler;
     }
-    public getBindingHandler<T>(attribute: IBindingAttribute): IBindingHandler<T> {
-        const handler = this.getHandler<any>(attribute.name);
-        if (!handler) {
-            throw Error(`binding '${attribute.name}' has not been registered.`);
-        }
-        return handler;
-    }
+
     private getBindingHandlers(bindings: IBindingAttribute[]) {
         // lookup handlers
-        const pairs = bindings.map(x => {
-            const handler = this.getBindingHandler(x);
-            return { binding: x, handler: handler };
-        });
+        const handlers: BindingGroup<any>[] = [];
+        const group = groupBy(bindings, x => x.name);
+        for (const name in group) {
+            const handler = this.getHandler(name);
+            handlers.push({ name: name, handler: handler, bindings: group[name] });
+        }
+
         // sort by priority
-        pairs.sort((a, b) => b.handler.priority - a.handler.priority);
+        handlers.sort((a, b) => b.handler.priority - a.handler.priority);
 
         // check if there's binding-handler competition for descendants (which is illegal)
-        const hd = pairs.filter(x => x.handler.controlsDescendants).map(x => `'${x.binding.name}'`);
+        const hd = handlers.filter(x => x.handler.controlsDescendants).map(x => `'${x.name}'`);
         if (hd.length > 1) {
             throw Error(`bindings ${hd.join(", ")} are competing for descendants of target element!`);
         }
-        return pairs;
+        return handlers;
     }
 
     private registerCoreBindings() {
@@ -191,4 +187,10 @@ export class DomManager {
         this.registerHandler("focus", new FocusBinding(this));
     }
 
+}
+
+interface BindingGroup<T> {
+    name: string;
+    handler: IBindingHandler<T>;
+    bindings: IBindingAttribute[];
 }

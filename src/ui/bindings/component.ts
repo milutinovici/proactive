@@ -1,12 +1,11 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { isDisposable } from "../utils";
-import { INodeState, IDataContext, IComponent } from "../interfaces";
+import { INodeState, IDataContext, IBindingAttribute } from "../interfaces";
 import { BindingBase } from "./bindingBase";
-import { exception } from "../exceptionHandlers";
 import { components } from "../components/registry";
 
-export default class ComponentBinding<T> extends BindingBase<string> {
+export default class ComponentBinding<T> extends BindingBase<T> {
     public priority = 30;
     public controlsDescendants = true;
 
@@ -14,8 +13,13 @@ export default class ComponentBinding<T> extends BindingBase<string> {
         super(domManager);
     }
 
-    protected applyBindingInternal(element: HTMLElement, componentName: Rx.Observable<string>, ctx: IDataContext, state: INodeState<string>): void {
-        const componentParams = this.getParams(element, ctx, state);
+    public applyBinding(element: HTMLElement, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T>): void {
+        const componentName = this.evaluateBinding<string>(bindings.filter(x => x.parameter === undefined)[0].expression, ctx, element) as Rx.Observable<string>;
+        let vmBinding = bindings.filter(x => x.parameter === "vm")[0];
+
+        const viewModel = vmBinding ? this.evaluateBinding<T>(vmBinding.expression, ctx, element) as Rx.Observable<T> : Rx.Observable.of(undefined);
+        const params = {};
+        bindings.filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(ctx, element));
         let internal: Rx.Subscription;
 
         function doCleanup() {
@@ -23,17 +27,11 @@ export default class ComponentBinding<T> extends BindingBase<string> {
                 internal.unsubscribe();
             }
         }
-
-        const obs = componentName.mergeMap(name => {
-            const component: Rx.Observable<IComponent<T>> = components.load<T>(name, componentParams);
-            if (component == null) {
-                exception.next(new Error(`component '${name}' is not registered with current module-context`));
-            }
-            return component;
-        });
+        const descriptor = componentName.mergeMap(name => components.load<T>(name));
+        const observable = descriptor.combineLatest(viewModel, (desc, vm) => components.initialize(desc, vm, params));
 
         // subscribe to any input changes
-        state.cleanup.add(obs.subscribe(component => {
+        state.cleanup.add(observable.subscribe(component => {
             doCleanup();
             internal = new Rx.Subscription();
             // isolated nodestate and ctx
@@ -81,12 +79,4 @@ export default class ComponentBinding<T> extends BindingBase<string> {
         }
     }
 
-    private getParams(element: HTMLElement, ctx: IDataContext, state: INodeState<string>): Object {
-        const attributes = state.params;
-        const params = {};
-        attributes.forEach(x => {
-                params[x.name] = x.expression(ctx, element);
-            });
-        return params;
-    }
 }

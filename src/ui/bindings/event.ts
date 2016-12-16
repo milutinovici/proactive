@@ -1,7 +1,7 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { BindingBase } from "./bindingBase";
-import { IDataContext, INodeState } from "../interfaces";
+import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
 import { isRxObserver } from "../utils";
 
 export default class EventBinding extends BindingBase<Event> {
@@ -12,12 +12,18 @@ export default class EventBinding extends BindingBase<Event> {
         super(domManager);
     }
 
-    protected applyBindingInternal(el: HTMLElement, observer: Rx.Observer<Event>, ctx: IDataContext, state: INodeState<Event>, eventName: string) {
-        const events = Rx.Observable.fromEvent<Event>(el, eventName);
-        if (isRxObserver(observer)) {
-            state.cleanup.add(events.subscribe(observer));
-        } else {
-            throw Error("invalid binding options");
+     public applyBinding(el: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<KeyboardEvent>): void {
+        for (const binding of bindings) {
+            if (binding.parameter === undefined) {
+                throw Error(`event name must be supplied for ${binding.name} binding on ${el}`);
+            }
+            const observer = this.evaluateBinding(binding.expression, ctx, el);
+            const events = Rx.Observable.fromEvent<Event>(el, binding.parameter);
+            if (isRxObserver(observer)) {
+                state.cleanup.add(events.subscribe(observer));
+            } else {
+                throw Error(`observer or function be supplied for ${binding.name} binding on ${el}`);
+            }
         }
     }
 }

@@ -19,12 +19,11 @@ export class ComponentRegistry {
         return this.components[name] != null;
     }
 
-    public load<T>(name: string, params?: Object): Rx.Observable<IComponent<T>> {
+    public load<T>(name: string): Rx.Observable<IComponentDescriptor<T>> {
         let result = this.getDescriptor<T>(name);
         result = result.map(x => <IComponentDescriptor<T>> { template: this.compileTemplate(x.template), viewModel: x.viewModel });
         result.do(x => this.components[name] = x ); // cache descriptor
-
-        return this.initialize<T>(result, params);
+        return result;
     }
 
     private getDescriptor<T>(name: string): Rx.Observable<IComponentDescriptor<T>> {
@@ -40,15 +39,14 @@ export class ComponentRegistry {
         }
     }
 
-    private initialize<T>(obs: Rx.Observable<IComponentDescriptor<T>>, params?: Object): Rx.Observable<IComponent<T>> {
-        return obs.take(1).map(descriptor => {
-                let vm: any = descriptor.viewModel;
-                if (isFunction(vm)) {
-                    vm = new vm(params);
-                }
-                return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: vm };
-            })
-            .take(1);
+    public initialize<T>(descriptor: IComponentDescriptor<T>, instance: T, params?: Object): IComponent<T> {
+        let vm = descriptor.viewModel;
+        if (instance !== undefined) {
+            return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: instance };
+        } else if (isFunction(vm)) {
+            return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: new vm(params) };
+        }
+        return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: vm };
     }
 
     private compileTemplate(template: Node[] | string): Node[] {

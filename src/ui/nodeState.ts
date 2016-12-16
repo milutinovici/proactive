@@ -74,7 +74,7 @@ export class NodeStateManager {
         let state: INodeState<any> | undefined = this.get<any>(node);
 
         // collect model hierarchy
-        let currentNode = node;
+        let currentNode: Node | null = node;
         while (currentNode) {
             state = state != null ? state : this.weakMap.get(currentNode);
             if (state != null) {

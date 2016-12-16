@@ -27,7 +27,7 @@ it("component: Loads a component using its name as tag", expect => {
 });
 
 it("component: Loads a component through an AMD module loader", expect => {
-    const str = `<div bind-component="'test-component'" param-foo="42"></div>`;
+    const str = `<div bind-component="'test-component'" bind-component-foo="42"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
     ui.components.register("test-component", "src/ui/components/my-select");
 
@@ -118,7 +118,7 @@ it("component: When the component isn't supplying a view-model, binding against 
 });
 
 it("component: Params get passed to view-model constructor", expect => {
-    const str = `<div bind-component="'test-component'" param-foo="42"></div>`;
+    const str = `<div bind-component="'test-component'" bind-component-foo="42"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     const template = `<span bind-text="foo">invalid</span>`;
@@ -135,7 +135,7 @@ it("component: Params get passed to view-model constructor", expect => {
 });
 
 it("component: Invokes preBindingInit", expect => {
-    const str = `<test-component id="fixture5" params="foo: 42"></test-component>`;
+    const str = `<test-component id="fixture5" bind-component-foo="42"></test-component>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     const template = "<span>foo</span>";
@@ -165,7 +165,7 @@ it("component: Invokes preBindingInit", expect => {
 });
 
 it("component: Invokes postBindingInit", expect => {
-    const str = `<test-component id="fixture5" params="foo: 42"></test-component>`;
+    const str = `<test-component id="fixture5" bind-component-foo="42"></test-component>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     const template = "<span>foo</span>";

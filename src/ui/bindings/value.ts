@@ -2,9 +2,9 @@ import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { INodeState, IDataContext } from "../interfaces";
 import { isRxObserver, isInputElement, tryCatch } from "../utils";
-import { BindingBase } from "./bindingBase";
+import { SingleBindingBase } from "./bindingBase";
 
-export default class ValueBinding<T> extends BindingBase<T> {
+export default class ValueBinding<T> extends SingleBindingBase<T> {
     public priority = 5;
 
     constructor(domManager: DomManager) {

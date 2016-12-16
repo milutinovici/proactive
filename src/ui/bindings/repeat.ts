@@ -2,7 +2,7 @@ import * as Rx from "rxjs";
 import { BindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
 import { ForEachNodeState } from "../nodeState";
-import { IDataContext, INodeState } from "../interfaces";
+import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
 import { tryCatch } from "../utils";
 import { compareLists } from "./compareLists";
 
@@ -26,47 +26,48 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
         });
     }
 
-    public applyBindingInternal(node: HTMLElement, obs: Rx.Observable<T[]>, ctx: IDataContext, state: INodeState<T[]>): void {
-        const placeholder = document.createComment("placeholder");
-        const elements: Node[] = [placeholder];
-        let oldArray: T[] = [];
-
+    public applyBinding(node: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T[]>): void {
+        const parent = node.parentElement as HTMLElement;
+        const placeholder: Comment = document.createComment(`repeat ${bindings[0].expression}`);
         // backup inner HTML
-        const parent = node.parentElement;
         parent.insertBefore(placeholder, node);
         parent.removeChild(node);
 
+        const elements: Node[] = [];
+        let oldArray: T[] = [];
+
+        const obs = this.evaluateBinding(bindings[0].expression, ctx, node) as Rx.Observable<T[]>;
         // subscribe
         state.cleanup.add(obs.subscribe(tryCatch<T[]>(array => {
-            this.applyValue(elements, node, array, oldArray, placeholder);
+            this.applyValue(parent, elements, node, array, oldArray, placeholder);
             oldArray = array;
         })));
-
+        state.cleanup.add(() => parent.removeChild(placeholder));
     }
 
-    protected applyValue(elements: Node[], template: HTMLElement, newArray: T[], oldArray: T[], placeholder: Node): void {
+    protected applyValue(parent: Element, elements: Node[], template: Element, newArray: T[], oldArray: T[], placeholder: Node): void {
         let changes = compareLists(oldArray, newArray);
         for (const change of changes) {
             if (change.status === "added") {
-                this.addRow(elements, template, change.value, change.index, placeholder);
+                this.addRow(parent, elements, template, change.value, change.index, placeholder);
             } else if (change.status === "deleted") {
-                this.removeRow(elements, change.index, placeholder);
+                this.removeRow(parent, elements, change.index);
             } else if (change.status === "moved") {
-                this.moveRow(elements, change.index, change.index);
+                this.moveRow(parent, elements, change.index, change.index);
             }
         }
     }
 
-    private addRow(elements: Node[], template: HTMLElement, item: T, index: number, placeholder: Node): INodeState<T> {
-            let node = <HTMLElement> template.cloneNode(true);
+    private addRow(parent: Element, elements: Node[], template: Element, item: T, index: number, placeholder: Node): INodeState<T> {
+            let node = <Element> template.cloneNode(true);
             let state = new ForEachNodeState(item, index);
 
             let before = elements[index];
-            elements[0].parentElement.insertBefore(node, before);
+            parent.insertBefore(node, before);
             elements.splice(index, 0, node);
 
             if (before === placeholder) {
-                before.parentElement.removeChild(placeholder);
+                parent.removeChild(placeholder);
                 elements.pop();
             }
             this.domManager.nodeState.set(node, state);
@@ -82,16 +83,11 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
             return state;
     }
 
-    private removeRow(elements: Node[], index: number, placeholder: Node) {
+    private removeRow(parent: Element, elements: Node[], index: number) {
         let row = <HTMLElement> elements[index];
         this.domManager.cleanNode(row);
 
-        if (elements.length === 1) {
-            row.parentElement.insertBefore(placeholder, row);
-            elements.push(placeholder);
-        }
-
-        row.parentElement.removeChild(row);
+        parent.removeChild(row);
         elements.splice(index, 1);
 
         for (let i = index; i < elements.length; i++) {
@@ -100,10 +96,10 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
         }
     }
 
-    private moveRow(elements: Node[], oldIndex: number, newIndex: number) {
+    private moveRow(parent: Element, elements: Node[], oldIndex: number, newIndex: number) {
         let node = elements[oldIndex];
         let before = elements[newIndex];
-        node.parentElement.insertBefore(node, before);
+        parent.insertBefore(node, before);
         let state = <ForEachNodeState<T>> this.domManager.nodeState.get(node);
         state.index.next(newIndex);
         for (let i = Math.min(oldIndex, newIndex); i < Math.max(oldIndex, newIndex); i++) {

@@ -1,7 +1,7 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { BindingBase } from "./bindingBase";
-import { IDataContext, INodeState } from "../interfaces";
+import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
 import { isRxObserver } from "../utils";
 
 const keysByCode = {
@@ -19,7 +19,7 @@ const keysByCode = {
     39: "right",
     40: "down",
     45: "insert",
-    46: "delete",
+    46: "deconste",
 };
 
 export default class KeyPressBinding extends BindingBase<KeyboardEvent> {
@@ -30,15 +30,34 @@ export default class KeyPressBinding extends BindingBase<KeyboardEvent> {
         super(domManager);
     }
 
-    protected applyBindingInternal(el: HTMLElement, observer: Rx.Observer<KeyboardEvent>, ctx: IDataContext, state: INodeState<KeyboardEvent>, parameter: string) {
+    public applyBinding(el: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<KeyboardEvent>): void {
+        for (const binding of bindings) {
+            const parameter = binding.parameter;
+            if (parameter === undefined) {
+                throw new Error(`key must be defined for ${binding.name} binding on ${el}`);
+            }
+            const observer = this.evaluateBinding(binding.expression, ctx, el);
+            if (!isRxObserver(observer)) {
+                throw new Error(`must supply function or observer for ${binding.name} binding on ${el}`);
+            }
 
-        let obs = Rx.Observable.fromEvent<KeyboardEvent>(el, "keydown")
-            .filter((x: KeyboardEvent) => !x.repeat)
-            .publish()
-            .refCount();
+            const obs = Rx.Observable.fromEvent<KeyboardEvent>(el, "keydown")
+                .filter((x: KeyboardEvent) => !x.repeat)
+                .publish()
+                .refCount();
 
+            const combinations = this.getKeyCombination(parameter);
+
+            state.cleanup.add(obs.filter(e => this.testCombinations(combinations, e)).subscribe(e => {
+                observer.next(e);
+                e.preventDefault();
+            }));
+        }
+    }
+
+    private getKeyCombination(parameter: string): KeyCombination[] {
         let combination: KeyCombination;
-        let combinations: KeyCombination[] = [];
+        const combinations: KeyCombination[] = [];
 
         // parse key combinations
         parameter.split(" ").forEach(variation => {
@@ -53,27 +72,26 @@ export default class KeyPressBinding extends BindingBase<KeyboardEvent> {
 
             combinations.push(combination);
         });
-
-        this.wireKey(observer, obs, combinations, ctx, state.cleanup);
+        return combinations;
     }
 
     private testCombination(combination: KeyCombination, event: KeyboardEvent): boolean {
-        let metaPressed = !!(event.metaKey && !event.ctrlKey);
-        let altPressed = !!event.altKey;
-        let ctrlPressed = !!event.ctrlKey;
-        let shiftPressed = !!event.shiftKey;
+        const metaPressed = !!(event.metaKey && !event.ctrlKey);
+        const altPressed = !!event.altKey;
+        const ctrlPressed = !!event.ctrlKey;
+        const shiftPressed = !!event.shiftKey;
         let keyCode = event.keyCode;
 
-        let metaRequired = !!combination.keys["meta"];
-        let altRequired = !!combination.keys["alt"];
-        let ctrlRequired = !!combination.keys["ctrl"];
-        let shiftRequired = !!combination.keys["shift"];
+        const metaRequired = !!combination.keys["meta"];
+        const altRequired = !!combination.keys["alt"];
+        const ctrlRequired = !!combination.keys["ctrl"];
+        const shiftRequired = !!combination.keys["shift"];
 
         // normalize keycodes
         if ((!shiftPressed || shiftRequired) && keyCode >= 65 && keyCode <= 90) {
             keyCode = keyCode + 32;
         }
-        let mainKeyPressed = combination.keys[keysByCode[keyCode]] ||
+        const mainKeyPressed = combination.keys[keysByCode[keyCode]] ||
                              combination.keys[keyCode.toString()] ||
                              combination.keys[String.fromCharCode(keyCode)];
 
@@ -87,24 +105,9 @@ export default class KeyPressBinding extends BindingBase<KeyboardEvent> {
     }
 
     private testCombinations(combinations: KeyCombination[], event: KeyboardEvent): boolean {
-        for (const combi of combinations) {
-            if (this.testCombination(combi, event)) {
-                return true;
-            }
-        }
-        return false;
+        return combinations.some(combi => this.testCombination(combi, event));
     }
 
-    private wireKey(observer: Rx.Observer<KeyboardEvent>, obs: Rx.Observable<KeyboardEvent>, combinations: KeyCombination[], ctx: IDataContext, cleanup: Rx.Subscription) {
-            if (isRxObserver(observer)) {
-                cleanup.add(obs.filter(e => this.testCombinations(combinations, e)).subscribe(e => {
-                    observer.next(e);
-                    e.preventDefault();
-                }));
-            } else {
-            throw Error("invalid binding options");
-        }
-    }
 }
 
 interface KeyCombination {

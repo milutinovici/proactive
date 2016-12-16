@@ -1,10 +1,10 @@
 import * as Rx from "rxjs";
-import { BindingBase } from "./bindingBase";
+import { SingleBindingBase } from "./bindingBase";
 import { IDataContext, INodeState } from "../interfaces";
 import { tryCatch } from "../utils";
 import { DomManager } from "../domManager";
 
-export default class WithBinding<T> extends BindingBase<T> {
+export default class WithBinding<T> extends SingleBindingBase<T> {
 
     public priority = 50;
     public controlsDescendants = true;

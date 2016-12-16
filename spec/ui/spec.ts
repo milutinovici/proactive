@@ -1,5 +1,5 @@
 import * as it from "tape";
-import * as tapeDom from "tape-dom";
+const tapeDom = require("tape-dom");
 
 if (tapeDom) {
     tapeDom.installCSS();
