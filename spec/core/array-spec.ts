@@ -46,12 +46,14 @@ it("unshift should insert item at the begining of a Array", expect => {
     expect.end();
 });
 it("should reverse order of items", expect => {
-    const items = px.array([1, 2, 3, 4, 5]);
+    const original = [1, 2, 3, 4, 5];
+    const items = px.array(original);
     let reversed: number[] = [];
     items.subscribe(x => reversed = x);
     items.reverse();
     expect.isEquivalent(items(), [5, 4, 3, 2, 1]);
     expect.isEquivalent(reversed, [5, 4, 3, 2, 1]);
+    expect.isInequal(original, reversed);
     expect.end();
 });
 it("splice should remove item range", expect => {
@@ -74,9 +76,11 @@ it("reverse should reverse items", expect => {
     expect.end();
 });
 it("sort should sort items", expect => {
-    const items = px.array([1, 2, 3]);
+    const original = [1, 2, 3];
+    const items = px.array(original);
     items.sort((x, y) => x < y ? 1 : -1);
     expect.isEquivalent(items(), [3, 2, 1]);
+    expect.isInequal(original, items());
     expect.end();
 });
 it("Array is also an observer", expect => {

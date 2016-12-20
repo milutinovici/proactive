@@ -82,9 +82,8 @@ export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Rx.Observer<T[
         return removed;
     }
     public reverse(): void {
-        const old = this.getValue();
-        const reversed = old.reverse();
-        this.setValue(reversed);
+        const old = this.getValue().slice();
+        this.setValue(old.reverse());
     }
     public sort(fn: (a: T, b: T) => number): void {
         const old = this.getValue();
