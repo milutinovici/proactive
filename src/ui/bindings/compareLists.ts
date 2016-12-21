@@ -1,21 +1,24 @@
 export interface Delta<T> {
-    status: "moved" | "deleted" | "added" | "retained";
+    status: "moved" | "deleted" | "added";
     value: T;
     index: number;
+    moved?: number;
 }
 
-function findMovesInArrayComparison<T>(left: T[], right: T[], limitFailedCompares: number) {
+function findMovesInArrayComparison<T>(left: Delta<T>[], right: Delta<T>[], limitFailedCompares: number) {
     if (left.length && right.length) {
         let failedCompares: number;
         let l: number;
         let r: number;
-        let leftItem: T;
-        let rightItem: T;
+        let leftItem: Delta<T>;
+        let rightItem: Delta<T>;
         for (failedCompares = l = 0; (!limitFailedCompares || failedCompares < limitFailedCompares) && (leftItem = left[l]); ++l) {
             for (r = 0; rightItem = right[r]; ++r) {
-                if (leftItem["value"] === rightItem["value"]) {
-                    leftItem["moved"] = rightItem["index"];
-                    rightItem["moved"] = leftItem["index"];
+                if (leftItem.value === rightItem.value) {
+                    leftItem.moved = rightItem.index;
+                    rightItem.moved = leftItem.index;
+                    leftItem.status = "moved";
+                    rightItem.status = "moved";
                     right.splice(r, 1);         // This item is marked as moved; so remove it from right list
                     failedCompares = r = 0;     // Reset failed compares count because we're checking for consecutive failures
                     break;
@@ -87,31 +90,25 @@ export const compareLists = (function compareArrays() {
         for (smlIndex = smlIndexMax, bigIndex = bigIndexMax; smlIndex || bigIndex; ) {
             meMinusOne = editDistanceMatrix[smlIndex][bigIndex] - 1;
             if (bigIndex && meMinusOne === editDistanceMatrix[smlIndex][bigIndex - 1]) {
-                notInSml.push(editScript[editScript.length] = <Delta<T>> {     // added
+                notInSml.push(<Delta<T>> {     // added
                     "status": statusNotInSml,
                     "value": bigArray[--bigIndex],
                     "index": bigIndex });
             } else if (smlIndex && meMinusOne === editDistanceMatrix[smlIndex - 1][bigIndex]) {
-                notInBig.push(editScript[editScript.length] = <Delta<T>> {     // deleted
+                notInBig.push(<Delta<T>> {     // deleted
                     "status": statusNotInBig,
                     "value": smlArray[--smlIndex],
                     "index": smlIndex });
             } else {
                 --bigIndex;
                 --smlIndex;
-                if (!options["sparse"]) {
-                    editScript.push({
-                        "status": "retained",
-                        "value": bigArray[bigIndex],
-                        "index": -1 });
-                }
             }
         }
 
         // Set a limit on the number of consecutive non-matching comparisons; having it a multiple of
         // smlIndexMax keeps the time complexity of this algorithm linear.
         findMovesInArrayComparison(notInBig, notInSml, <any> !options["dontLimitMoves"] && smlIndexMax * 10);
-
+        editScript.push(...notInBig, ...notInSml);
         return editScript.reverse();
     }
 

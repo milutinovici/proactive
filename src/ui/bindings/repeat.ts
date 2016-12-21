@@ -53,7 +53,7 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
             } else if (change.status === "deleted") {
                 this.removeRow(parent, elements, change.index);
             } else if (change.status === "moved") {
-                this.moveRow(parent, elements, change.index, change.index);
+                this.moveRow(parent, elements, change.index, change.moved || 0);
             }
         }
     }
@@ -98,7 +98,7 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
 
     private moveRow(parent: Element, elements: Node[], oldIndex: number, newIndex: number) {
         let node = elements[oldIndex];
-        let before = elements[newIndex];
+        let before = elements[newIndex + 1];
         parent.insertBefore(node, before);
         let state = <ForEachNodeState<T>> this.domManager.nodeState.get(node);
         state.index.next(newIndex);
