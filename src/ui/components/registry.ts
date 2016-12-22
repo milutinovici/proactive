@@ -2,7 +2,7 @@ import * as Rx from "rxjs";
 import { IComponentDescriptor, IComponent } from "../interfaces";
 import { observableRequire, isFunction, nodeListToArray } from "../utils";
 import { html } from "../templateEngines";
-
+import { exception } from "../exceptionHandlers";
 export class ComponentRegistry {
 
     private readonly components: { [name: string]: IComponentDescriptor<any> | string } = {};
@@ -21,7 +21,7 @@ export class ComponentRegistry {
 
     public load<T>(name: string): Rx.Observable<IComponentDescriptor<T>> {
         let result = this.getDescriptor<T>(name);
-        result = result.map(x => <IComponentDescriptor<T>> { template: this.compileTemplate(x.template), viewModel: x.viewModel });
+        result = result.map(x => <IComponentDescriptor<T>> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel });
         result.do(x => this.components[name] = x ); // cache descriptor
         return result;
     }
@@ -44,7 +44,13 @@ export class ComponentRegistry {
         if (instance !== undefined) {
             return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: instance };
         } else if (isFunction(vm)) {
-            return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: new vm(params) };
+            let model: T = {} as any;
+            try {
+                model = new vm(params);
+            } catch (e) {
+                exception.next(new Error(`Failed in constructor of component "${descriptor.name}". ${e.message}`));
+            }
+            return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: model };
         }
         return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: vm };
     }

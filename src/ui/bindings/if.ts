@@ -2,7 +2,7 @@ import * as Rx from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
 import { IDataContext, INodeState } from "../interfaces";
-import { nodeListToArray, tryCatch } from "../utils";
+import { nodeListToArray } from "../utils";
 
 export class IfBinding extends SingleBindingBase<boolean> {
 
@@ -23,7 +23,7 @@ export class IfBinding extends SingleBindingBase<boolean> {
         }
         const visibility = observable.map(x => !!x).distinctUntilChanged();
         // subscribe
-        state.cleanup.add(visibility.subscribe(tryCatch<boolean>(x => {
+        state.cleanup.add(visibility.subscribe((x => {
             this.applyValue(el, x, template, ctx);
         })));
     }

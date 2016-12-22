@@ -3,7 +3,6 @@ import { BindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
 import { ForEachNodeState } from "../nodeState";
 import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
-import { tryCatch } from "../utils";
 import { compareLists } from "./compareLists";
 
 // Binding contributions to data-context
@@ -38,10 +37,10 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
 
         const obs = this.evaluateBinding(bindings[0].expression, ctx, node) as Rx.Observable<T[]>;
         // subscribe
-        state.cleanup.add(obs.subscribe(tryCatch<T[]>(array => {
+        state.cleanup.add(obs.subscribe(array => {
             this.applyValue(parent, elements, node, array, oldArray, placeholder);
             oldArray = array;
-        })));
+        }));
         state.cleanup.add(() => parent.removeChild(placeholder));
     }
 

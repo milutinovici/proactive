@@ -36,7 +36,7 @@ export default class ComponentBinding<T> extends BindingBase<T> {
             internal = new Rx.Subscription();
             // isolated nodestate and ctx
             if (component.viewModel) {
-                const componentState = this.domManager.nodeState.get<T>(element) || this.domManager.nodeState.create();
+                const componentState = this.domManager.nodeState.get<T>(element) || this.domManager.nodeState.create<T>();
                 componentState["isolate"] = true;
                 componentState.model = component.viewModel;
                 this.domManager.nodeState.set(element, componentState);

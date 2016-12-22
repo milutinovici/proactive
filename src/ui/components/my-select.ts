@@ -1,5 +1,5 @@
 import * as Rx from "rxjs";
-import "text!./my-select.html";
+import "./my-select.html";
 
 export class Select {
     public readonly options: Rx.Observable<string[]>;
@@ -10,5 +10,5 @@ export class Select {
     }
 }
 
-export const template = require("text!./my-select.html");
+export const template = require("./my-select.html");
 export const viewModel = Select;

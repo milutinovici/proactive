@@ -2,6 +2,7 @@ import { IBindingAttribute } from "./interfaces";
 import { compileBindingExpression } from "./expressionCompiler";
 import { isElement } from "./utils";
 import { components } from "./components/registry";
+// import { exception } from "./exceptionHandlers";
 
 const bindingPrefix = /^bind-/;
 
@@ -9,7 +10,7 @@ export class BindingProvider {
 
     public getBindings(element: Element): IBindingAttribute[] {
         if (!isElement(element)) {
-            throw new Error("Only html elements can have bindings");
+             throw new Error("Only html elements can have bindings");
         }
         const bindings = this.getAttributeValues(element, bindingPrefix);
         const tagName = element.tagName.toLowerCase();

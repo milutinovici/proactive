@@ -8,8 +8,7 @@ export interface IBindingAttribute {
 export interface ICompiledExpression<T> {
     (scope?: IDataContext, element?: Element): T;
 
-    literal?: boolean;
-    constant?: boolean;
+    text?: string;
     write?: (scope?: IDataContext, element?: Element) => (value: T) => void;
 }
 
@@ -46,11 +45,11 @@ export interface IDataContext {
 }
 export interface INodeState<T> {
     readonly cleanup: Rx.Subscription;
-    isBound: boolean;   // true of this node has been touched by applyBindings
     model?: T;        // scope model
 }
 
 export interface IComponentDescriptor<T> {
+    name?: string;
     template: Node[] | string;
     viewModel?: T|(new (params: any) => T);
 }

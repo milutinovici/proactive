@@ -2,7 +2,8 @@ import * as Rx from "rxjs";
 import { BindingBase } from "./bindingBase";
 import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
 import { DomManager } from "../domManager";
-import { isRxObserver, tryCatch } from "../utils";
+import { isRxObserver } from "../utils";
+import { exception } from "../exceptionHandlers";
 
 export default class CheckedBinding extends BindingBase<boolean> {
     public priority = 0;
@@ -12,17 +13,16 @@ export default class CheckedBinding extends BindingBase<boolean> {
     }
 
     public applyBinding(el: HTMLInputElement, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<boolean>): void {
-        const tag = el.tagName.toLowerCase();
-        const isCheckBox = el.type === "checkbox";
-        const isRadioButton = el.type === "radio";
-        if (tag !== "input" || (!isCheckBox && !isRadioButton)) {
-            throw Error("checked-binding only operates on checkboxes and radio-buttons");
+        super.applyBinding(el, bindings, ctx, state);
+        if (!this.isCheckboxOrRadio(el)) {
+            exception.next(new Error(`checked-binding only operates on checkboxes and radio-buttons. ${el.tagName} is not supported`));
+            return;
         }
 
         const observable = this.evaluateBinding<boolean>(bindings[0].expression, ctx, el) as Rx.Observable<boolean>;
-        state.cleanup.add(observable.subscribe(tryCatch<boolean>(value => {
+        state.cleanup.add(observable.subscribe(value => {
             el.checked = value;
-        })));
+        }));
 
         if (isRxObserver(observable) || observable["write"] !== undefined) {
             const events = this.getCheckedEventObservables(el);
@@ -37,5 +37,12 @@ export default class CheckedBinding extends BindingBase<boolean> {
 
     protected getCheckedEventObservables(el: HTMLInputElement): Rx.Observable<Event> {
         return Rx.Observable.merge<Event>(Rx.Observable.fromEvent(el, "click"), Rx.Observable.fromEvent(el, "change"));
+    }
+
+    private isCheckboxOrRadio(element: HTMLInputElement): boolean {
+        const tag = element.tagName.toLowerCase();
+        const isCheckBox = element.type === "checkbox";
+        const isRadioButton = element.type === "radio";
+        return tag === "input" && (isCheckBox || isRadioButton);
     }
 }

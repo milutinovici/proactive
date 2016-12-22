@@ -1,5 +1,4 @@
 import * as Rx from "rxjs";
-import { exception } from "./exceptionHandlers";
 
 const regexCssClassName = /\S+/g;
 
@@ -173,16 +172,6 @@ export function observableRequire<T>(module: string): Rx.Observable<T> {
 
         return Rx.Subscription.EMPTY;
     });
-}
-
-export function tryCatch<T>(action: (val: T) => void): (val: T) => void {
-    return (val: T) => {
-        try {
-            action(val);
-        } catch (e) {
-            exception.next(e);
-        }
-    };
 }
 
 export function nodeIndex(node: Node) {

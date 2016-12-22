@@ -24,26 +24,25 @@ export function compileBindingExpression<T>(expression: string): ICompiledExpres
         fn = ($context?, $element?) => null;
     }
     const readBody = `with($context){with($data||{}){return ${expression};}}`;
-    fn = <any> new Function("$context", "$element", readBody);
+    fn =  <any> new Function("$context", "$element", readBody);
+    fn.text = expression;
     if (canWrite(expression)) {
         const writeBody = `with($context){with($data||{}){return function(_z){ ${expression} = _z;}}}`;
         fn.write = <any> new Function("$context", "$element", writeBody);
     }
-    return fn;
-}
-
-export function evaluateExpression<T>(exp: ICompiledExpression<T>, ctx: IDataContext, element: Element): T | null {
-    try {
-        let result = exp(ctx, element);
-        return result;
-    } catch (e) {
-        exception.next(e);
-    }
-    return null;
+    return (ctx: IDataContext, el: Element) => {
+            try {
+                let result = fn(ctx, el);
+                return result;
+            } catch (e) {
+                exception.next(new Error(`Binding expression "${fn.text}" on element ${el.nodeName} failed. ${e.message}`));
+                return null;
+            }
+        };
 }
 
 export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDataContext, element: Element): Rx.Observable<T | null> {
-    let result = evaluateExpression(exp, ctx, element);
+    let result = exp(ctx, element);
     if (isRxObservable(result)) {
         return result;
     } else { // wrap it

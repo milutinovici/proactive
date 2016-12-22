@@ -3,6 +3,7 @@ import { DomManager } from "../domManager";
 import { BindingBase } from "./bindingBase";
 import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
 import { isRxObserver } from "../utils";
+import { exception } from "../exceptionHandlers";
 
 const keysByCode = {
     8: "backspace",
@@ -34,11 +35,13 @@ export default class KeyPressBinding extends BindingBase<KeyboardEvent> {
         for (const binding of bindings) {
             const parameter = binding.parameter;
             if (parameter === undefined) {
-                throw new Error(`key must be defined for ${binding.name} binding on ${el}`);
+                exception.next(new Error(`key must be defined for ${binding.name} binding on ${el.tagName}`));
+                continue;
             }
             const observer = this.evaluateBinding(binding.expression, ctx, el);
             if (!isRxObserver(observer)) {
-                throw new Error(`must supply function or observer for ${binding.name} binding on ${el}`);
+                exception.next(new Error(`must supply function or observer for ${binding.name} binding on ${el.tagName}`));
+                continue;
             }
 
             const obs = Rx.Observable.fromEvent<KeyboardEvent>(el, "keydown")

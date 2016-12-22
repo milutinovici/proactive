@@ -1,6 +1,7 @@
 import { DomManager } from "../domManager";
 import { toggleCssClass } from "../utils";
 import { OneWayBindingBase } from "./bindingBase";
+import { exception } from "../exceptionHandlers";
 
 export class CssBinding extends OneWayBindingBase<string> {
     constructor(domManager: DomManager) {
@@ -15,7 +16,7 @@ export class CssBinding extends OneWayBindingBase<string> {
                 toggleCssClass(el, !!value, ...classes);
             }
         } else {
-            throw new Error("Class name undefined");
+            exception.next(new Error(`Class name for binding is undefined on ${el.tagName}`));
         }
     }
 }

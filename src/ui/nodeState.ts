@@ -1,21 +1,13 @@
 import * as Rx from "rxjs";
-import { IBindingAttribute, IDataContext, INodeState } from "./interfaces";
+import { IDataContext, INodeState } from "./interfaces";
 
 export class NodeState<T> implements INodeState<T> {
     public  model?: T;        // scope model
     public readonly cleanup: Rx.Subscription;
-    public isBound: boolean;   // true if this node has been touched by applyBindings
-    public readonly bindings: IBindingAttribute[] = [];
-    public readonly params: IBindingAttribute[] = [];
 
     constructor(model?: T) {
         this.model = model;
         this.cleanup = new Rx.Subscription();
-        this.isBound = false;
-    }
-
-    public getBinding(name: string): IBindingAttribute {
-        return this.bindings.filter(x => x.name === name)[0];
     }
 }
 
@@ -38,12 +30,6 @@ export class NodeStateManager {
     }
     public create<T>(model?: T): NodeState<T> {
         return new NodeState(model);
-    }
-
-    public isBound(node: Node): boolean {
-        const state = this.weakMap.get(node);
-
-        return state != null && !!state.isBound;
     }
 
     public set<T>(node: Node, state: INodeState<T>): void {
@@ -71,7 +57,7 @@ export class NodeStateManager {
 
     public getDataContext(node: Node): IDataContext {
         let models: any[] = [];
-        let state: INodeState<any> | undefined = this.get<any>(node);
+        let state = this.get<any>(node);
 
         // collect model hierarchy
         let currentNode: Node | null = node;

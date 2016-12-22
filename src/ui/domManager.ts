@@ -12,6 +12,7 @@ import CheckedBinding from "./bindings/checked";
 import ComponentBinding from "./bindings/component";
 import KeyPressBinding from "./bindings/keypress";
 import FocusBinding from "./bindings/focus";
+import { exception } from "./exceptionHandlers";
 
 export class DomManager {
     public readonly nodeState: NodeStateManager;
@@ -27,9 +28,6 @@ export class DomManager {
     public applyBindings(model: Object, rootNode: Element): void {
         if (rootNode === undefined || !isElement(rootNode)) {
             throw Error("first parameter should be your model, second parameter should be a DOM node!");
-        }
-        if (this.nodeState.isBound(rootNode)) {
-            throw Error("an element must not be bound multiple times!");
         }
         // create or update node state for root node
         let state = this.nodeState.get<any>(rootNode);
@@ -106,9 +104,6 @@ export class DomManager {
         if (!state) {
             state = this.nodeState.create();
             this.nodeState.set(el, state);
-        } else if (state.isBound) {
-            // throw Error("an element may be bound multiple times!");
-            // return false;
         }
 
         const handlers = this.getBindingHandlers(bindings);
@@ -127,8 +122,6 @@ export class DomManager {
             }
             group.handler.applyBinding(el, group.bindings, ctx, state);
         }
-        // mark bound
-        state.isBound = true;
 
         return controlsDescendants;
     }
@@ -140,7 +133,7 @@ export class DomManager {
     public getHandler<T>(name: string): IBindingHandler<T> {
         const handler = this.bindingHandlers[name];
         if (!handler) {
-            throw Error(`binding '${name}' has not been registered.`);
+            exception.next(new Error(`binding '${name}' has not been registered.`));
         }
         return handler;
     }
@@ -154,7 +147,9 @@ export class DomManager {
         const group = groupBy(bindings, x => x.name);
         for (const name in group) {
             const handler = this.getHandler(name);
-            handlers.push({ name: name, handler: handler, bindings: group[name] });
+            if (handler !== undefined) {
+                handlers.push({ name: name, handler: handler, bindings: group[name] });
+            }
         }
 
         // sort by priority

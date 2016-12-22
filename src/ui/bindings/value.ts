@@ -1,8 +1,9 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { INodeState, IDataContext } from "../interfaces";
-import { isRxObserver, isInputElement, tryCatch } from "../utils";
+import { isRxObserver, isInputElement } from "../utils";
 import { SingleBindingBase } from "./bindingBase";
+import { exception } from "../exceptionHandlers";
 
 export default class ValueBinding<T> extends SingleBindingBase<T> {
     public priority = 5;
@@ -14,7 +15,7 @@ export default class ValueBinding<T> extends SingleBindingBase<T> {
     protected applyBindingInternal(element: HTMLInputElement, observable: Rx.Observable<T> | Rx.Subject<T>, ctx: IDataContext, state: INodeState<T>, eventName = "change"): void {
         const tag = element.tagName.toLowerCase();
         if (!isInputElement(element)) {
-            throw Error("value-binding only operates on checkboxes and radio-buttons");
+            exception.next(new Error(`Value binding only operates on input elements. ${element["tagName"]} is not supported`));
         }
         const storeValueInNodeState = (tag === "input" && element.type === "radio");
 
@@ -38,7 +39,7 @@ export default class ValueBinding<T> extends SingleBindingBase<T> {
     }
     public updateValue(element: HTMLInputElement, observable: Rx.Observable<T> | Rx.Subject<T>, storeValueInNodeState: boolean,  eventName: string): Rx.Subscription {
         const events = Rx.Observable.fromEvent(element, eventName);
-        return events.subscribe(tryCatch<Event>(e => {
+        return events.subscribe(e => {
             if (storeValueInNodeState) {
                 if (isRxObserver(observable)) {
                     observable.next(getNodeValue<T>(element, this.domManager));
@@ -52,7 +53,7 @@ export default class ValueBinding<T> extends SingleBindingBase<T> {
                     observable["write"](<any> element.value);
                 }
             }
-        }));
+        });
     }
 }
 
