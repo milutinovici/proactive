@@ -5,7 +5,7 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("if: binding to a boolean constant (true) using static template", expect => {
-    const template = `<div bind-if="true"><span>foo</span></div>`;
+    const template = `<div x-if="true"><span>foo</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let backup = el.innerHTML;
@@ -15,7 +15,7 @@ it("if: binding to a boolean constant (true) using static template", expect => {
 });
 
 it("if: binding to a boolean constant (false) using static template", expect => {
-    const template = `<div bind-if="false"><span>foo</span></div>`;
+    const template = `<div x-if="false"><span>foo</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     expect.doesNotThrow(() => ui.applyBindings({}, el));
@@ -24,7 +24,7 @@ it("if: binding to a boolean constant (false) using static template", expect => 
 });
 
 it("if: binding to a boolean observable value using static template", expect => {
-    const template = `<div bind-if="$data"><span>foo</span></div>`;
+    const template = `<div x-if="$data"><span>foo</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let backup = el.innerHTML;
@@ -42,7 +42,7 @@ it("if: binding to a boolean observable value using static template", expect => 
 });
 
 it("if: binding to a boolean observable using static template", expect => {
-    const template = `<div bind-if="$data"><span>foo</span></div>`;
+    const template = `<div x-if="$data"><span>foo</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let backup = el.innerHTML;
@@ -60,7 +60,7 @@ it("if: binding to a boolean observable using static template", expect => {
 });
 
 it("if: binding to a boolean observable value using dynamic template", expect => {
-    const template = `<div bind-if="$data"><span bind-text="'foo'">bar</span></div>`;
+    const template = `<div x-if="$data"><span x-text="'foo'">bar</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let prop = px.value(true);
@@ -76,7 +76,7 @@ it("if: binding to a boolean observable value using dynamic template", expect =>
 });
 
 it("if: binding to a boolean observable value using dynamic template with event", expect => {
-    const template = `<div bind-if="$data"><button bind-evt-click="cmd">Click me</button></div>`;
+    const template = `<div x-if="$data"><button x-evt-click="cmd">Click me</button></div>`;
     const el = <HTMLElement> util.parse(template)[0];
     let count = 0;
     let model = {

@@ -4,7 +4,7 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("binding to a string constant", expect => {
-    const template = `<span bind-text="'foo'">invalid</span>`;
+    const template = `<span x-text="'foo'">invalid</span>`;
     const el = <HTMLElement> util.parse(template)[0];
     let model = {};
 
@@ -15,7 +15,7 @@ it("binding to a string constant", expect => {
 });
 
 it("binding to a numeric constant", expect => {
-    const template = `<span bind-text="42">invalid</span>`;
+    const template = `<span x-text="42">invalid</span>`;
     const el = <HTMLElement> util.parse(template)[0];
     let model = {};
 
@@ -26,7 +26,7 @@ it("binding to a numeric constant", expect => {
 });
 
 it("binding to a falsy numeric model value", expect => {
-    const template = `<span bind-text="$data">invalid</span>`;
+    const template = `<span x-text="$data">invalid</span>`;
     const el = <HTMLElement> util.parse(template)[0];
     let model = 0;
 
@@ -37,7 +37,7 @@ it("binding to a falsy numeric model value", expect => {
 });
 
 it("binding to a boolean constant", expect => {
-    const template = `<span bind-text="true">invalid</span>`;
+    const template = `<span x-text="true">invalid</span>`;
     const el = <HTMLElement> util.parse(template)[0];
     let model = {};
 
@@ -48,7 +48,7 @@ it("binding to a boolean constant", expect => {
 });
 
 it("binding to a non-observable model value", expect => {
-    const template = `<span bind-text="constantString">invalid</span>`;
+    const template = `<span x-text="constantString">invalid</span>`;
     const el = <HTMLElement> util.parse(template)[0];
     let model = { constantString: "foo" };
 
@@ -59,7 +59,7 @@ it("binding to a non-observable model value", expect => {
 });
 
 it("binding to a observable model value", expect => {
-    const template = `<span bind-text="observableString">invalid</span>`;
+    const template = `<span x-text="observableString">invalid</span>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let model = { observableString: px.value("foo") };
@@ -81,7 +81,7 @@ it("binding to a observable model value", expect => {
 });
 
 it("binding to a view computed observable", expect => {
-    const template = `<span bind-text="'hello ' + observableString">invalid</span>`;
+    const template = `<span x-text="'hello ' + observableString">invalid</span>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let model = { observableString: px.value("foo") };

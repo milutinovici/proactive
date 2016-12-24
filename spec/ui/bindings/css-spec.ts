@@ -4,7 +4,7 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("css: binding to a string constant", expect => {
-    const template = `<div bind-css-foo="true">empty</div>`;
+    const template = `<div x-css-foo="true">empty</div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let model = {};
@@ -15,7 +15,7 @@ it("css: binding to a string constant", expect => {
 });
 
 it("css: binding to a non-observable model value", expect => {
-    const template = `<div bind-css-foo="constantBool">empty</div>`;
+    const template = `<div x-css-foo="constantBool">empty</div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let model = createCssModel();
@@ -28,7 +28,7 @@ it("css: binding to a non-observable model value", expect => {
 });
 
 it("css: binding to a observable model value", expect => {
-    const template = `<div bind-css-foo="observableBool">empty</div>`;
+    const template = `<div x-css-foo="observableBool">empty</div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let model = createCssModel();
@@ -49,7 +49,7 @@ it("css: binding to a observable model value", expect => {
 });
 
 it("css: binding multiple css classes to multiple observable model properties", expect => {
-    const template = `<div bind-css-foo="observableBool" bind-css-bar="observableBool2">empty</div>`;
+    const template = `<div x-css-foo="observableBool" x-css-bar="observableBool2">empty</div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let model = createCssModel();
@@ -86,7 +86,7 @@ it("css: binding multiple css classes to multiple observable model properties", 
 });
 
 it("css: When class is not defined, error is thrown", expect => {
-    const template = `<div bind-css="constantString">empty</div>`;
+    const template = `<div x-css="constantString">empty</div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let model = createCssModel();

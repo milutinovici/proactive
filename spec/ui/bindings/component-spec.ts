@@ -3,7 +3,7 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("component: Loads a component using simple string options", expect => {
-    const str = `<div bind-component="'test-component'"></div>`;
+    const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     const template = "<span>foo</span>";
@@ -18,7 +18,7 @@ it("component: Loads a component using its name as tag", expect => {
     const str = `<test-component></test-component>`;
     const el = <HTMLElement> util.parse(str)[0];
 
-    const template = `<span bind-text="foo">invalid</span>`;
+    const template = `<span x-text="foo">invalid</span>`;
     ui.components.register("test-component", { template: template });
 
     expect.doesNotThrow(() => ui.applyBindings({ foo: "bar" }, el));
@@ -27,7 +27,7 @@ it("component: Loads a component using its name as tag", expect => {
 });
 
 it("component: Loads a component through an AMD module loader", expect => {
-    const str = `<div bind-component="'test-component'" bind-component-foo="42"></div>`;
+    const str = `<div x-component="'test-component'" x-component-foo="42"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
     ui.components.register("test-component", "src/ui/components/my-select");
 
@@ -49,7 +49,7 @@ it("component: Loads a component through an AMD module loader", expect => {
 });
 
 it("component: Loads a template from a string", expect => {
-    const str = `<div bind-component="'test-component'"></div>`;
+    const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     const template = "<span>foo</span>";
@@ -61,7 +61,7 @@ it("component: Loads a template from a string", expect => {
 });
 
 it("component: Loads a template from a node-array", expect => {
-    const str = `<div bind-component="'test-component'"></div>`;
+    const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     const template = "<span>foo</span>";
@@ -77,7 +77,7 @@ it("component: Loads a template from a node-array", expect => {
 it("component: Loads a template from a selector", expect => {
     const template =  util.parse(`<span style="display:none;" id="template1">bar</span>`)[0];
     document.body.appendChild(template);
-    const str = `<div bind-component="'test-component'"></div>`;
+    const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     ui.components.register("test-component", { template: "#template1" });
@@ -88,7 +88,7 @@ it("component: Loads a template from a selector", expect => {
 });
 
 it("component: Loads a template through an AMD module loader", expect => {
-    const str = `<div bind-component="'test-component'"></div>`;
+    const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     let vm = {
@@ -105,10 +105,10 @@ it("component: Loads a template through an AMD module loader", expect => {
 });
 
 it("component: When the component isn't supplying a view-model, binding against parent-context works as expected", expect => {
-    const str = `<div bind-component="'test-component'"></div>`;
+    const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
-    const template = `<span bind-text="foo">invalid</span>`;
+    const template = `<span x-text="foo">invalid</span>`;
 
     ui.components.register("test-component", { template: template });
 
@@ -118,10 +118,10 @@ it("component: When the component isn't supplying a view-model, binding against 
 });
 
 it("component: Params get passed to view-model constructor", expect => {
-    const str = `<div bind-component="'test-component'" bind-component-foo="42"></div>`;
+    const str = `<div x-component="'test-component'" x-component-foo="42"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
-    const template = `<span bind-text="foo">invalid</span>`;
+    const template = `<span x-text="foo">invalid</span>`;
 
     // constructor 
     function constr(this: any, params: any) {
@@ -135,7 +135,7 @@ it("component: Params get passed to view-model constructor", expect => {
 });
 
 it("component: Invokes preBindingInit", expect => {
-    const str = `<test-component id="fixture5" bind-component-foo="42"></test-component>`;
+    const str = `<test-component id="fixture5" x-component-foo="42"></test-component>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     const template = "<span>foo</span>";
@@ -165,7 +165,7 @@ it("component: Invokes preBindingInit", expect => {
 });
 
 it("component: Invokes postBindingInit", expect => {
-    const str = `<test-component id="fixture5" bind-component-foo="42"></test-component>`;
+    const str = `<test-component id="fixture5" x-component-foo="42"></test-component>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     const template = "<span>foo</span>";
@@ -197,7 +197,7 @@ it("component: Invokes postBindingInit", expect => {
 });
 
 it("component: Unsubscribes a component's viewmodel if has unsubscribe fn", expect => {
-    const str = `<div bind-component="'test-component'"></div>`;
+    const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
     const template = "<span>foo</span>";
@@ -220,10 +220,10 @@ it("component: Unsubscribes a component's viewmodel if has unsubscribe fn", expe
 });
 
 it("component: Components are properly isolated", expect => {
-    const str = `<div bind-with="foo"><test-component></test-component></div>`;
+    const str = `<div x-with="foo"><test-component></test-component></div>`;
     const el = <HTMLElement> util.parse(str)[0];
 
-    const template = `<span bind-text="bar">invalid</span>`;
+    const template = `<span x-text="bar">invalid</span>`;
     let value = "baz";
 
     ui.components.register("test-component", {

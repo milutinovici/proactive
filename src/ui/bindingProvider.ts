@@ -4,7 +4,7 @@ import { isElement } from "./utils";
 import { components } from "./components/registry";
 // import { exception } from "./exceptionHandlers";
 
-const bindingPrefix = /^bind-/;
+const bindingPrefix = /^x-/;
 
 export class BindingProvider {
 

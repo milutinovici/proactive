@@ -4,7 +4,7 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("with: bound to a non-observable value", expect => {
-    const template = `<div bind-with="childModel"><span bind-text="foo">invalid</span></div>`;
+    const template = `<div x-with="childModel"><span x-text="foo">invalid</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let childModel = {
@@ -29,7 +29,7 @@ it("with: bound to a non-observable value", expect => {
 });
 
 it("with: bound to an observable value", expect => {
-    const template = `<div bind-with="childModel"><span bind-text="foo">invalid</span></div>`;
+    const template = `<div x-with="childModel"><span x-text="foo">invalid</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let childModel1 = {

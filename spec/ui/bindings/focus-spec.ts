@@ -7,7 +7,7 @@ let focusInEvent = "focusin";
 let focusOutEvent = "focusout";
 
 it("focus: Should respond to changes on an observable value by blurring or focusing the element", expect => {
-    const template = `<div><input bind-focus="myVal" /><input /></div>`;
+    const template = `<div><input x-focus="myVal" /><input /></div>`;
     const el = <Element> util.parse(template)[0];
     let input = <HTMLInputElement> el.childNodes[0];
     document.body.appendChild(el);
@@ -36,7 +36,7 @@ it("focus: Should respond to changes on an observable value by blurring or focus
 });
 
 it("focus: Should set an observable value to be true on focus and false on blur", expect => {
-    const template = `<div><input bind-focus="myVal" /><input /><p bind-text="myVal"></p></div>`;
+    const template = `<div><input x-focus="myVal" /><input /><p x-text="myVal"></p></div>`;
     const el = <Element> util.parse(template)[0];
     document.body.appendChild(el);
     let model = { myVal: px.value() };
@@ -67,7 +67,7 @@ it("focus: Should set an observable value to be true on focus and false on blur"
 });
 
 it("focus: Should not unnecessarily focus or blur an element that is already focused/blurred", expect => {
-    const template = `<input bind-focus="isFocused" />`;
+    const template = `<input x-focus="isFocused" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
     // This is the closest we can get to representing issue #698 as a spec
     let model = { isFocused: px.value<Object | null>({}) };

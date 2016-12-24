@@ -4,7 +4,7 @@ import { BindingProvider } from "../../src/ui/bindingProvider";
 import * as util from "./spec-utils";
 
 it("get bindings from element with a single binding", expect => {
-    const template = `<div bind-text="'hello'"></div>`;
+    const template = `<div x-text="'hello'"></div>`;
     const el = <HTMLElement> util.parse(template)[0];
     const provider = new BindingProvider();
     const bindings = provider.getBindings(el);
@@ -15,7 +15,7 @@ it("get bindings from element with a single binding", expect => {
 });
 
 it("get bindings from element with multiple bindings", expect => {
-    const template = `<div bind-text="'hello'" bind-attr-id="1"></div>`;
+    const template = `<div x-text="'hello'" x-attr-id="1"></div>`;
     const el = <HTMLElement> util.parse(template)[0];
     const provider = new BindingProvider();
     const bindings = provider.getBindings(el);
@@ -28,7 +28,7 @@ it("get bindings from element with multiple bindings", expect => {
 });
 
 // it("get binding handlers from element with a single binding", expect => {
-//     const template = `<div bind-text="'hello'"></div>`;
+//     const template = `<div x-text="'hello'"></div>`;
 //     const el = <HTMLElement> util.parse(template)[0];
 //     const provider = new BindingProvider();
 //     const bindings = provider.getBindings(el);
@@ -39,7 +39,7 @@ it("get bindings from element with multiple bindings", expect => {
 // });
 
 // it("get binding handlers from element with multiple bindings", expect => {
-//     const template = `<div bind-text="'hello'" bind-attr-id="1"></div>`;
+//     const template = `<div x-text="'hello'" x-attr-id="1"></div>`;
 //     const el = <HTMLElement> util.parse(template)[0];
 //     const provider = new BindingProvider();
 //     const bindings = provider.getBindings(el);
@@ -51,7 +51,7 @@ it("get bindings from element with multiple bindings", expect => {
 // });
 
 // it("get binding handlers from element with a non registered binding handler", expect => {
-//     const template = `<div bind-texxt="'hello'"></div>`;
+//     const template = `<div x-texxt="'hello'"></div>`;
 //     const el = <HTMLElement> util.parse(template)[0];
 //     const provider = new BindingProvider();
 //     const bindings = provider.getBindings(el);

@@ -5,7 +5,7 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("value: Should treat null values as empty strings", expect => {
-    const template = `<input type="text" bind-value="myProp" />`;
+    const template = `<input type="text" x-value="myProp" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     ui.applyBindings({ myProp: px.value(0) }, el);
@@ -14,7 +14,7 @@ it("value: Should treat null values as empty strings", expect => {
 });
 
 it("value: Should assign an empty string as value if the model value is undefined", expect => {
-    const template = `<input type="text" bind-value="undefined" />`;
+    const template = `<input type="text" x-value="undefined" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     ui.applyBindings({ }, el);
@@ -23,7 +23,7 @@ it("value: Should assign an empty string as value if the model value is undefine
 });
 
 it("value: For observable values, should unwrap the value and update on change", expect => {
-    const template = `<input type="text" bind-value="someProp" />`;
+    const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(123);
@@ -35,7 +35,7 @@ it("value: For observable values, should unwrap the value and update on change",
 });
 
 it("value: For observable values, should update on change if new value is 'strictly' different from previous value", expect => {
-    const template = `<input type="text" bind-value="someProp" />`;
+    const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value<string | number>("+123");
@@ -47,7 +47,7 @@ it("value: For observable values, should update on change if new value is 'stric
 });
 
 it("value: For writeable observable values, should catch the node's onchange and write values back to the observable", expect => {
-    const template = `<input type="text" bind-value="someProp" />`;
+    const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(123);
@@ -63,7 +63,7 @@ it("value: For writeable observable values, should catch the node's onchange and
 });
 
 it("value: Should ignore node changes when bound to a read-only observable", expect => {
-    const template = `<input type="text" bind-value="prop" />`;
+    const template = `<input type="text" x-value="prop" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let computedValue = Rx.Observable.of("zzz").toComputed();
@@ -83,7 +83,7 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
 it("value: Should be able to write to observable subproperties of an observable, even after the parent observable has changed", expect => {
     // This spec represents https://github.com/SteveSanderson/knockout/issues#issue/13
     // Set up a text box whose value is linked to the subproperty of the observable's current value
-    const template = `<input type="text" bind-value="myprop.subproperty" />`;
+    const template = `<input type="text" x-value="myprop.subproperty" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let originalSubproperty = px.value("original value");
@@ -104,7 +104,7 @@ it("value: Should be able to write to observable subproperties of an observable,
 });
 
 it("value: Should only register one single onchange handler", expect => {
-    const template = `<input type="text" bind-value="someProp" />`;
+    const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let notifiedValues: number[] = [];
@@ -128,7 +128,7 @@ it("value: Should only register one single onchange handler", expect => {
 });
 
 it("value: should update non observable values", expect => {
-    const template = `<input type="text" bind-value="someProp" />`;
+    const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
     const viewModel = { someProp: "ABC" };
     ui.applyBindings(viewModel, el);

@@ -4,7 +4,7 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("binding to a standard array", expect => {
-    const template = `<ul><li bind-repeat="src" bind-text="$data"></li></ul>`;
+    const template = `<ul><li x-repeat="src" x-text="$data"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let list = [1, 5, 7];
@@ -17,7 +17,7 @@ it("binding to a standard array", expect => {
 });
 
 it("binding to a standard array and template accessing index", expect => {
-    const template = `<ul><li bind-repeat="src" bind-text="$index"></li></ul>`;
+    const template = `<ul><li x-repeat="src" x-text="$index"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let list = [1, 5, 7];
@@ -30,7 +30,7 @@ it("binding to a standard array and template accessing index", expect => {
 });
 
 it("binding to a value yielding an array", expect => {
-    const template = `<ul><li bind-repeat="src" bind-text="$index"></li></ul>`;
+    const template = `<ul><li x-repeat="src" x-text="$index"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let prop = px.value<number[]>([]);
@@ -47,7 +47,7 @@ it("binding to a value yielding an array", expect => {
 });
 
 it("binding to a observable list containing numbers", expect => {
-    const template = `<ul><li bind-repeat="src" bind-text="$index"></li></ul>`;
+    const template = `<ul><li x-repeat="src" x-text="$index"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let list = px.array([1, 5, 7]);
@@ -59,7 +59,7 @@ it("binding to a observable list containing numbers", expect => {
 });
 
 it("binding to a observable list containing numbers without initialContents", expect => {
-    const template = `<ul><li bind-repeat="src" bind-text="$data"></li></ul>`;
+    const template = `<ul><li x-repeat="src" x-text="$data"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let list = px.array();
@@ -77,7 +77,7 @@ it("binding to a observable list containing numbers without initialContents", ex
 });
 
 it("binding to a observable list adding/removing", expect => {
-    const template = `<ul><li bind-repeat="src" bind-text="$data"></li></ul>`;
+    const template = `<ul><li x-repeat="src" x-text="$data"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let list = px.array([1, 3, 5]);
@@ -103,7 +103,7 @@ it("binding to a observable list adding/removing", expect => {
 });
 
 it("binding to a observable list moving", expect => {
-    const template = `<ul><li bind-repeat="$data" bind-text="$data"></li></ul>`;
+    const template = `<ul><li x-repeat="$data" x-text="$data"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let list = px.array([1, 3, 5]);
@@ -118,8 +118,8 @@ it("binding to a observable list moving", expect => {
 });
 
 it("binding to a observable list containing model", expect => {
-    const template = `<ul><li bind-repeat="$data">
-                        <span class="part1" bind-text="foo"></span>
+    const template = `<ul><li x-repeat="$data">
+                        <span class="part1" x-text="foo"></span>
                       </li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
@@ -133,8 +133,8 @@ it("binding to a observable list containing model", expect => {
 });
 
 it("observable list of observables", expect => {
-    const template = `<ul><li bind-repeat="src">
-                        <span class="part1" bind-text="foo"></span>
+    const template = `<ul><li x-repeat="src">
+                        <span class="part1" x-text="foo"></span>
                       </li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 

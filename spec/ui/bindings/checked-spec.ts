@@ -30,7 +30,7 @@ it("checked: Triggering a click should toggle a checkbox's checked state before 
 });
 
 it("checked: Should be able to control a checkbox's checked state", expect => {
-    const template = `<input type="checkbox" bind-checked="someProp" />`;
+    const template = `<input type="checkbox" x-checked="someProp" />`;
     const testNode = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(true);
@@ -44,7 +44,7 @@ it("checked: Should be able to control a checkbox's checked state", expect => {
 });
 
 it("checked: Should be able to control a radio's checked state", expect => {
-    const template = `<input type="radio" bind-checked="someProp" />`;
+    const template = `<input type="radio" x-checked="someProp" />`;
     const testNode = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(true);
@@ -58,7 +58,7 @@ it("checked: Should be able to control a radio's checked state", expect => {
 });
 
 it("checked: Should update observable properties on the model when the checkbox click event fires", expect => {
-    const template = `<input type="checkbox" bind-checked="someProp" />`;
+    const template = `<input type="checkbox" x-checked="someProp" />`;
     const testNode = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(false);
@@ -70,7 +70,7 @@ it("checked: Should update observable properties on the model when the checkbox 
 });
 
 it("checked: Should update observable properties on the model when the radio's click event fires", expect => {
-    const template = `<input type="radio" bind-checked="someProp" />`;
+    const template = `<input type="radio" x-checked="someProp" />`;
     const testNode = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(false);
@@ -82,7 +82,7 @@ it("checked: Should update observable properties on the model when the radio's c
 });
 
 it("checked: Should only notify observable properties on the model once even if the checkbox change events fire multiple times", expect => {
-    const template = `<input type="checkbox" bind-checked="someProp" />`;
+    const template = `<input type="checkbox" x-checked="someProp" />`;
     const testNode = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(false);
@@ -105,7 +105,7 @@ it("checked: Should only notify observable properties on the model once even if 
 });
 
 it("checked: Should only notify observable properties on the model once even if the radio change events fire multiple times", expect => {
-    const template = `<input type="radio" bind-checked="someProp" />`;
+    const template = `<input type="radio" x-checked="someProp" />`;
     const testNode = <HTMLInputElement> util.parse(template)[0];
 
     let myobservable = px.value(false);
@@ -129,7 +129,7 @@ it("checked: Should only notify observable properties on the model once even if 
 });
 
 it("chedked: should update non observable values", expect => {
-    const template = `<input type="checkbox" bind-checked="someProp" />`;
+    const template = `<input type="checkbox" x-checked="someProp" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
     const viewModel = { someProp: false };
     ui.applyBindings(viewModel, el);

@@ -4,7 +4,7 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("attr: binding to a string constant", expect => {
-    const template = `<div bind-attr-data-foo="true">empty</div>`;
+    const template = `<div x-attr-data-foo="true">empty</div>`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let model = {};
@@ -15,7 +15,7 @@ it("attr: binding to a string constant", expect => {
 });
 
 it("attr: binding to a non-observable model value", expect => {
-    const template = `<div bind-attr-data-foo="constantString">empty</div>`;
+    const template = `<div x-attr-data-foo="constantString">empty</div>`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let model = createCssModel();
@@ -28,7 +28,7 @@ it("attr: binding to a non-observable model value", expect => {
 });
 
 it("attr: binding to a observable model value", expect => {
-    const template = `<div bind-attr-data-foo="observableString">empty</div>`;
+    const template = `<div x-attr-data-foo="observableString">empty</div>`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let model = createCssModel();
@@ -49,7 +49,7 @@ it("attr: binding to a observable model value", expect => {
 });
 
 it("attr: binding multiple attr classes to multiple observable model properties", expect => {
-    const template = `<div bind-attr-data-foo="observableString" bind-attr-data-bar="observableString2">empty</div>`;
+    const template = `<div x-attr-data-foo="observableString" x-attr-data-bar="observableString2">empty</div>`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let model = createCssModel();
