@@ -4,7 +4,7 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("event: this is bound to $data", expect => {
-    const template = `<button x-evt-click="clickHandler">Click me</button>`;
+    const template = `<button x-on-click="clickHandler">Click me</button>`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let model = new TestVM();
@@ -18,7 +18,7 @@ it("event: this is bound to $data", expect => {
 });
 
 it("event: binds a single event to a handler function", expect => {
-    const template = `<button x-evt-click="clickHandler">Click me</button>`;
+    const template = `<button x-on-click="clickHandler">Click me</button>`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let called = false;
@@ -62,7 +62,7 @@ it("event: binds a single event to a handler function", expect => {
 });
 
 it("event: binds multiple events to handler functions", expect => {
-    const template = `<input type="text" x-evt-click="clickHandler" x-evt-input="inputHandler" />`;
+    const template = `<input type="text" x-on-click="clickHandler" x-on-input="inputHandler" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let clickCallCount = 0;
@@ -101,7 +101,7 @@ it("event: binds multiple events to handler functions", expect => {
 });
 
 it("event: binds multiple events to observers", expect => {
-    const template = `<input type="text" x-evt-click="clickObserver" x-evt-input="inputObserver" />`;
+    const template = `<input type="text" x-on-click="clickObserver" x-on-input="inputObserver" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let clickCallCount = 0;
@@ -149,7 +149,7 @@ it("event: binds a single key to a handler function", expect => {
     let callCount = 0;
 
     let model = {
-        clickHandler: (evt: KeyboardEvent, element: HTMLInputElement, ctx: Object) => {
+        clickHandler: (on: KeyboardEvent, element: HTMLInputElement, ctx: Object) => {
             callCount++;
 
             if (ctx.hasOwnProperty("$data")) {

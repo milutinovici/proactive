@@ -130,13 +130,6 @@ export class DomManager {
         return !this.ignore.some(x => x === el.tagName);
     }
 
-    public getHandler<T>(name: string): IBindingHandler<T> {
-        const handler = this.bindingHandlers[name];
-        if (!handler) {
-            exception.next(new Error(`binding '${name}' has not been registered.`));
-        }
-        return handler;
-    }
     public registerHandler<T>(name: string, handler: IBindingHandler<T>) {
         this.bindingHandlers[name] = handler;
     }
@@ -146,10 +139,12 @@ export class DomManager {
         const handlers: BindingGroup<any>[] = [];
         const group = groupBy(bindings, x => x.name);
         for (const name in group) {
-            const handler = this.getHandler(name);
-            if (handler !== undefined) {
-                handlers.push({ name: name, handler: handler, bindings: group[name] });
+            const handler = this.bindingHandlers[name];
+            if (!handler) {
+                exception.next(new Error(`Binding handler "${name}" has not been registered. With expression "${group[name][0].expression.text}"`));
+                continue;
             }
+            handlers.push({ name: name, handler: handler, bindings: group[name] });
         }
 
         // sort by priority
@@ -167,7 +162,7 @@ export class DomManager {
         this.registerHandler("css", new CssBinding(this));
         this.registerHandler("attr", new AttrBinding(this));
         this.registerHandler("style", new StyleBinding(this));
-        this.registerHandler("evt", new EventBinding(this));
+        this.registerHandler("on", new EventBinding(this));
         this.registerHandler("key", new KeyPressBinding(this));
         this.registerHandler("if", new IfBinding(this));
         this.registerHandler("with", new WithBinding(this));

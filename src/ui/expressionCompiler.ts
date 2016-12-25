@@ -17,28 +17,25 @@ function canWrite(expression: string): boolean {
     return match !== null;
 }
 
-export function compileBindingExpression<T>(expression: string): ICompiledExpression<T | null> {
+export function compileBindingExpression<T>(expression: string, twoWay?: boolean): ICompiledExpression<T | null> {
     expression = expression.trim();
-    let fn: ICompiledExpression<T | null>;
-    if (expression === "") {
-        fn = ($context?, $element?) => null;
-    }
-    const readBody = `with($context){with($data||{}){return ${expression};}}`;
-    fn =  <any> new Function("$context", "$element", readBody);
-    fn.text = expression;
-    if (canWrite(expression)) {
-        const writeBody = `with($context){with($data||{}){return function(_z){ ${expression} = _z;}}}`;
-        fn.write = <any> new Function("$context", "$element", writeBody);
-    }
-    return (ctx: IDataContext, el: Element) => {
+
+    let fn = (ctx: IDataContext, el: Element) => {
             try {
-                let result = fn(ctx, el);
-                return result;
+                const readBody = expression ? `with($context){with($data||{}){return ${expression};}}` : "return null;";
+                let read = new Function("$context", "$element", readBody) as (ctx: IDataContext, el: Element) => T | null;
+                return read(ctx, el);
             } catch (e) {
-                exception.next(new Error(`Binding expression "${fn.text}" on element ${el.nodeName} failed. ${e.message}`));
+                exception.next(new Error(`Binding expression "${expression}" on element ${el.nodeName} failed. ${e.message}`));
                 return null;
             }
         };
+    fn["text"] = expression;
+    if (twoWay && canWrite(expression)) {
+        const writeBody = `with($context){with($data||{}){return function(_z){ ${expression} = _z;}}}`;
+        fn["write"] = new Function("$context", "$element", writeBody);
+    }
+    return fn as ICompiledExpression<T | null>;
 }
 
 export function expressionToObservable<T>(exp: ICompiledExpression<T>, ctx: IDataContext, element: Element): Rx.Observable<T | null> {

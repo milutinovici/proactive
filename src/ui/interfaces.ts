@@ -8,7 +8,7 @@ export interface IBindingAttribute {
 export interface ICompiledExpression<T> {
     (scope?: IDataContext, element?: Element): T;
 
-    text?: string;
+    text: string;
     write?: (scope?: IDataContext, element?: Element) => (value: T) => void;
 }
 

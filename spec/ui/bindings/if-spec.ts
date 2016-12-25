@@ -76,7 +76,7 @@ it("if: binding to a boolean observable value using dynamic template", expect =>
 });
 
 it("if: binding to a boolean observable value using dynamic template with event", expect => {
-    const template = `<div x-if="$data"><button x-evt-click="cmd">Click me</button></div>`;
+    const template = `<div x-if="$data"><button x-on-click="cmd">Click me</button></div>`;
     const el = <HTMLElement> util.parse(template)[0];
     let count = 0;
     let model = {
