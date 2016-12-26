@@ -1,5 +1,5 @@
 import { NodeStateManager } from "./nodeState";
-import { isElement, groupBy } from "./utils";
+import { isElement, groupBy, nodeListToArray } from "./utils";
 import { BindingProvider } from "./bindingProvider";
 import { IDataContext, IBindingHandler, IBindingAttribute } from "./interfaces";
 import EventBinding from "./bindings/event";
@@ -45,9 +45,8 @@ export class DomManager {
 
     public applyBindingsToDescendants(ctx: IDataContext, node: Element): void {
         if (node.hasChildNodes()) {
-            for (let i = 0; i < node.children.length; i++) {
-                this.applyBindingsRecursive(ctx, node.children[i]);
-            }
+            const children = nodeListToArray(node.children);
+            children.forEach(child => this.applyBindingsRecursive(ctx, child as Element));
         }
     }
 
