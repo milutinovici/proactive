@@ -1,14 +1,12 @@
-import { IBindingAttribute } from "./interfaces";
-import { compileBindingExpression } from "./expressionCompiler";
+import { BindingAttribute } from "./bindingAttribute";
 import { isElement } from "./utils";
 import { components } from "./components/registry";
-// import { exception } from "./exceptionHandlers";
 
 const bindingPrefix = /^x-/;
 
 export class BindingProvider {
 
-    public getBindings(element: Element): IBindingAttribute[] {
+    public getBindings(element: Element): BindingAttribute<any>[] {
         if (!isElement(element)) {
              throw new Error("Only html elements can have bindings");
         }
@@ -21,21 +19,19 @@ export class BindingProvider {
         return bindings;
     }
 
-    private getAttributeValues(element: Element, prefix: RegExp): IBindingAttribute[] {
+    private getAttributeValues(element: Element, prefix: RegExp): BindingAttribute<any>[] {
 
         const attributes: Attr[] = [].filter.call(element.attributes, (at: Attr) => prefix.test(at.name));
         return attributes.map(x => {
             const array = x.name.split("-");
-            const expression = compileBindingExpression<any>(x.value);
-            return { expression: expression, name: array[1], parameter: array.slice(2, array.length).join("-") || undefined };
+            return new BindingAttribute(element.tagName.toLowerCase(), array[1], x.value, array.slice(2, array.length).join("-") || undefined);
         });
     }
 
-    private customElementToBinding(element: Element): IBindingAttribute {
+    private customElementToBinding(element: Element): BindingAttribute<any> {
         // when a component is referenced as custom-element, apply a virtual 'component' binding
         const tagName = element.tagName.toLowerCase();
-        const expression = compileBindingExpression<any>(`'${tagName}'`);
-        return { expression: expression, name: "component" };
+        return new BindingAttribute(tagName, "component", `'${tagName}'`);
     }
 
 }

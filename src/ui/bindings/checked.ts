@@ -19,7 +19,7 @@ export default class CheckedBinding extends BindingBase<boolean> {
             return;
         }
 
-        const observable = this.evaluateBinding<boolean>(bindings[0].expression, ctx, el) as Rx.Observable<boolean>;
+        const observable = this.evaluateBinding<boolean>(bindings[0], ctx, el) as Rx.Observable<boolean>;
         state.cleanup.add(observable.subscribe(value => {
             el.checked = value;
         }));

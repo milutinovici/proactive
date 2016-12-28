@@ -19,7 +19,7 @@ export default class EventBinding extends BindingBase<Event> {
                 exception.next(new Error(`event name must be supplied for ${binding.name} binding on ${el}`));
                 continue;
             }
-            const observer = this.evaluateBinding(binding.expression, ctx, el);
+            const observer = this.evaluateBinding<Event>(binding, ctx, el);
             const events = Rx.Observable.fromEvent<Event>(el, binding.parameter);
             if (isRxObserver(observer)) {
                 state.cleanup.add(events.subscribe(observer));

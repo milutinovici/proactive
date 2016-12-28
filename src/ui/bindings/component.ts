@@ -14,10 +14,10 @@ export default class ComponentBinding<T> extends BindingBase<T> {
     }
 
     public applyBinding(element: HTMLElement, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T>): void {
-        const componentName = this.evaluateBinding<string>(bindings.filter(x => x.parameter === undefined)[0].expression, ctx, element) as Rx.Observable<string>;
+        const componentName = this.evaluateBinding<string>(bindings.filter(x => x.parameter === undefined)[0], ctx, element) as Rx.Observable<string>;
         let vmBinding = bindings.filter(x => x.parameter === "vm")[0];
 
-        const viewModel = vmBinding ? this.evaluateBinding<T>(vmBinding.expression, ctx, element) as Rx.Observable<T> : Rx.Observable.of(undefined);
+        const viewModel = vmBinding ? this.evaluateBinding<T>(vmBinding, ctx, element) as Rx.Observable<T> : Rx.Observable.of(undefined);
         const params = {};
         bindings.filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(ctx, element));
         let internal: Rx.Subscription;

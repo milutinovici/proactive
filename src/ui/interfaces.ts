@@ -1,9 +1,11 @@
-import * as Rx from "rxjs";
+import { Observable, Subscription } from "rxjs";
 
 export interface IBindingAttribute {
     readonly name: string;
+    readonly text: string;
     readonly parameter?: string;
     readonly expression: ICompiledExpression<any>;
+    toObservable(ctx: IDataContext, element: Element): Observable<any>;
 }
 export interface ICompiledExpression<T> {
     (scope?: IDataContext, element?: Element): T;
@@ -44,7 +46,7 @@ export interface IDataContext {
     readonly $parents: Object[];
 }
 export interface INodeState<T> {
-    readonly cleanup: Rx.Subscription;
+    readonly cleanup: Subscription;
     model?: T;        // scope model
 }
 

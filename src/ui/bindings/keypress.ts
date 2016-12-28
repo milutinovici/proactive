@@ -38,7 +38,7 @@ export default class KeyPressBinding extends BindingBase<KeyboardEvent> {
                 exception.next(new Error(`key must be defined for ${binding.name} binding on ${el.tagName}`));
                 continue;
             }
-            const observer = this.evaluateBinding(binding.expression, ctx, el);
+            const observer = this.evaluateBinding<KeyboardEvent>(binding, ctx, el);
             if (!isRxObserver(observer)) {
                 exception.next(new Error(`must supply function or observer for ${binding.name} binding on ${el.tagName}`));
                 continue;
