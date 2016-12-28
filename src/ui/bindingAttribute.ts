@@ -1,20 +1,18 @@
 import { exception } from "./exceptionHandlers";
 import { Observable, Observer } from "rxjs";
-import { ICompiledExpression, IDataContext, IBindingAttribute } from "./interfaces";
+import { IDataContext, IBindingAttribute } from "./interfaces";
 import { isRxObservable } from "./utils";
 
 export class BindingAttribute<T> implements IBindingAttribute {
     public readonly tag: string;
     public readonly name: string;
     public readonly text: string;
-    public readonly expression: ICompiledExpression<T | null>;
     public readonly parameter?: string;
 
     constructor(tag: string, name: string, text: string, parameter?: string) {
         this.tag = tag;
         this.name = name;
         this.text = text.trim();
-        this.expression = this.compileBindingExpression();
         this.parameter = parameter;
     }
 
@@ -27,19 +25,17 @@ export class BindingAttribute<T> implements IBindingAttribute {
         }
     }
 
-    private compileBindingExpression(): ICompiledExpression<T | null> {
-        let fn = (ctx: IDataContext) => {
-                try {
-                    const readBody = this.text ? `with($context){with($data||{}){return ${this.text};}}` : "return null;";
-                    let read = new Function("$context", "exception", readBody) as (ctx: IDataContext, ex: Observer<Error>) => T | null;
-                    return read(ctx, exception);
-                } catch (e) {
-                    exception.next(new Error(`Binding expression "${this.text}" on element ${this.tag} failed. ${e.message}`));
-                    return null;
-                }
-            };
-        return fn as ICompiledExpression<T | null>;
-    }
+    public expression(ctx: IDataContext): T | null {
+        try {
+            const readBody = this.text ? `with($context){with($data||{}){return ${this.text};}}` : "return null;";
+            let read = new Function("$context", "exception", readBody) as (ctx: IDataContext, ex: Observer<Error>) => T | null;
+            return read(ctx, exception);
+        } catch (e) {
+            exception.next(new Error(`Binding expression "${this.text}" on element ${this.tag} failed. ${e.message}`));
+            return null;
+        }
+    };
+
     public writeExpression(ctx: IDataContext): (value: any) => void {
         try {
             if (this.canWrite(this.text)) {

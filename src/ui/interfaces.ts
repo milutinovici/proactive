@@ -9,7 +9,7 @@ export interface IBindingAttribute {
     toObservable(ctx: IDataContext): Observable<any>;
 }
 export interface ICompiledExpression<T> {
-    (scope?: IDataContext): T;
+    (scope: IDataContext): T;
 }
 
 export interface IBindingHandler<T> {
