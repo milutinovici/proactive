@@ -140,7 +140,7 @@ export class DomManager {
         for (const name in group) {
             const handler = this.bindingHandlers[name];
             if (!handler) {
-                exception.next(new Error(`Binding handler "${name}" has not been registered. With expression "${group[name][0].expression.text}"`));
+                exception.next(new Error(`Binding handler "${name}" has not been registered. With expression "${group[name][0].text}"`));
                 continue;
             }
             handlers.push({ name: name, handler: handler, bindings: group[name] });

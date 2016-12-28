@@ -5,13 +5,11 @@ export interface IBindingAttribute {
     readonly text: string;
     readonly parameter?: string;
     readonly expression: ICompiledExpression<any>;
-    toObservable(ctx: IDataContext, element: Element): Observable<any>;
+    toObservable(ctx: IDataContext): Observable<any>;
 }
 export interface ICompiledExpression<T> {
-    (scope?: IDataContext, element?: Element): T;
-
-    text: string;
-    write?: (scope?: IDataContext, element?: Element) => (value: T) => void;
+    (scope?: IDataContext): T;
+    write?: (scope?: IDataContext) => (value: T) => void;
 }
 
 export interface IBindingHandler<T> {

@@ -1,5 +1,5 @@
 import { exception } from "./exceptionHandlers";
-import { Observable } from "rxjs";
+import { Observable, Observer } from "rxjs";
 import { ICompiledExpression, IDataContext, IBindingAttribute } from "./interfaces";
 import { isRxObservable } from "./utils";
 
@@ -13,13 +13,13 @@ export class BindingAttribute<T> implements IBindingAttribute {
     constructor(tag: string, name: string, text: string, parameter?: string) {
         this.tag = tag;
         this.name = name;
-        this.text = text;
+        this.text = text.trim();
         this.parameter = parameter;
-        this.expression = this.compileBindingExpression(text);
+        this.expression = this.compileBindingExpression();
     }
 
-    public toObservable(ctx: IDataContext, element: Element): Observable<T | null> {
-        let result = this.expression(ctx, element);
+    public toObservable(ctx: IDataContext): Observable<T | null> {
+        let result = this.expression(ctx);
         if (isRxObservable(result)) {
             return result;
         } else { // wrap it
@@ -27,23 +27,20 @@ export class BindingAttribute<T> implements IBindingAttribute {
         }
     }
 
-    private compileBindingExpression(expression: string, twoWay?: boolean): ICompiledExpression<T | null> {
-        expression = expression.trim();
-
-        let fn = (ctx: IDataContext, el: Element) => {
+    private compileBindingExpression(twoWay = false): ICompiledExpression<T | null> {
+        let fn = (ctx: IDataContext) => {
                 try {
-                    const readBody = expression ? `with($context){with($data||{}){return ${expression};}}` : "return null;";
-                    let read = new Function("$context", "$element", readBody) as (ctx: IDataContext, el: Element) => T | null;
-                    return read(ctx, el);
+                    const readBody = this.text ? `with($context){with($data||{}){return ${this.text};}}` : "return null;";
+                    let read = new Function("$context", "exception", readBody) as (ctx: IDataContext, ex: Observer<Error>) => T | null;
+                    return read(ctx, exception);
                 } catch (e) {
-                    exception.next(new Error(`Binding expression "${expression}" on element ${el.nodeName} failed. ${e.message}`));
+                    exception.next(new Error(`Binding expression "${this.text}" on element ${this.tag} failed. ${e.message}`));
                     return null;
                 }
             };
-        fn["text"] = expression;
-        if (twoWay && this.canWrite(expression)) {
-            const writeBody = `with($context){with($data||{}){return function(_z){ ${expression} = _z;}}}`;
-            fn["write"] = new Function("$context", "$element", writeBody);
+        if (twoWay && this.canWrite(this.text)) {
+            const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
+            fn["write"] = new Function("$context", writeBody);
         }
         return fn as ICompiledExpression<T | null>;
     }
