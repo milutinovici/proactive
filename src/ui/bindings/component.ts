@@ -19,7 +19,7 @@ export default class ComponentBinding<T> extends BindingBase<T> {
 
         const viewModel = vmBinding ? this.evaluateBinding<T>(vmBinding, ctx, element) as Rx.Observable<T> : Rx.Observable.of(undefined);
         const params = {};
-        bindings.filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(ctx, element));
+        bindings.filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(ctx));
         let internal: Rx.Subscription;
 
         function doCleanup() {

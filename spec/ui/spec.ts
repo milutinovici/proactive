@@ -6,6 +6,5 @@ if (tapeDom) {
     tapeDom.stream(it);
 }
 
-// import "./bindingProvider-spec";
-// import "./expressionCompiler-spec";
+import "./bindingProvider-spec";
 import "./bindings-spec";

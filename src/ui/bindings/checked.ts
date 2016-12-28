@@ -10,6 +10,7 @@ export default class CheckedBinding extends BindingBase<boolean> {
 
     constructor(domManager: DomManager) {
         super(domManager);
+        this.twoWay = true;
     }
 
     public applyBinding(el: HTMLInputElement, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<boolean>): void {

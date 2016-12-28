@@ -10,6 +10,7 @@ export default class ValueBinding<T> extends SingleBindingBase<T> {
 
     constructor(domManager: DomManager) {
         super(domManager);
+        this.twoWay = true;
     }
 
     protected applyBindingInternal(element: HTMLInputElement, observable: Rx.Observable<T> | Rx.Subject<T>, ctx: IDataContext, state: INodeState<T>, eventName = "change"): void {

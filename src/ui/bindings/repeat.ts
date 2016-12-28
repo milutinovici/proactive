@@ -35,7 +35,7 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
         const elements: Node[] = [];
         let oldArray: T[] = [];
 
-        const obs = this.evaluateBinding<T[]>(bindings[0], ctx) as Rx.Observable<T[]>;
+        const obs = this.evaluateBinding<T[]>(bindings[0], ctx, node) as Rx.Observable<T[]>;
         // subscribe
         state.cleanup.add(obs.subscribe(array => {
             this.applyValue(parent, elements, node, array, oldArray, placeholder);

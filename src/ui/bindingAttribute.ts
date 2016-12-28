@@ -7,15 +7,15 @@ export class BindingAttribute<T> implements IBindingAttribute {
     public readonly tag: string;
     public readonly name: string;
     public readonly text: string;
-    public readonly parameter?: string;
     public readonly expression: ICompiledExpression<T | null>;
+    public readonly parameter?: string;
 
     constructor(tag: string, name: string, text: string, parameter?: string) {
         this.tag = tag;
         this.name = name;
         this.text = text.trim();
-        this.parameter = parameter;
         this.expression = this.compileBindingExpression();
+        this.parameter = parameter;
     }
 
     public toObservable(ctx: IDataContext): Observable<T | null> {
@@ -27,7 +27,7 @@ export class BindingAttribute<T> implements IBindingAttribute {
         }
     }
 
-    private compileBindingExpression(twoWay = false): ICompiledExpression<T | null> {
+    private compileBindingExpression(): ICompiledExpression<T | null> {
         let fn = (ctx: IDataContext) => {
                 try {
                     const readBody = this.text ? `with($context){with($data||{}){return ${this.text};}}` : "return null;";
@@ -38,14 +38,23 @@ export class BindingAttribute<T> implements IBindingAttribute {
                     return null;
                 }
             };
-        if (twoWay && this.canWrite(this.text)) {
-            const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
-            fn["write"] = new Function("$context", writeBody);
-        }
         return fn as ICompiledExpression<T | null>;
     }
+    public writeExpression(ctx: IDataContext): (value: any) => void {
+        try {
+            if (BindingAttribute.canWrite(this.text)) {
+                const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
+                return new Function("$context", writeBody) as (value: T) => void;
+            } else {
+                return (value: T) => {};
+            }
+        } catch (e) {
+            exception.next(new Error(`Binding expression "${this.text}" on element ${this.tag} failed. ${e.message}`));
+            return (value: T) => {};
+        }
+    }
 
-    private canWrite(expression: string): boolean {
+    private static canWrite(expression: string): boolean {
         const javaScriptReservedWords = ["true", "false", "null", "undefined"];
 
         // Matches something that can be assigned to--either an isolated identifier or something ending with a property accessor
