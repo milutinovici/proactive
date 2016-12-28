@@ -37,7 +37,7 @@ export abstract class BindingBase<T> implements IBindingHandler<T> {
         } else {
             obs = binding.toObservable(ctx);
             if (this.twoWay) {
-                obs.write = binding.writeExpression.bind(binding);
+                obs.write = binding.writeExpression(ctx);
             }
         }
         return obs;

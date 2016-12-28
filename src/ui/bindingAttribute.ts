@@ -42,9 +42,9 @@ export class BindingAttribute<T> implements IBindingAttribute {
     }
     public writeExpression(ctx: IDataContext): (value: any) => void {
         try {
-            if (BindingAttribute.canWrite(this.text)) {
+            if (this.canWrite(this.text)) {
                 const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
-                return new Function("$context", writeBody) as (value: T) => void;
+                return new Function("$context", writeBody)(ctx) as (value: T) => void;
             } else {
                 return (value: T) => {};
             }
@@ -54,7 +54,7 @@ export class BindingAttribute<T> implements IBindingAttribute {
         }
     }
 
-    private static canWrite(expression: string): boolean {
+    private canWrite(expression: string): boolean {
         const javaScriptReservedWords = ["true", "false", "null", "undefined"];
 
         // Matches something that can be assigned to--either an isolated identifier or something ending with a property accessor
