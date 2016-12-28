@@ -27,7 +27,7 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
 
     public applyBinding(node: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T[]>): void {
         const parent = node.parentElement as HTMLElement;
-        const placeholder: Comment = document.createComment(`repeat ${bindings[0].expression}`);
+        const placeholder: Comment = document.createComment(`repeat ${bindings[0].expression.text}`);
         // backup inner HTML
         parent.insertBefore(placeholder, node);
         parent.removeChild(node);

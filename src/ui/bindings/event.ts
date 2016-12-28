@@ -24,7 +24,7 @@ export default class EventBinding extends BindingBase<Event> {
             if (isRxObserver(observer)) {
                 state.cleanup.add(events.subscribe(observer));
             } else {
-                exception.next(new Error(`observer or function must be supplied for ${binding.name} binding on ${el}`));
+                exception.next(new Error(`Observer or function must be supplied for ${binding.name} binding on ${el}`));
             }
         }
     }
