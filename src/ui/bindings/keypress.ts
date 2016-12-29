@@ -31,14 +31,14 @@ export default class KeyPressBinding extends BindingBase<KeyboardEvent> {
         super(domManager);
     }
 
-    public applyBinding(el: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<KeyboardEvent>): void {
+    public applyBinding(el: Element, bindings: IBindingAttribute<KeyboardEvent>[], ctx: IDataContext, state: INodeState<KeyboardEvent>): void {
         for (const binding of bindings) {
             const parameter = binding.parameter;
             if (parameter === undefined) {
                 exception.next(new Error(`key must be defined for ${binding.name} binding on ${el.tagName}`));
                 continue;
             }
-            const observer = this.evaluateBinding<KeyboardEvent>(binding, ctx, el);
+            const observer = binding.evaluate(ctx, el, this.twoWay);
             if (!isRxObserver(observer)) {
                 exception.next(new Error(`must supply function or observer for ${binding.name} binding on ${el.tagName}`));
                 continue;

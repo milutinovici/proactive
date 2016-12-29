@@ -1,15 +1,11 @@
-import { Observable, Subscription } from "rxjs";
+import { Observable, Subscription, Observer } from "rxjs";
 
-export interface IBindingAttribute {
+export interface IBindingAttribute<T> {
     readonly name: string;
     readonly text: string;
     readonly parameter?: string;
-    readonly expression: ICompiledExpression<any>;
-    writeExpression(scope?: IDataContext): (value: any) => void;
-    toObservable(ctx: IDataContext): Observable<any>;
-}
-export interface ICompiledExpression<T> {
-    (scope: IDataContext): T;
+    readonly expression: (scope: IDataContext) => T | null;
+    evaluate(ctx: IDataContext, element: Element, twoWay: boolean): Observable<T> | Observer<T>;
 }
 
 export interface IBindingHandler<T> {
@@ -18,7 +14,7 @@ export interface IBindingHandler<T> {
         * sometimes it is necessary to specify the order in which the bindings are applied.
         */
         readonly priority: number;
-
+        readonly twoWay: boolean;
        /**
         * If set to true then bindings won't be applied to children
         * of the element such binding is encountered on. Instead
@@ -33,7 +29,7 @@ export interface IBindingHandler<T> {
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
-        applyBinding(node: Node, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T>): void;
+        applyBinding(node: Node, bindings: IBindingAttribute<T>[], ctx: IDataContext, state: INodeState<T>): void;
 
 }
 

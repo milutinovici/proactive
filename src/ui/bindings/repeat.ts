@@ -25,7 +25,7 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
         });
     }
 
-    public applyBinding(node: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T[]>): void {
+    public applyBinding(node: Element, bindings: IBindingAttribute<T[]>[], ctx: IDataContext, state: INodeState<T[]>): void {
         const parent = node.parentElement as HTMLElement;
         const placeholder: Comment = document.createComment(`repeat ${bindings[0].text}`);
         // backup inner HTML
@@ -35,7 +35,7 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
         const elements: Node[] = [];
         let oldArray: T[] = [];
 
-        const obs = this.evaluateBinding<T[]>(bindings[0], ctx, node) as Rx.Observable<T[]>;
+        const obs = bindings[0].evaluate(ctx, node, this.twoWay) as Rx.Observable<T[]>;
         // subscribe
         state.cleanup.add(obs.subscribe(array => {
             this.applyValue(parent, elements, node, array, oldArray, placeholder);

@@ -13,14 +13,14 @@ export default class CheckedBinding extends BindingBase<boolean> {
         this.twoWay = true;
     }
 
-    public applyBinding(el: HTMLInputElement, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<boolean>): void {
+    public applyBinding(el: HTMLInputElement, bindings: IBindingAttribute<boolean>[], ctx: IDataContext, state: INodeState<boolean>): void {
         super.applyBinding(el, bindings, ctx, state);
         if (!this.isCheckboxOrRadio(el)) {
             exception.next(new Error(`checked-binding only operates on checkboxes and radio-buttons. ${el.tagName} is not supported`));
             return;
         }
 
-        const observable = this.evaluateBinding<boolean>(bindings[0], ctx, el) as Rx.Observable<boolean>;
+        const observable = bindings[0].evaluate(ctx, el, this.twoWay) as Rx.Observable<boolean>;
         state.cleanup.add(observable.subscribe(value => {
             el.checked = value;
         }));

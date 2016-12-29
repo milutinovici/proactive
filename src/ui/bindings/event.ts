@@ -13,13 +13,13 @@ export default class EventBinding extends BindingBase<Event> {
         super(domManager);
     }
 
-     public applyBinding(el: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<KeyboardEvent>): void {
+     public applyBinding(el: Element, bindings: IBindingAttribute<Event>[], ctx: IDataContext, state: INodeState<KeyboardEvent>): void {
         for (const binding of bindings) {
             if (binding.parameter === undefined) {
                 exception.next(new Error(`event name must be supplied for ${binding.name} binding on ${el}`));
                 continue;
             }
-            const observer = this.evaluateBinding<Event>(binding, ctx, el);
+            const observer = binding.evaluate(ctx, el, this.twoWay);
             const events = Rx.Observable.fromEvent<Event>(el, binding.parameter);
             if (isRxObserver(observer)) {
                 state.cleanup.add(events.subscribe(observer));

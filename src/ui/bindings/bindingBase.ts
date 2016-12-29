@@ -1,5 +1,5 @@
-import * as Rx from "rxjs";
-import { isRxObservable, isRxObserver, isFunction, isElement } from "../utils";
+import { Observable, Observer } from "rxjs";
+import { isElement } from "../utils";
 import { DomManager } from "../domManager";
 import { IDataContext, IBindingHandler, IBindingAttribute, INodeState } from "../interfaces";
 import { exception } from "../exceptionHandlers";
@@ -18,7 +18,7 @@ export abstract class BindingBase<T> implements IBindingHandler<T> {
         this.domManager = domManager;
     }
 
-    public applyBinding(node: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T>): void {
+    public applyBinding(node: Element, bindings: IBindingAttribute<T>[], ctx: IDataContext, state: INodeState<T>): void {
         if (!isElement(node)) {
             throw Error("binding only operates on elements!");
         }
@@ -27,33 +27,18 @@ export abstract class BindingBase<T> implements IBindingHandler<T> {
         }
     }
 
-    protected evaluateBinding<T>(binding: IBindingAttribute, ctx: IDataContext, element: Element): Rx.Observable<T> | Rx.Observer<T> {
-        let obs: any = binding.expression(ctx);
-        if (isRxObservable(obs) || isRxObserver(obs)) {
-            obs = obs;
-        } else if (isFunction(obs)) {
-            const fn: (t: T, element: Element, ctx: IDataContext) => void = obs.bind(ctx.$data);
-            obs = new Rx.Subscriber<T>(x => fn(x, element, ctx), exception.error);
-        } else {
-            obs = binding.toObservable(ctx);
-            if (this.twoWay) {
-                obs.write = binding.writeExpression(ctx);
-            }
-        }
-        return obs;
-    }
 }
 
 export abstract class SingleBindingBase<T> extends BindingBase<T> {
-    public applyBinding(el: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T>): void {
+    public applyBinding(el: Element, bindings: IBindingAttribute<T>[], ctx: IDataContext, state: INodeState<T>): void {
         super.applyBinding(el, bindings, ctx, state);
         if (bindings.length > 1) {
             exception.next(new Error(`more than 1 single binding on element ${el}`));
             return;
         }
-        this.applyBindingInternal(el, this.evaluateBinding<T>(bindings[0], ctx, el), ctx, state, bindings[0].parameter);
+        this.applyBindingInternal(el, bindings[0].evaluate(ctx, el, this.twoWay), ctx, state, bindings[0].parameter);
     }
-    protected abstract applyBindingInternal(el: Element, observable: Rx.Observable<T> | Rx.Observer<T>, ctx: IDataContext, state: INodeState<T>, parameter?: string): void;
+    protected abstract applyBindingInternal(el: Element, observable: Observable<T> | Observer<T>, ctx: IDataContext, state: INodeState<T>, parameter?: string): void;
 }
 
 /**
@@ -65,10 +50,10 @@ export abstract class OneWayBindingBase<T> extends BindingBase<T> {
         super(domManager);
     }
 
-    public applyBinding(el: Element, bindings: IBindingAttribute[], ctx: IDataContext, state: INodeState<T>): void {
+    public applyBinding(el: Element, bindings: IBindingAttribute<T>[], ctx: IDataContext, state: INodeState<T>): void {
         super.applyBinding(el, bindings, ctx, state);
         for (const binding of bindings) {
-            const observable = this.evaluateBinding(binding, ctx, el) as Rx.Observable<T>;
+            const observable = binding.evaluate(ctx, el, this.twoWay) as Observable<T>;
             const subscription = observable.subscribe((x => this.applyValue(el, x, binding.parameter)));
             state.cleanup.add(subscription);
         }

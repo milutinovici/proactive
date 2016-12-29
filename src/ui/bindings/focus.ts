@@ -1,10 +1,10 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
-import { BindingBase } from "./bindingBase";
+import { SingleBindingBase } from "./bindingBase";
 import { IDataContext, INodeState } from "../interfaces";
 import { isRxObserver } from "../utils";
 
-export default class HasFocusBinding extends BindingBase<boolean> {
+export default class HasFocusBinding extends SingleBindingBase<boolean> {
 
     public priority = -1;
 
@@ -12,7 +12,7 @@ export default class HasFocusBinding extends BindingBase<boolean> {
         super(domManager);
     }
 
-    protected applyBindingInternal(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, ctx: IDataContext, state: INodeState<boolean>, parameter?: string): INodeState<boolean> {
+    public applyBindingInternal(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, ctx: IDataContext, state: INodeState<boolean>, parameter?: string): INodeState<boolean> {
         const delay = parseInt(parameter || "0");
 
         state.cleanup.add(observable.subscribe(x => {

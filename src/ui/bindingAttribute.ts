@@ -1,9 +1,9 @@
 import { exception } from "./exceptionHandlers";
-import { Observable, Observer } from "rxjs";
+import { Observable, Observer, Subscriber } from "rxjs";
 import { IDataContext, IBindingAttribute } from "./interfaces";
-import { isRxObservable } from "./utils";
+import { isRxObservable, isRxObserver, isFunction } from "./utils";
 
-export class BindingAttribute<T> implements IBindingAttribute {
+export class BindingAttribute<T> implements IBindingAttribute<T> {
     public readonly tag: string;
     public readonly name: string;
     public readonly text: string;
@@ -16,13 +16,20 @@ export class BindingAttribute<T> implements IBindingAttribute {
         this.parameter = parameter;
     }
 
-    public toObservable(ctx: IDataContext): Observable<T | null> {
-        let result = this.expression(ctx);
-        if (isRxObservable(result)) {
-            return result;
-        } else { // wrap it
-            return Observable.of(result);
+    public evaluate(ctx: IDataContext, element: Element, twoWay: boolean): Observable<T> | Observer<T> {
+        let obs: any = this.expression(ctx);
+        if (isRxObservable(obs) || isRxObserver(obs)) {
+            obs = obs;
+        } else if (isFunction(obs)) {
+            const fn: (t: T, element: Element, ctx: IDataContext) => void = obs.bind(ctx.$data);
+            obs = new Subscriber<T>(x => fn(x, element, ctx), exception.error);
+        } else {
+            obs = this.toObservable(ctx);
+            if (twoWay) {
+                obs.write = this.write(ctx);
+            }
         }
+        return obs;
     }
 
     public expression(ctx: IDataContext): T | null {
@@ -36,7 +43,16 @@ export class BindingAttribute<T> implements IBindingAttribute {
         }
     };
 
-    public writeExpression(ctx: IDataContext): (value: any) => void {
+    private toObservable(ctx: IDataContext): Observable<T | null> {
+        let result = this.expression(ctx);
+        if (isRxObservable(result)) {
+            return result;
+        } else { // wrap it
+            return Observable.of(result);
+        }
+    }
+
+    private write(ctx: IDataContext): (value: any) => void {
         try {
             if (this.canWrite(this.text)) {
                 const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;

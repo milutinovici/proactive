@@ -133,7 +133,7 @@ export class DomManager {
         this.bindingHandlers[name] = handler;
     }
 
-    private getBindingHandlers(bindings: IBindingAttribute[]) {
+    private getBindingHandlers(bindings: IBindingAttribute<any>[]) {
         // lookup handlers
         const handlers: BindingGroup<any>[] = [];
         const group = groupBy(bindings, x => x.name);
@@ -181,5 +181,5 @@ export class DomManager {
 interface BindingGroup<T> {
     name: string;
     handler: IBindingHandler<T>;
-    bindings: IBindingAttribute[];
+    bindings: IBindingAttribute<T>[];
 }
