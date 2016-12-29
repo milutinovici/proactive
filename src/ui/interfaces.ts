@@ -1,6 +1,7 @@
 import { Observable, Subscription, Observer } from "rxjs";
 
 export interface IBindingAttribute<T> {
+    readonly tag: string;
     readonly name: string;
     readonly text: string;
     readonly parameter?: string;

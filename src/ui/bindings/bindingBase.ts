@@ -12,7 +12,7 @@ export abstract class BindingBase<T> implements IBindingHandler<T> {
     public priority = 0;
     public twoWay = false;
     public controlsDescendants = false;
-    protected domManager: DomManager;
+    protected readonly domManager: DomManager;
 
     constructor(domManager: DomManager) {
         this.domManager = domManager;

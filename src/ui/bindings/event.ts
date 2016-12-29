@@ -13,10 +13,10 @@ export default class EventBinding extends BindingBase<Event> {
         super(domManager);
     }
 
-     public applyBinding(el: Element, bindings: IBindingAttribute<Event>[], ctx: IDataContext, state: INodeState<KeyboardEvent>): void {
+     public applyBinding(el: Element, bindings: IBindingAttribute<Event>[], ctx: IDataContext, state: INodeState<Event>): void {
         for (const binding of bindings) {
             if (binding.parameter === undefined) {
-                exception.next(new Error(`event name must be supplied for ${binding.name} binding on ${el}`));
+                exception.next(new Error(`event name must be supplied for ${binding.name} binding on ${binding.tag} element`));
                 continue;
             }
             const observer = binding.evaluate(ctx, el, this.twoWay);
