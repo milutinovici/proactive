@@ -10,6 +10,7 @@ export default class HasFocusBinding extends SingleBindingBase<boolean> {
 
     constructor(domManager: DomManager) {
         super(domManager);
+        this.twoWay = true;
     }
 
     public applyBindingInternal(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, ctx: IDataContext, state: INodeState<boolean>, parameter?: string): INodeState<boolean> {
