@@ -1,5 +1,5 @@
 import * as Rx from "rxjs";
-import { IComponentDescriptor, IComponent } from "../interfaces";
+import { IComponentDescriptor } from "../interfaces";
 import { observableRequire, isFunction, nodeListToArray } from "../utils";
 import { html } from "../templateEngines";
 import { exception } from "../exceptionHandlers";
@@ -39,20 +39,18 @@ export class ComponentRegistry {
         }
     }
 
-    public initialize<T>(descriptor: IComponentDescriptor<T>, instance: T, params?: Object): IComponent<T> {
-        let vm = descriptor.viewModel;
-        if (instance !== undefined) {
-            return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: instance };
-        } else if (isFunction(vm)) {
-            let model: T = {} as any;
+    public initialize<T extends Object>(descriptor: IComponentDescriptor<T>, params?: Object): T | null {
+        let vm = descriptor.viewModel || null;
+        if (isFunction(vm)) {
+            let model: T | null = null;
             try {
                 model = new vm(params);
             } catch (e) {
                 exception.next(new Error(`Failed in constructor of component "${descriptor.name}". ${e.message}`));
             }
-            return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: model };
+            return model;
         }
-        return <IComponent<T>> { template: <Node[]> descriptor.template, viewModel: vm };
+        return vm;
     }
 
     private compileTemplate(template: Node[] | string): Node[] {
