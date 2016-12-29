@@ -1,6 +1,6 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
-import { isDisposable } from "../utils";
+import { isSubscription } from "../utils";
 import { INodeState, IDataContext, IBindingAttribute } from "../interfaces";
 import { BindingBase } from "./bindingBase";
 import { components } from "../components/registry";
@@ -42,7 +42,7 @@ export default class ComponentBinding<T> extends BindingBase<T> {
                 this.domManager.nodeState.set(element, componentState);
                 ctx = this.domManager.nodeState.getDataContext(element);
                 // auto-dispose view-model
-                if (isDisposable(component.viewModel)) {
+                if (isSubscription(component.viewModel)) {
                     internal.add(component.viewModel);
                 }
             }

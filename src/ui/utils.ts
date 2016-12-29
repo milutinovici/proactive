@@ -3,26 +3,6 @@ import * as Rx from "rxjs";
 const regexCssClassName = /\S+/g;
 
 /**
-* Unsubscribes all subscrition members of an object
-* @param {any} target
-*/
-export function unsubscribeMembers(target: any): void {
-    Object.keys(target).filter(propertyName => {
-        const disp = target[propertyName];
-        return disp != null && isFunction(disp.unsubscribe);
-    })
-    .map(propertyName => target[propertyName])
-    .forEach(disp => disp.unsubscribe());
-}
-/**
-* Extracts the values of a Set by invoking its forEach method and capturing the output
-*/
-export function setToArray<T>(src: any): Array<T> {
-    const result = new Array<T>();
-    src.forEach((x: T) => result.push(x));
-    return result;
-}
-/**
 * Determines if target is an instance of a Rx.Observable
 * @param {any} target
 */
@@ -101,40 +81,19 @@ export function hasCssClass(node: HTMLElement, className: string): boolean {
 }
 
 /**
- * Returns true if the specified element may be disabled
- * @param {HTMLElement} el
- */
-export function elementCanBeDisabled(el: Element): boolean {
-    return el instanceof HTMLButtonElement ||
-        el instanceof HTMLAnchorElement ||
-        el instanceof HTMLInputElement ||
-        el instanceof HTMLFieldSetElement ||
-        el instanceof HTMLLinkElement ||
-        el instanceof HTMLOptGroupElement ||
-        el instanceof HTMLOptionElement ||
-        el instanceof HTMLSelectElement ||
-        el instanceof HTMLTextAreaElement;
-}
-/**
  * Returns true if object is a Function.
  * @param obj
  */
 export function isFunction(obj: any): obj is Function {
     return typeof obj === "function";
 }
+
 /**
- * Returns true if param is an object.
+ * Returns true if object is a Subscription
  * @param obj
  */
-export function isObject(obj: any): obj is Object {
-    return typeof obj === "object";
-}
-/**
- * Returns true if object is a Disposable
- * @param obj
- */
-export function isDisposable(obj: any): obj is Rx.Subscription {
-    return isFunction(obj["unsubscribe"]);
+export function isSubscription(obj: any): obj is Rx.Subscription {
+    return isFunction(obj.unsubscribe);
 }
 
 /**
