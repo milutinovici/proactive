@@ -92,7 +92,7 @@ export function isFunction(obj: any): obj is Function {
  * Returns true if object is a Subscription
  * @param obj
  */
-export function isSubscription(obj: any): obj is Rx.Subscription {
+export function isSubscription(obj: any): boolean {
     return isFunction(obj.unsubscribe);
 }
 

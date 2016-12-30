@@ -1,4 +1,5 @@
 import * as it from "tape";
+import * as Rx from "rxjs";
 import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
@@ -238,5 +239,23 @@ it("component: Components are properly isolated", expect => {
 
     expect.doesNotThrow(() => ui.applyBindings({ foo: 42 }, el));
     expect.equal(el.childNodes[0].childNodes[0].textContent, value);
+    expect.end();
+});
+
+it("component: Components emit custom events", expect => {
+    const str = `<test-component x-on-pulse="log"></test-component>`;
+    const el = <HTMLElement> util.parse(str)[0];
+    const template = `<span>pulse</span>`;
+    const emitter = new Rx.Subject();
+    ui.components.register("test-component", {
+        template: template,
+        viewModel: { emitter },
+    });
+    let value = "";
+    const vm = { log: (x: CustomEvent) => value = x.detail };
+
+    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    emitter.next(new CustomEvent("pulse", { detail: "myPulse" }));
+    expect.equal(value, "myPulse");
     expect.end();
 });

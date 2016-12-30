@@ -45,6 +45,10 @@ export interface INodeState<T> {
     model?: T;        // scope model
 }
 
+export interface IViewModel {
+    emitter?: Observable<CustomEvent>;
+}
+
 export interface IComponentDescriptor<T> {
     name?: string;
     template: Node[] | string;
