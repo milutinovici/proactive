@@ -87,14 +87,14 @@ export default class ComponentBinding<T extends Object> extends BindingBase<T> {
     }
 
     private getViewModel(element: HTMLElement, bindings: IBindingAttribute<any>[], ctx: IDataContext, descriptor: Rx.Observable<IComponentDescriptor<T>>, params: Object) {
-        const viewModel = descriptor.map(x => components.initialize(x, params) || ctx.$data as T);
-        const singleton = this.getSingleton(element, bindings, ctx);
-        return singleton.combineLatest(viewModel, (single: T, vm: T) => single ? single : vm);
+        const viewModel = descriptor.map(x => components.initialize(x, params));
+        const data = this.getData(element, bindings, ctx);
+        return data.combineLatest(viewModel, (d: T, vm: T) => d ? d : vm);
     }
 
-    private getSingleton(element: HTMLElement, bindings: IBindingAttribute<any>[], ctx: IDataContext) {
-        const singletonBinding = bindings.filter(x => x.parameter === "vm")[0] as IBindingAttribute<T>;
-        return singletonBinding ? singletonBinding.evaluate(ctx, element, this.twoWay) as Rx.Observable<T> : Rx.Observable.of(null);
+    private getData(element: HTMLElement, bindings: IBindingAttribute<any>[], ctx: IDataContext) {
+        const dataBinding = bindings.filter(x => x.parameter === "data")[0] as IBindingAttribute<T>;
+        return dataBinding ? dataBinding.evaluate(ctx, element, this.twoWay) as Rx.Observable<T> : Rx.Observable.of(null);
     }
 
 }
