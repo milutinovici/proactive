@@ -91,3 +91,12 @@ it("Array is also an observer", expect => {
     expect.isEquivalent(items2(), [1, 2, 3, 4]);
     expect.end();
 });
+
+it("next sets current value", expect => {
+    const val = px.array([0]);
+    const array = [1];
+    val.next(array);
+
+    expect.equal(val(), array);
+    expect.end();
+});

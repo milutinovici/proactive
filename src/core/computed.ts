@@ -2,7 +2,7 @@ import * as Rx from "rxjs";
 import { ComputedValue } from "./interfaces";
 
 export class ComputedValueImpl<T> extends Rx.Observable<T> {
-    protected source: Rx.Observable<T>;
+    protected readonly source: Rx.Observable<T>;
     protected value: T;
 
     constructor(source: Rx.Observable<T>, initial: T) {

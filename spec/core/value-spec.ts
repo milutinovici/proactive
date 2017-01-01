@@ -161,3 +161,10 @@ it("value is also an observer", expect => {
     expect.equal(val2(), 4);
     expect.end();
 });
+it("next sets current value", expect => {
+    const val = px.value<number>(0);
+    val.next(1);
+
+    expect.equal(val(), 1);
+    expect.end();
+});

@@ -3,7 +3,7 @@ import { ObservableValue } from "./interfaces";
 import { ComputedValueImpl } from "./computed";
 
 export class ObservableValueImpl<T> extends ComputedValueImpl<T> implements Rx.Observer<T> {
-    protected source: Rx.BehaviorSubject<T>;
+    protected readonly source: Rx.BehaviorSubject<T>;
 
     constructor(initial: T) {
         super(new Rx.BehaviorSubject<T>(initial), initial);
@@ -14,6 +14,7 @@ export class ObservableValueImpl<T> extends ComputedValueImpl<T> implements Rx.O
         this.source.next(value);
     }
     public next(value: T) {
+        this.value = value;
         this.source.next(value);
     }
     public error(err: Error) {
