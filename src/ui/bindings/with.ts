@@ -12,7 +12,7 @@ export default class WithBinding<T> extends SingleBindingBase<T> {
         super(domManager);
     }
 
-    public applyBindingInternal(element: HTMLElement, observable: Rx.Observable<T>, ctx: IDataContext, state: INodeState<T>): void {
+    public applySingleBinding(element: HTMLElement, observable: Rx.Observable<T>, ctx: IDataContext, state: INodeState<T>): void {
         // subscribe
         state.cleanup.add(observable.subscribe(x => {
             this.applyValue(element, x, state);

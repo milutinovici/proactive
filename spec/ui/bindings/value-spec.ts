@@ -139,3 +139,17 @@ it("value: should update non observable values", expect => {
 
     expect.end();
 });
+
+it("value: input values type should be consistent", expect => {
+    const template = `<input type="number" x-value="someProp" />`;
+    const number = px.value(0);
+    const el = <HTMLInputElement> util.parse(template)[0];
+    const viewModel = { someProp: number };
+    ui.applyBindings(viewModel, el);
+
+    el.value = "3";
+    util.triggerEvent(el, "change");
+    expect.equal(4, 1 + number());
+
+    expect.end();
+});

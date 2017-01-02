@@ -1,5 +1,5 @@
 import { exception } from "./exceptionHandlers";
-import { Observable, Observer, Subscriber } from "rxjs";
+import { Observable, Observer, Subscriber, Symbol } from "rxjs";
 import { IDataContext, IBindingAttribute } from "./interfaces";
 import { isRxObservable, isRxObserver, isFunction } from "./utils";
 
@@ -26,7 +26,10 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
         } else {
             obs = this.toObservable(ctx);
             if (twoWay) {
-                obs.write = this.write(ctx);
+                obs.next = this.write(ctx);
+                // obs.error = exception.error;
+                obs.complete = () => {};
+                obs[Symbol.rxSubscriber] = () => obs;
             }
         }
         return obs;

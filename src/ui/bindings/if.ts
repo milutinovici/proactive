@@ -14,7 +14,7 @@ export class IfBinding extends SingleBindingBase<boolean> {
         super(domManager);
     }
 
-    protected applyBindingInternal(el: HTMLElement, observable: Rx.Observable<boolean>, ctx: IDataContext, state: INodeState<boolean>) {
+    protected applySingleBinding(el: HTMLElement, observable: Rx.Observable<boolean>, ctx: IDataContext, state: INodeState<boolean>) {
         // backup inner HTML
         const template = new Array<Node>();
         // template

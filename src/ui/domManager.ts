@@ -6,9 +6,8 @@ import EventBinding from "./bindings/event";
 import { IfBinding } from "./bindings/if";
 import { AttrBinding, CssBinding, StyleBinding, HtmlBinding, TextBinding } from "./bindings/oneWay";
 import RepeatBinding from "./bindings/repeat";
-import ValueBinding from "./bindings/value";
 import WithBinding from "./bindings/with";
-import CheckedBinding from "./bindings/checked";
+import { ValueBinding } from "./bindings/value";
 import ComponentBinding from "./bindings/component";
 import KeyPressBinding from "./bindings/keypress";
 import FocusBinding from "./bindings/focus";
@@ -169,8 +168,6 @@ export class DomManager {
         this.registerHandler("html", new HtmlBinding(this));
         this.registerHandler("repeat", new RepeatBinding(this));
 
-        this.registerHandler("checked", new CheckedBinding(this));
-        // this.registerBinding("selectedValue", "bindings.selectedValue");
         this.registerHandler("component", new ComponentBinding(this));
         this.registerHandler("value", new ValueBinding(this));
         this.registerHandler("focus", new FocusBinding(this));

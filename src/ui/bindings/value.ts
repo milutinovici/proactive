@@ -1,11 +1,10 @@
-import * as Rx from "rxjs";
-import { DomManager } from "../domManager";
-import { INodeState, IDataContext } from "../interfaces";
-import { isRxObserver, isInputElement } from "../utils";
+import { Observable, Subject } from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
-import { exception } from "../exceptionHandlers";
+import { IDataContext, INodeState } from "../interfaces";
+import { DomManager } from "../domManager";
+import { isRxObserver } from "../utils";
 
-export default class ValueBinding<T> extends SingleBindingBase<T> {
+export class ValueBinding extends SingleBindingBase<string|number|boolean> {
     public priority = 5;
 
     constructor(domManager: DomManager) {
@@ -13,104 +12,40 @@ export default class ValueBinding<T> extends SingleBindingBase<T> {
         this.twoWay = true;
     }
 
-    protected applyBindingInternal(element: HTMLInputElement, observable: Rx.Observable<T> | Rx.Subject<T>, ctx: IDataContext, state: INodeState<T>, eventName = "change"): void {
-        const tag = element.tagName.toLowerCase();
-        if (!isInputElement(element)) {
-            exception.next(new Error(`Value binding only operates on input elements. ${element["tagName"]} is not supported`));
-        }
-        const storeValueInNodeState = (tag === "input" && element.type === "radio");
+    public applySingleBinding(el: HTMLInputElement, observable: Observable<string|number|boolean> | Subject<string|number|boolean>, ctx: IDataContext, state: INodeState<string|number|boolean>, event = "change") {
 
-        function updateElement<T>(domManager: DomManager, value: T) {
-            if (storeValueInNodeState) {
-                setNodeValue(element, value, domManager);
+        const isCheckboxOrRadio = this.isCheckboxOrRadio(el as HTMLInputElement);
+
+        state.cleanup.add(observable.subscribe(value => {
+            if (isCheckboxOrRadio) {
+                if (Array.isArray(value)) {
+                    el.checked = value.some(x => x === el.name);
+                } else {
+                    el.checked = value as boolean;
+                }
             } else {
-                element.value = (value === null) || (value === undefined) ? "" : value.toString();
+                el.value = (value === null) || (value === undefined) ? "" : value.toString();
             }
-        }
-
-        state.cleanup.add(observable.subscribe(x => {
-            updateElement(this.domManager, x);
         }));
 
-        if (isRxObserver(observable) || observable["write"] !== undefined) {
-            state.cleanup.add(
-                this.updateValue(element, observable, storeValueInNodeState, eventName)
-            );
+        if (isRxObserver(observable)) {
+            const events = isCheckboxOrRadio ? this.getCheckedEvents(el, event) : Observable.fromEvent<Event>(el, event);
+            const values = isCheckboxOrRadio ? events.map(e => (e.target as HTMLInputElement).checked as any).distinctUntilChanged() :
+                                               events.map(e => (e.target as HTMLInputElement).value).distinctUntilChanged();
+            state.cleanup.add(values.subscribe(observable));
         }
     }
-    public updateValue(element: HTMLInputElement, observable: Rx.Observable<T> | Rx.Subject<T>, storeValueInNodeState: boolean,  eventName: string): Rx.Subscription {
-        const events = Rx.Observable.fromEvent(element, eventName);
-        return events.subscribe(e => {
-            if (storeValueInNodeState) {
-                if (isRxObserver(observable)) {
-                    observable.next(getNodeValue<T>(element, this.domManager));
-                } else {
-                    observable["write"](getNodeValue<T>(element, this.domManager));
-                }
-            } else {
-                if (isRxObserver(observable)) {
-                    observable.next(<any> element.value);
-                } else {
-                    observable["write"](<any> element.value);
-                }
-            }
-        });
+
+    // private array(old: string[], value: string): string[] {
+    //     old.
+    // }
+
+    private getCheckedEvents(el: Element, event: string): Observable<Event> {
+        return Observable.merge<Event>(Observable.fromEvent(el, "click"), Observable.fromEvent(el, event));
+    }
+
+    private isCheckboxOrRadio(element: HTMLInputElement): element is HTMLInputElement {
+        const tag = element.tagName.toLowerCase();
+        return tag === "input" && (element.type === "checkbox" || element.type === "radio");
     }
 }
-
-/**
- * For certain elements such as select and input type=radio we store
- * the real element value in NodeState if it is anything other than a
- * string. This method returns that value.
- * @param {Node} node
- * @param {IDomManager} domManager
- */
-export function getNodeValue<T>(node: HTMLInputElement, domManager: DomManager): T {
-    const state = domManager.nodeState.get<T>(node);
-    if (state != null && state[hasValueBindingValue]) {
-        return state[valueBindingValue];
-    }
-
-    return <any> node.value;
-}
-
-/**
- * Associate a value with an element. Either by using its value-attribute
- * or storing it in NodeState
- * @param {Node} node
- * @param {any} value
- * @param {IDomManager} domManager
- */
-export function setNodeValue<T>(node: HTMLInputElement, value: T, domManager: DomManager): void {
-    if ((value === null) || (value === undefined)) {
-        value = <any> "";
-    }
-    let state = domManager.nodeState.get<T>(node);
-
-    if (typeof value === "string") {
-        // Update the element only if the element and model are different. On some browsers, updating the value
-        // will move the cursor to the end of the input, which would be bad while the user is typing.
-        if (node.value !== <any> value) {
-            node.value = <any> value;
-
-            // clear state since value is stored in attribute
-            if (state != null && state[hasValueBindingValue]) {
-                state[hasValueBindingValue] = false;
-                state[valueBindingValue] = undefined;
-            }
-        }
-    } else {
-        // get or create state
-        if (state == null) {
-            state = domManager.nodeState.create<T>(value);
-            domManager.nodeState.set(node, state);
-        }
-
-        // store value
-        state[valueBindingValue] = value;
-        state[hasValueBindingValue] = true;
-    }
-}
-
-const hasValueBindingValue = "has.bindings.value";
-const valueBindingValue = "bindings.value";

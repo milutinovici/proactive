@@ -13,7 +13,7 @@ export default class HasFocusBinding extends SingleBindingBase<boolean> {
         this.twoWay = true;
     }
 
-    public applyBindingInternal(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, ctx: IDataContext, state: INodeState<boolean>, parameter?: string): INodeState<boolean> {
+    public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, ctx: IDataContext, state: INodeState<boolean>, parameter?: string): INodeState<boolean> {
         const delay = parseInt(parameter || "0");
 
         state.cleanup.add(observable.subscribe(x => {

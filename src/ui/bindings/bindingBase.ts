@@ -33,12 +33,12 @@ export abstract class SingleBindingBase<T> extends BindingBase<T> {
     public applyBinding(el: Element, bindings: IBindingAttribute<T>[], ctx: IDataContext, state: INodeState<T>): void {
         super.applyBinding(el, bindings, ctx, state);
         if (bindings.length > 1) {
-            exception.next(new Error(`more than 1 single binding on element ${el}`));
+            exception.next(new Error(`more than 1 ${bindings[0].name} binding on element ${el}`));
             return;
         }
-        this.applyBindingInternal(el, bindings[0].evaluate(ctx, el, this.twoWay), ctx, state, bindings[0].parameter);
+        this.applySingleBinding(el, bindings[0].evaluate(ctx, el, this.twoWay), ctx, state, bindings[0].parameter);
     }
-    protected abstract applyBindingInternal(el: Element, observable: Observable<T> | Observer<T>, ctx: IDataContext, state: INodeState<T>, parameter?: string): void;
+    protected abstract applySingleBinding(el: Element, observable: Observable<T> | Observer<T>, ctx: IDataContext, state: INodeState<T>, parameter?: string): void;
 }
 
 /**
