@@ -65,6 +65,8 @@ export class TextBinding extends OneWayBindingBase<string> {
     protected applyValue(el: HTMLElement, value: string): void {
         if ((value === null) || (value === undefined)) {
             value = "";
+        } else if (Array.isArray(value)) {
+            value = value.join(", ");
         }
         el.textContent = value;
     }
