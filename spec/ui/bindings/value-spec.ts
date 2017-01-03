@@ -153,3 +153,22 @@ it("value: input values type should be consistent", expect => {
 
     expect.end();
 });
+
+it("value: select multiple can be bound to an array", expect => {
+    const template = `<select multiple x-value="selected">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                      </select>`;
+    const selected = px.array<string>([]);
+    const el = <HTMLSelectElement> util.parse(template)[0];
+    const viewModel = { selected };
+    ui.applyBindings(viewModel, el);
+    selected.push("A");
+    expect.equal(el.options[0].selected, true);
+
+    el.options[1].selected = true;
+    util.triggerEvent(el, "change");
+    expect.equal(selected().length, 2);
+
+    expect.end();
+});

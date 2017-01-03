@@ -2,9 +2,9 @@ import { Observable, Subject } from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
 import { IDataContext, INodeState } from "../interfaces";
 import { DomManager } from "../domManager";
-import { isRxObserver } from "../utils";
+import { isRxObserver, nodeListToArray } from "../utils";
 
-export class ValueBinding extends SingleBindingBase<string|number|boolean> {
+export class ValueBinding extends SingleBindingBase<string|number|boolean|string[]> {
     public priority = 5;
 
     constructor(domManager: DomManager) {
@@ -12,27 +12,29 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean> {
         this.twoWay = true;
     }
 
-    public applySingleBinding(el: HTMLInputElement, observable: Observable<string|number|boolean> | Subject<string|number|boolean>, ctx: IDataContext, state: INodeState<string|number|boolean>, event = "change") {
-
-        const isCheckboxOrRadio = this.isCheckboxOrRadio(el as HTMLInputElement);
-
-        state.cleanup.add(observable.subscribe(value => {
-            if (isCheckboxOrRadio) {
-                if (Array.isArray(value)) {
-                    el.checked = value.some(x => x === el.name);
-                } else {
-                    el.checked = value as boolean;
-                }
-            } else {
-                el.value = (value === null) || (value === undefined) ? "" : value.toString();
-            }
-        }));
+    public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, ctx: IDataContext, state: INodeState<string|number|boolean|string[]>, event = "change") {
+        const isCheckboxOrRadio = ValueBinding.isCheckboxOrRadio(el);
+        const isMultiSelect = ValueBinding.isMultiSelect(el);
+        if (isCheckboxOrRadio) {
+            state.cleanup.add(observable.subscribe(value => ValueBinding.setElementChecked(el as HTMLInputElement, value as boolean)));
+        } else if (isMultiSelect) {
+            state.cleanup.add(observable.subscribe(value => ValueBinding.setElementOptions(el as HTMLSelectElement, value)));
+        } else {
+            state.cleanup.add(observable.subscribe(value => ValueBinding.setElementValue(el, value)));
+        }
 
         if (isRxObserver(observable)) {
-            const events = isCheckboxOrRadio ? this.getCheckedEvents(el, event) : Observable.fromEvent<Event>(el, event);
-            const values = isCheckboxOrRadio ? events.map(e => (e.target as HTMLInputElement).checked as any).distinctUntilChanged() :
-                                               events.map(e => (e.target as HTMLInputElement).value).distinctUntilChanged();
-            state.cleanup.add(values.subscribe(observable));
+            const events = ValueBinding.getEvents(el, event, isCheckboxOrRadio);
+            if (isCheckboxOrRadio) {
+                state.cleanup.add(events.map(evt => evt.target["checked"] as boolean).distinctUntilChanged().subscribe(observable));
+            } else if (isMultiSelect) {
+                state.cleanup.add(events.map(evt => (nodeListToArray(evt.target["options"]) as HTMLOptionElement[])
+                                                    .filter(o => o.selected)
+                                                    .map(o => o.value || o.textContent || ""))
+                                                    .subscribe(observable));
+            } else {
+                state.cleanup.add(events.map(evt => evt.target["value"] as string).distinctUntilChanged().subscribe(observable));
+            }
         }
     }
 
@@ -40,12 +42,31 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean> {
     //     old.
     // }
 
-    private getCheckedEvents(el: Element, event: string): Observable<Event> {
-        return Observable.merge<Event>(Observable.fromEvent(el, "click"), Observable.fromEvent(el, event));
+    private static getEvents(el: Element, event: string, isCheckboxOrRadio: boolean): Observable<Event> {
+        return isCheckboxOrRadio ? Observable.merge<Event>(Observable.fromEvent(el, "click"), Observable.fromEvent(el, event)) :
+                                   Observable.fromEvent<Event>(el, event);
     }
 
-    private isCheckboxOrRadio(element: HTMLInputElement): element is HTMLInputElement {
+    private static isCheckboxOrRadio(element: HTMLElement): element is HTMLInputElement {
         const tag = element.tagName.toLowerCase();
-        return tag === "input" && (element.type === "checkbox" || element.type === "radio");
+        return tag === "input" && (element["type"] === "checkbox" || element["type"] === "radio");
+    }
+    private static isMultiSelect(element: HTMLElement): element is HTMLSelectElement {
+        const tag = element.tagName.toLowerCase();
+        return tag === "select" && element["multiple"];
+    }
+    private static setElementValue(el: HTMLElement, value: any) {
+        el["value"] = (value === null) || (value === undefined) ? "" : value.toString();
+    }
+    private static setElementChecked(el: HTMLInputElement, value: boolean) {
+        el.checked = value;
+    }
+    private static setElementOptions(el: HTMLSelectElement, value: any) {
+        if (Array.isArray(value)) {
+            const options = nodeListToArray(el["options"]) as HTMLOptionElement[];
+            options.forEach(x => x.selected = value.indexOf(x.value) !== -1);
+        } else {
+            ValueBinding.setElementValue(el, value);
+        }
     }
 }
