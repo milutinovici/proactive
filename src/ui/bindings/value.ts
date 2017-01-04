@@ -2,7 +2,7 @@ import { Observable, Subject } from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
 import { IDataContext, INodeState } from "../interfaces";
 import { DomManager } from "../domManager";
-import { isRxObserver, nodeListToArray } from "../utils";
+import { isRxObserver, nodeListToArray, tryParse } from "../utils";
 
 export class ValueBinding extends SingleBindingBase<string|number|boolean|string[]> {
     public priority = 5;
@@ -33,7 +33,7 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
                                                     .map(o => o.value || o.textContent || ""))
                                                     .subscribe(observable));
             } else {
-                state.cleanup.add(events.map(evt => evt.target["value"] as string).distinctUntilChanged().subscribe(observable));
+                state.cleanup.add(events.map(evt => evt.target["value"] as string).distinctUntilChanged().map(tryParse).subscribe(observable));
             }
         }
     }
@@ -58,8 +58,12 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
     private static setElementValue(el: HTMLElement, value: any) {
         el["value"] = (value === null) || (value === undefined) ? "" : value.toString();
     }
-    private static setElementChecked(el: HTMLInputElement, value: boolean) {
-        el.checked = value;
+    private static setElementChecked(el: HTMLInputElement, value: any) {
+        if (typeof value === "boolean") {
+            el.checked = value;
+        } else {
+            el.checked = el.value === value;
+        }
     }
     private static setElementOptions(el: HTMLSelectElement, value: any) {
         if (Array.isArray(value)) {
