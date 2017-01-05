@@ -44,15 +44,15 @@ it("checked: Should be able to control a checkbox's checked state", expect => {
 });
 
 it("checked: Should be able to control a radio's checked state", expect => {
-    const template = `<input type="radio" x-value="someProp" />`;
+    const template = `<input type="radio" x-value="someProp" value="my" />`;
     const element = <HTMLInputElement> util.parse(template)[0];
 
-    let myobservable = px.value(true);
+    let myobservable = px.value("my");
 
     ui.applyBindings({ someProp: myobservable }, element);
     expect.equal(element.checked, true);
 
-    myobservable(false);
+    myobservable("other");
     expect.equal(element.checked, false);
     expect.end();
 });
@@ -70,14 +70,14 @@ it("checked: Should update observable properties on the model when the checkbox 
 });
 
 it("checked: Should update observable properties on the model when the radio's click event fires", expect => {
-    const template = `<input type="radio" x-value="someProp" />`;
+    const template = `<input type="radio" x-value="someProp" value="my"/>`;
     const element = <HTMLInputElement> util.parse(template)[0];
 
-    let myobservable = px.value(false);
+    let myobservable = px.value("other");
     ui.applyBindings({ someProp: myobservable }, element);
 
     util.triggerEvent(element, "click");
-    expect.equal(myobservable(), true);
+    expect.equal(myobservable(), "my");
     expect.end();
 });
 
@@ -139,3 +139,21 @@ it("checked: should update non observable values", expect => {
 
     expect.end();
 });
+
+it("checked: multiple radios bound to a single value", expect => {
+    const template = `<div>
+                          <input type="radio" name="grp" x-value="someProp" value="1st" />
+                          <input type="radio" name="grp" x-value="someProp" value="2nd" />
+                      </div>`;
+    const obs = px.value();
+    const el = <HTMLElement> util.parse(template)[0];
+    const viewModel = { someProp: obs };
+    ui.applyBindings(viewModel, el);
+
+    util.triggerEvent(el.children[0], "click");
+    expect.equal(viewModel.someProp(), "1st");
+    util.triggerEvent(el.children[1], "click");
+    expect.equal(viewModel.someProp(), "2nd");
+    expect.end();
+});
+

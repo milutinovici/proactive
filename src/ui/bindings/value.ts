@@ -1,4 +1,4 @@
-import { Observable, Subject } from "rxjs";
+import { Observable, Subject, Subscription } from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
 import { IDataContext, INodeState } from "../interfaces";
 import { DomManager } from "../domManager";
@@ -13,43 +13,54 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
     }
 
     public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, ctx: IDataContext, state: INodeState<string|number|boolean|string[]>, event = "change") {
-        const isCheckboxOrRadio = ValueBinding.isCheckboxOrRadio(el);
-        const isMultiSelect = ValueBinding.isMultiSelect(el);
-        if (isCheckboxOrRadio) {
-            state.cleanup.add(observable.subscribe(value => ValueBinding.setElementChecked(el as HTMLInputElement, value as boolean)));
-        } else if (isMultiSelect) {
-            state.cleanup.add(observable.subscribe(value => ValueBinding.setElementOptions(el as HTMLSelectElement, value)));
-        } else {
-            state.cleanup.add(observable.subscribe(value => ValueBinding.setElementValue(el, value)));
-        }
+        let sub1: Subscription;
+        let sub2: Subscription | undefined;
 
-        if (isRxObserver(observable)) {
-            const events = ValueBinding.getEvents(el, event, isCheckboxOrRadio);
-            if (isCheckboxOrRadio) {
-                state.cleanup.add(events.map(evt => evt.target["checked"] as boolean).distinctUntilChanged().subscribe(observable));
-            } else if (isMultiSelect) {
-                state.cleanup.add(events.map(evt => (nodeListToArray(evt.target["options"]) as HTMLOptionElement[])
+        if (ValueBinding.isCheckbox(el)) {
+            sub1 = observable.subscribe(value => ValueBinding.setChecked(el as HTMLInputElement, value as boolean));
+            if (isRxObserver(observable)) {
+                 const events = ValueBinding.getEvents(el, event, true);
+                 sub2 = events.map(evt => evt.target["checked"]).distinctUntilChanged().subscribe(observable);
+            }
+        } else if (ValueBinding.isRadio(el)) {
+            sub1 = observable.subscribe(value => ValueBinding.setRadio(el as HTMLInputElement, value));
+            if (isRxObserver(observable)) {
+                 const events = ValueBinding.getEvents(el, event, true);
+                 sub2 = events.map(evt => evt.target["value"]).distinctUntilChanged().map(tryParse).subscribe(observable);
+            }
+        } else if (ValueBinding.isMultiSelect(el)) {
+            sub1 = observable.subscribe(value => ValueBinding.setMultiSelect(el as HTMLSelectElement, value));
+            if (isRxObserver(observable)) {
+                const events = ValueBinding.getEvents(el, event, false);
+                sub2 = events.map(evt => (nodeListToArray(evt.target["options"]) as HTMLOptionElement[])
                                                     .filter(o => o.selected)
                                                     .map(o => o.value || o.textContent || ""))
-                                                    .subscribe(observable));
-            } else {
-                state.cleanup.add(events.map(evt => evt.target["value"] as string).distinctUntilChanged().map(tryParse).subscribe(observable));
+                                                    .subscribe(observable);
+            }
+        } else {
+            sub1 = observable.subscribe(value => ValueBinding.setElementValue(el, value));
+            if (isRxObserver(observable)) {
+                const events = ValueBinding.getEvents(el, event, false);
+                sub2 = events.map(evt => evt.target["value"] as string).distinctUntilChanged().map(tryParse).subscribe(observable);
             }
         }
+        state.cleanup.add(sub1);
+        if (sub2 !== undefined) {
+            state.cleanup.add(sub2);
+        }
     }
-
-    // private array(old: string[], value: string): string[] {
-    //     old.
-    // }
 
     private static getEvents(el: Element, event: string, isCheckboxOrRadio: boolean): Observable<Event> {
         return isCheckboxOrRadio ? Observable.merge<Event>(Observable.fromEvent(el, "click"), Observable.fromEvent(el, event)) :
                                    Observable.fromEvent<Event>(el, event);
     }
-
-    private static isCheckboxOrRadio(element: HTMLElement): element is HTMLInputElement {
+    private static isCheckbox(element: HTMLElement): element is HTMLInputElement {
         const tag = element.tagName.toLowerCase();
-        return tag === "input" && (element["type"] === "checkbox" || element["type"] === "radio");
+        return tag === "input" && element["type"] === "checkbox";
+    }
+    private static isRadio(element: HTMLElement): element is HTMLInputElement {
+        const tag = element.tagName.toLowerCase();
+        return tag === "input" && element["type"] === "radio";
     }
     private static isMultiSelect(element: HTMLElement): element is HTMLSelectElement {
         const tag = element.tagName.toLowerCase();
@@ -58,14 +69,13 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
     private static setElementValue(el: HTMLElement, value: any) {
         el["value"] = (value === null) || (value === undefined) ? "" : value.toString();
     }
-    private static setElementChecked(el: HTMLInputElement, value: any) {
-        if (typeof value === "boolean") {
-            el.checked = value;
-        } else {
-            el.checked = el.value === value;
-        }
+    private static setChecked(el: HTMLInputElement, value: boolean) {
+        el.checked = value;
     }
-    private static setElementOptions(el: HTMLSelectElement, value: any) {
+    private static setRadio(el: HTMLInputElement, value: any) {
+        el.checked = el.value == value;
+    }
+    private static setMultiSelect(el: HTMLSelectElement, value: any) {
         if (Array.isArray(value)) {
             const options = nodeListToArray(el["options"]) as HTMLOptionElement[];
             options.forEach(x => x.selected = value.indexOf(x.value) !== -1);
@@ -74,3 +84,4 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
         }
     }
 }
+

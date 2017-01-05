@@ -81,6 +81,26 @@ export function hasCssClass(node: HTMLElement, className: string): boolean {
 }
 
 /**
+ * Try
+ */
+export function tryParse(str: string): number|boolean|string {
+    if (isBoolean(str)) {
+        return str === "true";
+    } else if (!isNaN(str as any)) {
+        return parseFloat(str);
+    }
+    return str;
+}
+
+/**
+ * Returns true if string is a boolean value.
+ * @param obj
+ */
+export function isBoolean(str: string): boolean {
+    return typeof str === "true" || str === "false";
+}
+
+/**
  * Returns true if object is a Function.
  * @param obj
  */
