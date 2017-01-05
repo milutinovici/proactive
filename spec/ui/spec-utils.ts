@@ -21,7 +21,7 @@ Object.keys(knownEvents).forEach(x => {
     }
 });
 
-export function triggerEvent(element: HTMLElement, eventType: string, keyCode?: any) {
+export function triggerEvent(element: Element, eventType: string, keyCode?: any) {
     if (typeof document.createEvent === "function") {
         if (typeof element.dispatchEvent === "function") {
             let eventCategory = knownEventTypesByEventName[eventType] || "HTMLEvents";
@@ -49,8 +49,8 @@ export function triggerEvent(element: HTMLElement, eventType: string, keyCode?: 
         } else {
             throw new Error("The supplied element doesn't support dispatchEvent");
         }
-    } else if (element.click) {
-        element.click();
+    } else if (element["click"]) {
+        element["click"]();
     } else if (typeof element["fireEvent"] !== "undefined") {
         element["fireEvent"]("on" + eventType);
     } else {
