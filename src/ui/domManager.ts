@@ -125,7 +125,7 @@ export class DomManager {
     }
 
     private shouldBind(el: Element): boolean {
-        return !this.ignore.some(x => x === el.tagName);
+        return this.ignore.indexOf(el.tagName) === -1;
     }
 
     public registerHandler<T>(name: string, handler: IBindingHandler<T>) {

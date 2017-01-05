@@ -23,7 +23,7 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
                  sub2 = events.map(evt => evt.target["checked"]).distinctUntilChanged().subscribe(observable);
             }
         } else if (ValueBinding.isRadio(el)) {
-            sub1 = observable.subscribe(value => ValueBinding.setRadio(el as HTMLInputElement, value));
+            sub1 = observable.subscribe(value => ValueBinding.setRadio(el as HTMLInputElement, value as string|number|boolean));
             if (isRxObserver(observable)) {
                  const events = ValueBinding.getEvents(el, event, true);
                  sub2 = events.map(evt => evt.target["value"]).distinctUntilChanged().map(tryParse).subscribe(observable);
@@ -34,11 +34,11 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
                 const events = ValueBinding.getEvents(el, event, false);
                 sub2 = events.map(evt => (nodeListToArray(evt.target["options"]) as HTMLOptionElement[])
                                                     .filter(o => o.selected)
-                                                    .map(o => o.value || o.textContent || ""))
-                                                    .subscribe(observable);
+                                                    .map(o => tryParse(o.value || o.textContent || "")))
+                                                    .subscribe(observable as any);
             }
         } else {
-            sub1 = observable.subscribe(value => ValueBinding.setElementValue(el, value));
+            sub1 = observable.subscribe(value => ValueBinding.setElementValue(el, value as string|number|boolean));
             if (isRxObserver(observable)) {
                 const events = ValueBinding.getEvents(el, event, false);
                 sub2 = events.map(evt => evt.target["value"] as string).distinctUntilChanged().map(tryParse).subscribe(observable);
@@ -66,16 +66,20 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
         const tag = element.tagName.toLowerCase();
         return tag === "select" && element["multiple"];
     }
-    private static setElementValue(el: HTMLElement, value: any) {
+    private static setElementValue(el: HTMLElement, value: string|number|boolean) {
         el["value"] = (value === null) || (value === undefined) ? "" : value.toString();
     }
-    private static setChecked(el: HTMLInputElement, value: boolean) {
-        el.checked = value;
+    private static setChecked(el: HTMLInputElement, value: boolean|string[]) {
+        if (Array.isArray(value)) {
+            el.checked = value.indexOf(el.value) !== -1;
+        } else {
+            el.checked = value;
+        }
     }
-    private static setRadio(el: HTMLInputElement, value: any) {
-        el.checked = el.value == value;
+    private static setRadio(el: HTMLInputElement, value: string|number|boolean) {
+        el.checked = el.value === value.toString();
     }
-    private static setMultiSelect(el: HTMLSelectElement, value: any) {
+    private static setMultiSelect(el: HTMLSelectElement, value: string|number|boolean|string[]) {
         if (Array.isArray(value)) {
             const options = nodeListToArray(el["options"]) as HTMLOptionElement[];
             options.forEach(x => x.selected = value.indexOf(x.value) !== -1);
@@ -84,4 +88,3 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
         }
     }
 }
-
