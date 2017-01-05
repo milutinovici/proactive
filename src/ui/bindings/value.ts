@@ -77,7 +77,7 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
         }
     }
     private static setRadio(el: HTMLInputElement, value: string|number|boolean) {
-        el.checked = el.value === value.toString();
+        el.checked = el.value == value;
     }
     private static setMultiSelect(el: HTMLSelectElement, value: string|number|boolean|string[]) {
         if (Array.isArray(value)) {
