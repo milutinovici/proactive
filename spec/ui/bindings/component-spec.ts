@@ -246,7 +246,7 @@ it("component: Components emit custom events", expect => {
     const str = `<test-component x-on-pulse="log"></test-component>`;
     const el = <HTMLElement> util.parse(str)[0];
     const template = `<span>pulse</span>`;
-    const emitter = new Rx.Subject();
+    const emitter = new Rx.Subject<Event>();
     ui.components.register("test-component", {
         template: template,
         viewModel: { emitter },
