@@ -11,10 +11,6 @@ export class ProactiveUI {
     constructor(domManager: DomManager) {
         this.domManager = domManager;
         this.components = components;
-
-        Rx.Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
-            this.domManager.cleanDescendants(document.documentElement);
-        });
     }
 
     /**
@@ -22,8 +18,12 @@ export class ProactiveUI {
     * @param {Object} model The model to bind to
     * @param {Node} rootNode The node to be bound
     */
-    public applyBindings(model: Object, node?: Element) {
-        this.domManager.applyBindings(model, node || document.documentElement);
+    public applyBindings(model: Object, node = document.documentElement) {
+        this.domManager.applyBindings(model, node);
+        const sub = Rx.Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
+            this.domManager.cleanDescendants(node);
+            sub.unsubscribe();
+        });
     }
     /**
     * Removes and cleans up any binding-related state from the specified node and its descendants.
