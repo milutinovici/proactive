@@ -7,7 +7,7 @@ it("get bindings from element with a single binding", expect => {
     const template = `<div x-text="'hello'"></div>`;
     const el = <HTMLElement> util.parse(template)[0];
     const provider = new BindingProvider();
-    const bindings = provider.getBindings(el);
+    const bindings = provider.getBindings(el)["text"];
     expect.equal(bindings.length, 1, "element has 1 binding");
     expect.equal(bindings[0].name, "text", "it is text binding");
     expect.equal(bindings[0].parameter, undefined, "it has no parmeters");
@@ -19,11 +19,10 @@ it("get bindings from element with multiple bindings", expect => {
     const el = <HTMLElement> util.parse(template)[0];
     const provider = new BindingProvider();
     const bindings = provider.getBindings(el);
-    expect.equal(bindings.length, 2, "element has 2 bindings");
-    expect.equal(bindings[0].name, "text", "1st is text binding");
-    expect.equal(bindings[0].parameter, undefined, "1st has no parameter");
-    expect.equal(bindings[1].name, "attr", "2nd is attr");
-    expect.equal(bindings[1].parameter, "id", "2nd has parameter id");
+    expect.equal(bindings["text"].length, 1, "element has 1 text binding");
+    expect.equal(bindings["text"][0].parameter, undefined, "text has no parameter");
+    expect.equal(bindings["attr"].length, 1, "element has 1 attr binding");
+    expect.equal(bindings["attr"][0].parameter, "id", "attr has parameter id");
     expect.end();
 });
 

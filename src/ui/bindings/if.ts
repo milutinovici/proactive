@@ -10,11 +10,11 @@ export class IfBinding extends SingleBindingBase<boolean> {
     public controlsDescendants = true;
     protected inverse: boolean = false;
 
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
     }
 
-    protected applySingleBinding(el: HTMLElement, observable: Rx.Observable<boolean>, ctx: IDataContext, state: INodeState<boolean>) {
+    protected applySingleBinding(el: HTMLElement, observable: Rx.Observable<boolean>, state: INodeState<boolean>, ctx: IDataContext) {
         // backup inner HTML
         const template = new Array<Node>();
         // template
@@ -50,8 +50,8 @@ export class IfBinding extends SingleBindingBase<boolean> {
 }
 
 export class NotIfBinding extends IfBinding {
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
 
         this.inverse = true;
     }

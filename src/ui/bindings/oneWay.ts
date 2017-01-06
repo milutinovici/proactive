@@ -4,8 +4,8 @@ import { OneWayBindingBase } from "./bindingBase";
 import { exception } from "../exceptionHandlers";
 
 export class CssBinding extends OneWayBindingBase<string> {
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
     }
 
     protected applyValue(el: HTMLElement, value: string, className: string): void {
@@ -22,8 +22,8 @@ export class CssBinding extends OneWayBindingBase<string> {
 }
 
 export class AttrBinding extends OneWayBindingBase<string | number | boolean> {
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
 
         this.priority = 5;
     }
@@ -42,8 +42,8 @@ export class AttrBinding extends OneWayBindingBase<string | number | boolean> {
 }
 
 export class StyleBinding extends OneWayBindingBase<string | number | boolean> {
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
     }
 
     protected applyValue(el: HTMLElement, value: string | number | boolean, styleName: string): void {
@@ -58,8 +58,8 @@ export class StyleBinding extends OneWayBindingBase<string | number | boolean> {
 
 export class TextBinding extends OneWayBindingBase<string> {
     public controlsDescendants = true;
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
     }
 
     protected applyValue(el: HTMLElement, value: string): void {
@@ -74,8 +74,8 @@ export class TextBinding extends OneWayBindingBase<string> {
 
 export class HtmlBinding extends OneWayBindingBase<string> {
     public controlsDescendants = true;
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
     }
 
     protected applyValue(el: HTMLElement, value: string): void {

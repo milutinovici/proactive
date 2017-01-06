@@ -7,12 +7,12 @@ import { isRxObserver, nodeListToArray, tryParse } from "../utils";
 export class ValueBinding extends SingleBindingBase<string|number|boolean|string[]> {
     public priority = 5;
 
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
         this.twoWay = true;
     }
 
-    public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, ctx: IDataContext, state: INodeState<string|number|boolean|string[]>, event = "change") {
+    public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, state: INodeState<string|number|boolean|string[]>, ctx: IDataContext, event = "change") {
         let sub1: Subscription;
         let sub2: Subscription | undefined;
 

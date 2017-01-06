@@ -18,7 +18,7 @@ export class ProactiveUI {
     * @param {Object} model The model to bind to
     * @param {Node} rootNode The node to be bound
     */
-    public applyBindings(model: Object, node = document.documentElement) {
+    public applyBindings(model: Object, node: Element = document.documentElement) {
         this.domManager.applyBindings(model, node);
         const sub = Rx.Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
             this.domManager.cleanDescendants(node);

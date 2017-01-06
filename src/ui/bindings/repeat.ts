@@ -2,7 +2,7 @@ import * as Rx from "rxjs";
 import { BindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
 import { ForEachNodeState } from "../nodeState";
-import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
+import { IDataContext, INodeState } from "../interfaces";
 import { compareLists } from "./compareLists";
 
 // Binding contributions to data-context
@@ -10,11 +10,11 @@ interface IForEachDataContext extends IDataContext {
     $index: Rx.Observable<number>;
 }
 
-export default class RepeatBinding<T> extends BindingBase<T[]> {
+export class RepeatBinding<T> extends BindingBase<T[]> {
     public priority = 40;
 
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
 
         // hook into getDataContext() to map state["index"] to ctx["$index"]
         this.domManager.nodeState.registerDataContextExtension((node: Node, ctx: IForEachDataContext) => {
@@ -25,7 +25,8 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
         });
     }
 
-    public applyBinding(node: Element, bindings: IBindingAttribute<T[]>[], ctx: IDataContext, state: INodeState<T[]>): void {
+    public applyBinding(node: Element, state: INodeState<T[]>, ctx: IDataContext): void {
+        const bindings = state.bindings[this.name];
         const parent = node.parentElement as HTMLElement;
         const placeholder: Comment = document.createComment(`repeat ${bindings[0].text}`);
         // backup inner HTML

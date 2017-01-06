@@ -1,22 +1,22 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
-import { INodeState, IDataContext, IBindingAttribute, IComponentDescriptor, IComponent, IViewModel } from "../interfaces";
-import { BindingBase } from "./bindingBase";
+import { INodeState, IDataContext, IComponentDescriptor, IComponent, IViewModel } from "../interfaces";
+import { SingleBindingBase } from "./bindingBase";
 import { components } from "../components/registry";
 
-export default class ComponentBinding<T> extends BindingBase<IViewModel<T>> {
+export class ComponentBinding<T> extends SingleBindingBase<string> {
     public priority = 30;
     public controlsDescendants = true;
 
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
     }
 
-    public applyBinding(element: HTMLElement, bindings: IBindingAttribute<any>[], ctx: IDataContext, state: INodeState<T>): void {
-        const descriptor = this.getComponentDescriptor(element, bindings, ctx);
-        const params = this.getParams(bindings, ctx);
-        const viewModel = this.getViewModel(element, bindings, ctx, descriptor, params);
+    public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState<string>, ctx: IDataContext) {
+        const descriptor = observable.mergeMap(name => components.load<T>(name));
+        const params = this.getParams(state, ctx);
+        const viewModel = this.getViewModel(element, state, ctx, descriptor, params);
         const component = descriptor.combineLatest(viewModel, (desc, vm) => <IComponent<T>> { template: desc.template, viewModel: vm });
 
         let internal: Subscription;
@@ -82,26 +82,17 @@ export default class ComponentBinding<T> extends BindingBase<IViewModel<T>> {
         }
     }
 
-    private getComponentDescriptor(element: HTMLElement, bindings: IBindingAttribute<any>[], ctx: IDataContext) {
-        const componentName = bindings.filter(x => x.parameter === undefined)[0].evaluate(ctx, element, this.twoWay) as Observable<string>;
-        return componentName.mergeMap(name => components.load<T>(name));
-    }
-
-    private getParams(bindings: IBindingAttribute<any>[], ctx: IDataContext): T {
+    private getParams(state: INodeState<string>, ctx: IDataContext): T {
         const params = {};
-        bindings.filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(ctx));
+        if (state.bindings["attr"] !== undefined) {
+            state.bindings["attr"].filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(ctx));
+        }
         return params as T;
     }
 
-    private getViewModel(element: HTMLElement, bindings: IBindingAttribute<any>[], ctx: IDataContext, descriptor: Observable<IComponentDescriptor<T>>, params: Object) {
-        const viewModel = descriptor.map(x => components.initialize(x, params));
-        const data = this.getData(element, bindings, ctx);
-        return data.combineLatest(viewModel, (d, vm) => d ? d : vm);
+    private getViewModel(element: HTMLElement, state: INodeState<string>, ctx: IDataContext, descriptor: Observable<IComponentDescriptor<T>>, params: T): Observable<IViewModel<T>|null> {
+        return state.bindings["with"] ?
+               state.bindings["with"][0].evaluate(ctx, element, false) as Observable<IViewModel<T>> :
+               descriptor.map(x => components.initialize(x, params));
     }
-
-    private getData(element: HTMLElement, bindings: IBindingAttribute<any>[], ctx: IDataContext) {
-        const dataBinding = bindings.filter(x => x.parameter === "data")[0] as IBindingAttribute<IViewModel<T>>;
-        return dataBinding ? dataBinding.evaluate(ctx, element, this.twoWay) as Observable<IViewModel<T>> : Observable.of(null);
-    }
-
 }

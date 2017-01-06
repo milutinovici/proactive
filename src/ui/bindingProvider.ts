@@ -1,12 +1,12 @@
 import { BindingAttribute } from "./bindingAttribute";
-import { isElement } from "./utils";
+import { isElement, groupBy, Group } from "./utils";
 import { components } from "./components/registry";
 
 const bindingPrefix = /^x-/;
 
 export class BindingProvider {
 
-    public getBindings(element: Element): BindingAttribute<any>[] {
+    public getBindings(element: Element): Group<BindingAttribute<any>> {
         if (!isElement(element)) {
              throw new Error("Only html elements can have bindings");
         }
@@ -16,7 +16,7 @@ export class BindingProvider {
         if (tagName.indexOf("-") !== -1 && components.isRegistered(tagName)) {
             bindings.push(this.customElementToBinding(element));
         }
-        return bindings;
+        return groupBy(bindings, x => x.name);
     }
 
     private getAttributeValues(element: Element, prefix: RegExp): BindingAttribute<any>[] {

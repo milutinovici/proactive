@@ -1,16 +1,16 @@
 import { NodeStateManager } from "./nodeState";
-import { isElement, groupBy, nodeListToArray } from "./utils";
+import { isElement, nodeListToArray } from "./utils";
 import { BindingProvider } from "./bindingProvider";
-import { IDataContext, IBindingHandler, IBindingAttribute, IViewModel } from "./interfaces";
-import EventBinding from "./bindings/event";
+import { IDataContext, IBindingHandler, IViewModel } from "./interfaces";
+import { EventBinding } from "./bindings/event";
 import { IfBinding } from "./bindings/if";
 import { AttrBinding, CssBinding, StyleBinding, HtmlBinding, TextBinding } from "./bindings/oneWay";
-import RepeatBinding from "./bindings/repeat";
-import WithBinding from "./bindings/with";
+import { RepeatBinding } from "./bindings/repeat";
+import { WithBinding } from "./bindings/with";
 import { ValueBinding } from "./bindings/value";
-import ComponentBinding from "./bindings/component";
-import KeyPressBinding from "./bindings/keypress";
-import FocusBinding from "./bindings/focus";
+import { ComponentBinding } from "./bindings/component";
+import { KeyPressBinding } from "./bindings/keypress";
+import { FocusBinding } from "./bindings/focus";
 import { exception } from "./exceptionHandlers";
 
 export class DomManager {
@@ -97,28 +97,27 @@ export class DomManager {
 
         // get or create elment-state
         let state = this.nodeState.get<any>(el);
-
         // create and set if necessary
         if (!state) {
-            state = this.nodeState.create(ctx.$data);
+            state = this.nodeState.create<any>(ctx.$data);
             this.nodeState.set(el, state);
         }
-
-        const handlers = this.getBindingHandlers(bindings);
-        const controlsDescendants = handlers.some(x => x.handler.controlsDescendants);
+        state.bindings = bindings;
+        const handlers = this.getBindingHandlers(Object.keys(bindings));
+        const controlsDescendants = handlers.some(x => x.controlsDescendants);
 
         // apply all bindings
-        for (const group of handlers) {
+        for (const handler of handlers) {
             // prevent recursive applying of repeat
-            if (group.name === "repeat" && state["index"] !== undefined) {
+            if (handler.name === "repeat" && state["index"] !== undefined) {
                 continue;
             }
             // apply repeat before anything else, then imediately return
-            if (group.name === "repeat" && state["index"] === undefined) {
-                group.handler.applyBinding(el, group.bindings, ctx, state);
+            if (handler.name === "repeat" && state["index"] === undefined) {
+                handler.applyBinding(el, state, ctx);
                 return true;
             }
-            group.handler.applyBinding(el, group.bindings, ctx, state);
+            handler.applyBinding(el, state, ctx);
         }
 
         return controlsDescendants;
@@ -128,28 +127,27 @@ export class DomManager {
         return this.ignore.indexOf(el.tagName) === -1;
     }
 
-    public registerHandler<T>(name: string, handler: IBindingHandler<T>) {
-        this.bindingHandlers[name] = handler;
+    public registerHandler<T>(handler: IBindingHandler<T>) {
+        this.bindingHandlers[handler.name] = handler;
     }
 
-    private getBindingHandlers(bindings: IBindingAttribute<any>[]) {
+    private getBindingHandlers(handlerNames: string[]) {
         // lookup handlers
-        const handlers: BindingGroup<any>[] = [];
-        const group = groupBy(bindings, x => x.name);
-        for (const name in group) {
+        const handlers: IBindingHandler<any>[] = [];
+        for (const name of handlerNames) {
             const handler = this.bindingHandlers[name];
             if (!handler) {
-                exception.next(new Error(`Binding handler "${name}" has not been registered. With expression "${group[name][0].text}"`));
+                exception.next(new Error(`Binding handler "${name}" has not been registered.`));
                 continue;
             }
-            handlers.push({ name: name, handler: handler, bindings: group[name] });
+            handlers.push(handler);
         }
 
         // sort by priority
-        handlers.sort((a, b) => b.handler.priority - a.handler.priority);
+        handlers.sort((a, b) => b.priority - a.priority);
 
         // check if there's binding-handler competition for descendants (which is illegal)
-        const hd = handlers.filter(x => x.handler.controlsDescendants).map(x => `'${x.name}'`);
+        const hd = handlers.filter(x => x.controlsDescendants).map(x => `'${x.name}'`);
         if (hd.length > 1) {
             throw Error(`bindings ${hd.join(", ")} are competing for descendants of target element!`);
         }
@@ -157,26 +155,20 @@ export class DomManager {
     }
 
     private registerCoreBindings() {
-        this.registerHandler("css", new CssBinding(this));
-        this.registerHandler("attr", new AttrBinding(this));
-        this.registerHandler("style", new StyleBinding(this));
-        this.registerHandler("on", new EventBinding(this));
-        this.registerHandler("key", new KeyPressBinding(this));
-        this.registerHandler("if", new IfBinding(this));
-        this.registerHandler("with", new WithBinding(this));
-        this.registerHandler("text", new TextBinding(this));
-        this.registerHandler("html", new HtmlBinding(this));
-        this.registerHandler("repeat", new RepeatBinding(this));
+        this.registerHandler(new CssBinding("css", this));
+        this.registerHandler(new AttrBinding("attr", this));
+        this.registerHandler(new StyleBinding("style", this));
+        this.registerHandler(new EventBinding("on", this));
+        this.registerHandler(new KeyPressBinding("key", this));
+        this.registerHandler(new IfBinding("if", this));
+        this.registerHandler(new WithBinding("with", this));
+        this.registerHandler(new TextBinding("text", this));
+        this.registerHandler(new HtmlBinding("html", this));
+        this.registerHandler(new RepeatBinding("repeat", this));
 
-        this.registerHandler("component", new ComponentBinding(this));
-        this.registerHandler("value", new ValueBinding(this));
-        this.registerHandler("focus", new FocusBinding(this));
+        this.registerHandler(new ComponentBinding("component", this));
+        this.registerHandler(new ValueBinding("value", this));
+        this.registerHandler(new FocusBinding("focus", this));
     }
 
-}
-
-interface BindingGroup<T> {
-    name: string;
-    handler: IBindingHandler<T>;
-    bindings: IBindingAttribute<T>[];
 }

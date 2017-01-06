@@ -1,4 +1,5 @@
 import { Observable, Subscription, Observer } from "rxjs";
+import { Group } from "./utils";
 
 export interface IBindingAttribute<T> {
     readonly tag: string;
@@ -10,6 +11,7 @@ export interface IBindingAttribute<T> {
 }
 
 export interface IBindingHandler<T> {
+        readonly name: string;
         /**
         * When there are multiple bindings defined on a single DOM element,
         * sometimes it is necessary to specify the order in which the bindings are applied.
@@ -30,7 +32,7 @@ export interface IBindingHandler<T> {
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
-        applyBinding(node: Node, bindings: IBindingAttribute<T>[], ctx: IDataContext, state: INodeState<T>): void;
+        applyBinding(node: Node, state: INodeState<T>, ctx: IDataContext): void;
 
 }
 
@@ -44,6 +46,7 @@ export interface INodeState<T> {
     readonly cleanup: Subscription;
     model: IViewModel<T>;        // scope model
     isolate: boolean;
+    bindings: Group<IBindingAttribute<any>>;
 }
 export interface IViewModel<T> {
     readonly cleanup?: Subscription;

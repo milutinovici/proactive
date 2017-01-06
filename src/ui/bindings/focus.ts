@@ -4,16 +4,16 @@ import { SingleBindingBase } from "./bindingBase";
 import { IDataContext, INodeState } from "../interfaces";
 import { isRxObserver } from "../utils";
 
-export default class HasFocusBinding extends SingleBindingBase<boolean> {
+export class FocusBinding extends SingleBindingBase<boolean> {
 
     public priority = -1;
 
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
         this.twoWay = true;
     }
 
-    public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, ctx: IDataContext, state: INodeState<boolean>, parameter?: string): INodeState<boolean> {
+    public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, state: INodeState<boolean>, ctx: IDataContext, parameter?: string): INodeState<boolean> {
         const delay = parseInt(parameter || "0");
 
         state.cleanup.add(observable.subscribe(x => {

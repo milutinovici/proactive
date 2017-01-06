@@ -3,16 +3,16 @@ import { SingleBindingBase } from "./bindingBase";
 import { IDataContext, INodeState } from "../interfaces";
 import { DomManager } from "../domManager";
 
-export default class WithBinding<T> extends SingleBindingBase<T> {
+export class WithBinding<T> extends SingleBindingBase<T> {
 
     public priority = 50;
     public controlsDescendants = true;
 
-    constructor(domManager: DomManager) {
-        super(domManager);
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
     }
 
-    public applySingleBinding(element: HTMLElement, observable: Rx.Observable<T>, ctx: IDataContext, state: INodeState<T>): void {
+    public applySingleBinding(element: HTMLElement, observable: Rx.Observable<T>, state: INodeState<T>, ctx: IDataContext): void {
         // subscribe
         state.cleanup.add(observable.subscribe(x => {
             this.applyValue(element, x, state);
