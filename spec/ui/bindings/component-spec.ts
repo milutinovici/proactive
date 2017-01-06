@@ -197,15 +197,14 @@ it("component: Invokes postBindingInit", expect => {
     expect.end();
 });
 
-it("component: Unsubscribes a component's viewmodel if has unsubscribe fn", expect => {
+it("component: Unsubscribes a component's viewmodel if has cleanup subscription", expect => {
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
-
     const template = "<span>foo</span>";
     let unsubscribed = false;
 
     function vm(this: any) {
-        this.unsubscribe = () => unsubscribed = true;
+        this.cleanup = () => unsubscribed = true;
     }
 
     ui.components.register("test-component", {
@@ -223,7 +222,6 @@ it("component: Unsubscribes a component's viewmodel if has unsubscribe fn", expe
 it("component: Components are properly isolated", expect => {
     const str = `<div x-with="foo"><test-component></test-component></div>`;
     const el = <HTMLElement> util.parse(str)[0];
-
     const template = `<span x-text="bar">invalid</span>`;
     let value = "baz";
 

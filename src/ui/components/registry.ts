@@ -1,5 +1,5 @@
 import * as Rx from "rxjs";
-import { IComponentDescriptor } from "../interfaces";
+import { IComponentDescriptor, IViewModel } from "../interfaces";
 import { observableRequire, isFunction, nodeListToArray } from "../utils";
 import { html } from "../templateEngines";
 import { exception } from "../exceptionHandlers";
@@ -39,10 +39,10 @@ export class ComponentRegistry {
         }
     }
 
-    public initialize<T extends Object>(descriptor: IComponentDescriptor<T>, params?: Object): T | null {
+    public initialize<T extends Object>(descriptor: IComponentDescriptor<T>, params: T): IViewModel<T> | null {
         let vm = descriptor.viewModel || null;
         if (isFunction(vm)) {
-            let model: T | null = null;
+            let model: IViewModel<T> | null = null;
             try {
                 model = new vm(params);
             } catch (e) {

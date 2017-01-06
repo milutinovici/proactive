@@ -1,11 +1,12 @@
 import * as Rx from "rxjs";
-import { IDataContext, INodeState } from "./interfaces";
+import { IDataContext, INodeState, IViewModel } from "./interfaces";
 
 export class NodeState<T> implements INodeState<T> {
-    public  model?: T;        // scope model
+    public readonly model: IViewModel<T>;        // scope model
     public readonly cleanup: Rx.Subscription;
+    public isolate = false;
 
-    constructor(model?: T) {
+    constructor(model: IViewModel<T>) {
         this.model = model;
         this.cleanup = new Rx.Subscription();
     }
@@ -14,7 +15,7 @@ export class NodeState<T> implements INodeState<T> {
 export class ForEachNodeState<T> extends NodeState<T> {
     public readonly index: Rx.BehaviorSubject<number>;
 
-    constructor(model: T, index: number) {
+    constructor(model: IViewModel<T>, index: number) {
         super(model);
         this.index = new Rx.BehaviorSubject(index);
         this.cleanup.add(this.index);
@@ -28,7 +29,7 @@ export class NodeStateManager {
     constructor() {
         this.weakMap = new WeakMap<Node, INodeState<any>>();
     }
-    public create<T>(model?: T): NodeState<T> {
+    public create<T>(model: IViewModel<T>): NodeState<T> {
         return new NodeState(model);
     }
 
@@ -47,7 +48,7 @@ export class NodeStateManager {
             if (state.cleanup != null) {
                 state.cleanup.unsubscribe();
             }
-            state.model = undefined;
+            delete state.model;
             // delete state itself
             this.weakMap.delete(node);
         }
@@ -69,7 +70,7 @@ export class NodeStateManager {
                 }
             }
             // component isolation
-            if (state && state["isolate"]) {
+            if (state && state.isolate) {
                 break;
             }
             state = undefined;
@@ -89,21 +90,21 @@ export class NodeStateManager {
 }
 
 export class DataContext implements IDataContext {
-    public readonly $data: any;
-    public readonly $root?: Object;
-    public readonly $parent?: Object;
-    public readonly $parents: Object[];
+    public readonly $data: IViewModel<any>;
+    public readonly $root: IViewModel<any>;
+    public readonly $parent?: IViewModel<any>;
+    public readonly $parents: IViewModel<any>[];
 
-    constructor(models: any[]) {
+    constructor(models: IViewModel<any>[]) {
         if (models.length > 0) {
             this.$data = models[0];
             this.$root = models[models.length - 1];
-            this.$parent = models.length > 1 ? models[1] : null;
+            this.$parent = models.length > 1 ? models[1] : undefined;
             this.$parents = models.slice(1);
         }
     }
 
-    public createChildContext(model: any): IDataContext {
-        return new DataContext(this.$parents.concat(this.$data).concat[model]);
+    public createChildContext(model: IViewModel<any>): IDataContext {
+        return new DataContext(this.$parents.concat(this.$data).concat([model]));
     }
 }

@@ -1,7 +1,7 @@
 import { NodeStateManager } from "./nodeState";
 import { isElement, groupBy, nodeListToArray } from "./utils";
 import { BindingProvider } from "./bindingProvider";
-import { IDataContext, IBindingHandler, IBindingAttribute } from "./interfaces";
+import { IDataContext, IBindingHandler, IBindingAttribute, IViewModel } from "./interfaces";
 import EventBinding from "./bindings/event";
 import { IfBinding } from "./bindings/if";
 import { AttrBinding, CssBinding, StyleBinding, HtmlBinding, TextBinding } from "./bindings/oneWay";
@@ -24,7 +24,7 @@ export class DomManager {
         this.registerCoreBindings();
     }
 
-    public applyBindings(model: Object, rootNode: Element): void {
+    public applyBindings(model: IViewModel<any>, rootNode: Element): void {
         if (rootNode === undefined || !isElement(rootNode)) {
             throw Error("first parameter should be your model, second parameter should be a DOM node!");
         }
@@ -100,7 +100,7 @@ export class DomManager {
 
         // create and set if necessary
         if (!state) {
-            state = this.nodeState.create();
+            state = this.nodeState.create(ctx.$data);
             this.nodeState.set(el, state);
         }
 

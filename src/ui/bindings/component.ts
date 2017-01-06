@@ -1,11 +1,11 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { isSubscription, isRxObservable } from "../utils";
+import { isRxObservable } from "../utils";
 import { INodeState, IDataContext, IBindingAttribute, IComponentDescriptor, IComponent, IViewModel } from "../interfaces";
 import { BindingBase } from "./bindingBase";
 import { components } from "../components/registry";
 
-export default class ComponentBinding<T extends IViewModel> extends BindingBase<T> {
+export default class ComponentBinding<T> extends BindingBase<IViewModel<T>> {
     public priority = 30;
     public controlsDescendants = true;
 
@@ -32,14 +32,14 @@ export default class ComponentBinding<T extends IViewModel> extends BindingBase<
             internal = new Subscription();
             // isolated nodestate and ctx
             if (comp.viewModel) {
-                const componentState = this.domManager.nodeState.get<T>(element) || this.domManager.nodeState.create<T>();
-                componentState["isolate"] = true;
+                const componentState = this.domManager.nodeState.get<T>(element) || this.domManager.nodeState.create<T>(comp.viewModel);
+                componentState.isolate = true;
                 componentState.model = comp.viewModel;
                 this.domManager.nodeState.set(element, componentState);
                 ctx = this.domManager.nodeState.getDataContext(element);
                 // auto-dispose view-model
-                if (isSubscription(comp.viewModel)) {
-                    internal.add(comp.viewModel as any);
+                if (comp.viewModel.cleanup !== undefined) {
+                    internal.add(comp.viewModel.cleanup);
                 }
                 // wire custom events
 
@@ -50,12 +50,12 @@ export default class ComponentBinding<T extends IViewModel> extends BindingBase<
             }
 
             // done
-            this.applyTemplate(element, ctx, state.cleanup, comp.template, <T | undefined> comp.viewModel);
+            this.applyTemplate(element, ctx, state.cleanup, comp.template, comp.viewModel);
         }));
         state.cleanup.add(doCleanup);
     }
 
-    protected applyTemplate(element: HTMLElement, ctx: IDataContext, cleanup: Subscription, template: Node[], vm?: T) {
+    protected applyTemplate(element: HTMLElement, ctx: IDataContext, cleanup: Subscription, template: Node[], vm?: IViewModel<T>) {
         if (template) {
             // clear
             while (element.firstChild) {
@@ -87,21 +87,21 @@ export default class ComponentBinding<T extends IViewModel> extends BindingBase<
         return componentName.mergeMap(name => components.load<T>(name));
     }
 
-    private getParams(bindings: IBindingAttribute<any>[], ctx: IDataContext): Object {
+    private getParams(bindings: IBindingAttribute<any>[], ctx: IDataContext): T {
         const params = {};
         bindings.filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(ctx));
-        return params;
+        return params as T;
     }
 
     private getViewModel(element: HTMLElement, bindings: IBindingAttribute<any>[], ctx: IDataContext, descriptor: Observable<IComponentDescriptor<T>>, params: Object) {
         const viewModel = descriptor.map(x => components.initialize(x, params));
         const data = this.getData(element, bindings, ctx);
-        return data.combineLatest(viewModel, (d: T, vm: T) => d ? d : vm);
+        return data.combineLatest(viewModel, (d, vm) => d ? d : vm);
     }
 
     private getData(element: HTMLElement, bindings: IBindingAttribute<any>[], ctx: IDataContext) {
-        const dataBinding = bindings.filter(x => x.parameter === "data")[0] as IBindingAttribute<T>;
-        return dataBinding ? dataBinding.evaluate(ctx, element, this.twoWay) as Observable<T> : Observable.of(null);
+        const dataBinding = bindings.filter(x => x.parameter === "data")[0] as IBindingAttribute<IViewModel<T>>;
+        return dataBinding ? dataBinding.evaluate(ctx, element, this.twoWay) as Observable<IViewModel<T>> : Observable.of(null);
     }
 
 }

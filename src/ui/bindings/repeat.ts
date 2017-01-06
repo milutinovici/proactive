@@ -59,7 +59,7 @@ export default class RepeatBinding<T> extends BindingBase<T[]> {
 
     private addRow(parent: Element, elements: Node[], template: Element, item: T, index: number, placeholder: Node): INodeState<T> {
             let node = <Element> template.cloneNode(true);
-            let state = new ForEachNodeState(item, index);
+            let state = new ForEachNodeState<T>(item, index);
 
             let before = elements[index];
             parent.insertBefore(node, before);
