@@ -13,7 +13,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         super(name, domManager);
     }
 
-    public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState<string>, ctx: IDataContext) {
+    public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState, ctx: IDataContext) {
         const descriptor = observable.mergeMap(name => components.load<T>(name));
         const params = this.getParams(state, ctx);
         const viewModel = this.getViewModel(element, state, ctx, descriptor, params);
@@ -32,7 +32,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
             internal = new Subscription();
             // isolated nodestate and ctx
             if (comp.viewModel) {
-                const componentState = this.domManager.nodeState.get<T>(element) || this.domManager.nodeState.create<T>(comp.viewModel);
+                const componentState = this.domManager.nodeState.get(element) || this.domManager.nodeState.create(comp.viewModel);
                 componentState.isolate = true;
                 componentState.model = comp.viewModel;
                 this.domManager.nodeState.set(element, componentState);
@@ -82,7 +82,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         }
     }
 
-    private getParams(state: INodeState<string>, ctx: IDataContext): T {
+    private getParams(state: INodeState, ctx: IDataContext): T {
         const params = {};
         if (state.bindings["attr"] !== undefined) {
             state.bindings["attr"].filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(ctx));
@@ -90,7 +90,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         return params as T;
     }
 
-    private getViewModel(element: HTMLElement, state: INodeState<string>, ctx: IDataContext, descriptor: Observable<IComponentDescriptor<T>>, params: T): Observable<IViewModel<T>|null> {
+    private getViewModel(element: HTMLElement, state: INodeState, ctx: IDataContext, descriptor: Observable<IComponentDescriptor<T>>, params: T): Observable<IViewModel<T>|null> {
         return state.bindings["with"] ?
                state.bindings["with"][0].evaluate(ctx, element, false) as Observable<IViewModel<T>> :
                descriptor.map(x => components.initialize(x, params));

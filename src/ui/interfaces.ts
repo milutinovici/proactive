@@ -10,7 +10,7 @@ export interface IBindingAttribute<T> {
     evaluate(ctx: IDataContext, element: Element, twoWay: boolean): Observable<T> | Observer<T>;
 }
 
-export interface IBindingHandler<T> {
+export interface IBindingHandler {
         readonly name: string;
         /**
         * When there are multiple bindings defined on a single DOM element,
@@ -32,7 +32,7 @@ export interface IBindingHandler<T> {
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
-        applyBinding(node: Node, state: INodeState<T>, ctx: IDataContext): void;
+        applyBinding(node: Node, state: INodeState, ctx: IDataContext): void;
 
 }
 
@@ -42,9 +42,9 @@ export interface IDataContext {
     readonly $parent?: IViewModel<any>;
     readonly $parents: IViewModel<any>[];
 }
-export interface INodeState<T> {
+export interface INodeState {
     readonly cleanup: Subscription;
-    model: IViewModel<T>;        // scope model
+    model: IViewModel<any>;        // scope model
     isolate: boolean;
     bindings: Group<IBindingAttribute<any>>;
 }

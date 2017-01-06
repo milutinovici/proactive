@@ -13,7 +13,7 @@ export class FocusBinding extends SingleBindingBase<boolean> {
         this.twoWay = true;
     }
 
-    public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, state: INodeState<boolean>, ctx: IDataContext, parameter?: string): INodeState<boolean> {
+    public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, state: INodeState, ctx: IDataContext, parameter?: string) {
         const delay = parseInt(parameter || "0");
 
         state.cleanup.add(observable.subscribe(x => {
@@ -25,7 +25,6 @@ export class FocusBinding extends SingleBindingBase<boolean> {
                 this.handleElementFocusChange(el, observable, hasFocus);
             }));
         }
-        return state;
     }
 
     private updateElement(el: HTMLElement, value: boolean, delay: number) {

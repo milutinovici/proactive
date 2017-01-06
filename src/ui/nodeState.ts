@@ -2,22 +2,22 @@ import * as Rx from "rxjs";
 import { IDataContext, INodeState, IViewModel, IBindingAttribute } from "./interfaces";
 import { Group } from "./utils";
 
-export class NodeState<T> implements INodeState<T> {
-    public model: IViewModel<T>;        // scope model
+export class NodeState implements INodeState {
+    public model: IViewModel<any>;        // scope model
     public readonly cleanup: Rx.Subscription;
     public isolate = false;
     public bindings: Group<IBindingAttribute<any>>;
 
-    constructor(model: IViewModel<T>) {
+    constructor(model: IViewModel<any>) {
         this.model = model;
         this.cleanup = new Rx.Subscription();
     }
 }
 
-export class ForEachNodeState<T> extends NodeState<T> {
+export class ForEachNodeState extends NodeState {
     public readonly index: Rx.BehaviorSubject<number>;
 
-    constructor(model: IViewModel<T>, index: number) {
+    constructor(model: IViewModel<any>, index: number) {
         super(model);
         this.index = new Rx.BehaviorSubject(index);
         this.cleanup.add(this.index);
@@ -26,20 +26,20 @@ export class ForEachNodeState<T> extends NodeState<T> {
 
 export class NodeStateManager {
     private readonly dataContextExtensions = new Set<(node: Node, ctx: IDataContext) => void>();
-    private readonly weakMap: WeakMap<Node, INodeState<any>>;
+    private readonly weakMap: WeakMap<Node, INodeState>;
 
     constructor() {
-        this.weakMap = new WeakMap<Node, INodeState<any>>();
+        this.weakMap = new WeakMap<Node, INodeState>();
     }
-    public create<T>(model: IViewModel<T>): NodeState<T> {
+    public create(model: IViewModel<any>): NodeState {
         return new NodeState(model);
     }
 
-    public set<T>(node: Node, state: INodeState<T>): void {
+    public set(node: Node, state: INodeState): void {
         this.weakMap.set(node, state);
     }
 
-    public get<T>(node: Node): INodeState<T> | undefined {
+    public get(node: Node): INodeState | undefined {
         return this.weakMap.get(node);
     }
 
@@ -60,7 +60,7 @@ export class NodeStateManager {
 
     public getDataContext(node: Node): IDataContext {
         let models: any[] = [];
-        let state = this.get<any>(node);
+        let state = this.get(node);
 
         // collect model hierarchy
         let currentNode: Node | null = node;

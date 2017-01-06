@@ -12,14 +12,14 @@ export class WithBinding<T> extends SingleBindingBase<T> {
         super(name, domManager);
     }
 
-    public applySingleBinding(element: HTMLElement, observable: Rx.Observable<T>, state: INodeState<T>, ctx: IDataContext): void {
+    public applySingleBinding(element: HTMLElement, observable: Rx.Observable<T>, state: INodeState, ctx: IDataContext): void {
         // subscribe
         state.cleanup.add(observable.subscribe(x => {
             this.applyValue(element, x, state);
         }));
     }
 
-    protected applyValue(el: HTMLElement, value: T, state: INodeState<T>): void {
+    protected applyValue(el: HTMLElement, value: T, state: INodeState): void {
         state.model = value;
         const ctx = this.domManager.nodeState.getDataContext(el);
 

@@ -1,11 +1,11 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { BindingBase } from "./bindingBase";
-import { IDataContext, INodeState } from "../interfaces";
+import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
 import { isRxObserver } from "../utils";
 import { exception } from "../exceptionHandlers";
 
-export class EventBinding extends BindingBase<Event> {
+export class EventBinding extends BindingBase {
 
     public priority = 0;
 
@@ -13,8 +13,8 @@ export class EventBinding extends BindingBase<Event> {
         super(name, domManager);
     }
 
-    public applyBinding(el: Element, state: INodeState<Event>, ctx: IDataContext): void {
-        for (const binding of state.bindings[this.name]) {
+    public applyBinding(el: Element, state: INodeState, ctx: IDataContext): void {
+        for (const binding of state.bindings[this.name] as IBindingAttribute<Event>[]) {
             if (binding.parameter === undefined) {
                 exception.next(new Error(`Event name must be supplied for ${binding.name} binding, with "${binding.text}" on ${binding.tag} element`));
                 continue;

@@ -17,7 +17,7 @@ export class DomManager {
     public readonly nodeState: NodeStateManager;
 
     private readonly ignore = ["SCRIPT", "TEXTAREA", "TEMPLATE"];
-    private readonly bindingHandlers: { [name: string]: IBindingHandler<any> } = {};
+    private readonly bindingHandlers: { [name: string]: IBindingHandler } = {};
 
     constructor(nodeState: NodeStateManager) {
         this.nodeState = nodeState;
@@ -29,7 +29,7 @@ export class DomManager {
             throw Error("first parameter should be your model, second parameter should be a DOM node!");
         }
         // create or update node state for root node
-        let state = this.nodeState.get<any>(rootNode);
+        let state = this.nodeState.get(rootNode);
         if (state) {
             state.model = model;
         } else {
@@ -96,10 +96,10 @@ export class DomManager {
         const bindings = bindingProvider.getBindings(el);
 
         // get or create elment-state
-        let state = this.nodeState.get<any>(el);
+        let state = this.nodeState.get(el);
         // create and set if necessary
         if (!state) {
-            state = this.nodeState.create<any>(ctx.$data);
+            state = this.nodeState.create(ctx.$data);
             this.nodeState.set(el, state);
         }
         state.bindings = bindings;
@@ -127,13 +127,13 @@ export class DomManager {
         return this.ignore.indexOf(el.tagName) === -1;
     }
 
-    public registerHandler<T>(handler: IBindingHandler<T>) {
+    public registerHandler(handler: IBindingHandler) {
         this.bindingHandlers[handler.name] = handler;
     }
 
     private getBindingHandlers(handlerNames: string[]) {
         // lookup handlers
-        const handlers: IBindingHandler<any>[] = [];
+        const handlers: IBindingHandler[] = [];
         for (const name of handlerNames) {
             const handler = this.bindingHandlers[name];
             if (!handler) {

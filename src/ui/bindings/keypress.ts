@@ -1,7 +1,7 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { BindingBase } from "./bindingBase";
-import { IDataContext, INodeState } from "../interfaces";
+import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
 import { isRxObserver } from "../utils";
 import { exception } from "../exceptionHandlers";
 
@@ -23,7 +23,7 @@ const keysByCode = {
     46: "deconste",
 };
 
-export class KeyPressBinding extends BindingBase<KeyboardEvent> {
+export class KeyPressBinding extends BindingBase {
 
     public priority = 0;
 
@@ -31,8 +31,8 @@ export class KeyPressBinding extends BindingBase<KeyboardEvent> {
         super(name, domManager);
     }
 
-    public applyBinding(el: Element, state: INodeState<KeyboardEvent>, ctx: IDataContext): void {
-        for (const binding of state.bindings[this.name]) {
+    public applyBinding(el: Element, state: INodeState, ctx: IDataContext): void {
+        for (const binding of state.bindings[this.name] as IBindingAttribute<KeyboardEvent>[]) {
             const parameter = binding.parameter;
             if (parameter === undefined) {
                 exception.next(new Error(`key must be defined for ${binding.name} binding on ${el.tagName}`));
