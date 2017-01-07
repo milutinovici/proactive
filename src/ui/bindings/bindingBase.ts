@@ -1,4 +1,4 @@
-import { Observable, Observer } from "rxjs";
+import { Observable, Observer, Subscription } from "rxjs";
 import { isElement } from "../utils";
 import { DomManager } from "../domManager";
 import { IDataContext, IBindingHandler, INodeState } from "../interfaces";
@@ -44,16 +44,18 @@ export abstract class SingleBindingBase<T> extends BindingBase {
 * Base class for one-way bindings that take a single expression and apply the result to one or more target elements
 * @class
 */
-export abstract class OneWayBindingBase<T> extends BindingBase {
+export abstract class SimpleBinding<T> extends BindingBase {
 
     public applyBinding(el: Element, state: INodeState, ctx: IDataContext): void {
         super.applyBinding(el, state, ctx);
         for (const binding of state.bindings[this.name]) {
             const observable = binding.evaluate(ctx, el, this.twoWay) as Observable<T>;
-            const subscription = observable.subscribe((x => this.applyValue(el, x, binding.parameter)));
-            state.cleanup.add(subscription);
+            const subscription = this.apply(el, observable, binding.parameter);
+            if (subscription !== undefined) {
+                state.cleanup.add(subscription);
+            }
         }
     }
 
-    protected abstract applyValue(el: Element, value: T, parameter?: string): void;
+    protected abstract apply(el: Element, observable: Observable<T> | Observer<T>, parameter?: string): Subscription|undefined;
 }

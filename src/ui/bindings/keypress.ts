@@ -1,7 +1,6 @@
-import * as Rx from "rxjs";
+import { Observable, Observer, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { BindingBase } from "./bindingBase";
-import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
+import { SimpleBinding } from "./bindingBase";
 import { isRxObserver } from "../utils";
 import { exception } from "../exceptionHandlers";
 
@@ -23,7 +22,7 @@ const keysByCode = {
     46: "deconste",
 };
 
-export class KeyPressBinding extends BindingBase {
+export class KeyPressBinding extends SimpleBinding<KeyboardEvent> {
 
     public priority = 0;
 
@@ -31,31 +30,27 @@ export class KeyPressBinding extends BindingBase {
         super(name, domManager);
     }
 
-    public applyBinding(el: Element, state: INodeState, ctx: IDataContext): void {
-        for (const binding of state.bindings[this.name] as IBindingAttribute<KeyboardEvent>[]) {
-            const parameter = binding.parameter;
+    public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription|undefined {
             if (parameter === undefined) {
-                exception.next(new Error(`key must be defined for ${binding.name} binding on ${el.tagName}`));
-                continue;
+                exception.next(new Error(`key must be defined for ${this.name} binding on ${el.tagName}`));
+                return;
             }
-            const observer = binding.evaluate(ctx, el, this.twoWay);
             if (!isRxObserver(observer)) {
-                exception.next(new Error(`must supply function or observer for ${binding.name} binding on ${el.tagName}`));
-                continue;
+                exception.next(new Error(`must supply function or observer for ${this.name} binding on ${el.tagName}`));
+                return;
             }
 
-            const obs = Rx.Observable.fromEvent<KeyboardEvent>(el, "keydown")
+            const obs = Observable.fromEvent<KeyboardEvent>(el, "keydown")
                 .filter((x: KeyboardEvent) => !x.repeat)
                 .publish()
                 .refCount();
 
             const combinations = this.getKeyCombination(parameter);
 
-            state.cleanup.add(obs.filter(e => this.testCombinations(combinations, e)).subscribe(e => {
+            return obs.filter(e => this.testCombinations(combinations, e)).subscribe(e => {
                 observer.next(e);
                 e.preventDefault();
-            }));
-        }
+            });
     }
 
     private getKeyCombination(parameter: string): KeyCombination[] {

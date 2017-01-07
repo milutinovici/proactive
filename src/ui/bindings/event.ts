@@ -1,11 +1,10 @@
-import * as Rx from "rxjs";
+import { Observable, Observer, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { BindingBase } from "./bindingBase";
-import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
+import { SimpleBinding } from "./bindingBase";
 import { isRxObserver } from "../utils";
 import { exception } from "../exceptionHandlers";
 
-export class EventBinding extends BindingBase {
+export class EventBinding extends SimpleBinding<KeyboardEvent> {
 
     public priority = 0;
 
@@ -13,19 +12,16 @@ export class EventBinding extends BindingBase {
         super(name, domManager);
     }
 
-    public applyBinding(el: Element, state: INodeState, ctx: IDataContext): void {
-        for (const binding of state.bindings[this.name] as IBindingAttribute<Event>[]) {
-            if (binding.parameter === undefined) {
-                exception.next(new Error(`Event name must be supplied for ${binding.name} binding, with "${binding.text}" on ${binding.tag} element`));
-                continue;
-            }
-            const observer = binding.evaluate(ctx, el, this.twoWay);
-            const events = Rx.Observable.fromEvent<Event>(el, binding.parameter);
-            if (isRxObserver(observer)) {
-                state.cleanup.add(events.subscribe(observer));
-            } else {
-                exception.next(new Error(`Observer or function must be supplied for ${binding.name} binding on ${el}`));
-            }
+    public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription|undefined {
+        if (parameter === undefined) {
+            exception.next(new Error(`Event name must be supplied for ${this.name} binding, on ${el.tagName} element`));
+            return;
         }
+        if (!isRxObserver(observer)) {
+            exception.next(new Error(`Observer or function must be supplied for ${this.name} binding on ${el}`));
+            return;
+        }
+        const events = Observable.fromEvent<Event>(el, parameter);
+        return events.subscribe(observer);
     }
 }
