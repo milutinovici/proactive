@@ -1,6 +1,7 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
 import * as ui from "../../../src/ui/app";
+import { IViewModel } from "../../../src/ui/interfaces";
 import * as util from "../spec-utils";
 
 it("component: Loads a component using simple string options", expect => {
@@ -265,7 +266,7 @@ it("component: Components can set attributes on themselves", expect => {
     const subject = new Rx.BehaviorSubject(10);
     ui.components.register("test-component", {
         template: template,
-        viewModel: { attributes: { value: subject } },
+        viewModel: { attributes: { value: subject } } as IViewModel,
     });
 
     const vm = { };

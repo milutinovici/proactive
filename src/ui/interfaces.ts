@@ -38,29 +38,29 @@ export interface IBindingHandler {
 
 export interface IDataContext {
     readonly $data: any;
-    readonly $root: IViewModel<any>;
-    readonly $parent?: IViewModel<any>;
-    readonly $parents: IViewModel<any>[];
+    readonly $root: IViewModel;
+    readonly $parent?: IViewModel;
+    readonly $parents: IViewModel[];
 }
 export interface INodeState {
     readonly cleanup: Subscription;
-    model: IViewModel<any>;        // scope model
+    model: IViewModel;        // scope model
     isolate: boolean;
     bindings: Group<IBindingAttribute<any>>;
 }
-export interface IViewModel<T> {
+export interface IViewModel {
     readonly cleanup?: Subscription;
-    readonly attributes?: T;
+    readonly attributes?: { [name: string]: Observable<any> };
     readonly emitter?: Observable<Event>;
 }
 
-export interface IComponentDescriptor<T> {
+export interface IComponentDescriptor {
     name?: string;
     template: Node[] | string;
-    viewModel?: IViewModel<T>|(new (params: T) => IViewModel<T>);
+    viewModel?: IViewModel|(new (params?: Object) => IViewModel);
 }
 
-export interface IComponent<T> {
+export interface IComponent {
     template: Node[];
-    viewModel?: IViewModel<T>;
+    viewModel?: IViewModel;
 }

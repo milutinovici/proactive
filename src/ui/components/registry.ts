@@ -5,10 +5,10 @@ import { html } from "../templateEngines";
 import { exception } from "../exceptionHandlers";
 export class ComponentRegistry {
 
-    private readonly components: { [name: string]: IComponentDescriptor<any> | string } = {};
+    private readonly components: { [name: string]: IComponentDescriptor | string } = {};
 
     // component is either a descriptor or a require string
-    public register<T>(name: string, component: IComponentDescriptor<T> | string) {
+    public register(name: string, component: IComponentDescriptor | string) {
         if (name.indexOf("-") === -1) {
             throw new Error(`Component name "${name}" must contain a dash (-)` );
         }
@@ -19,30 +19,30 @@ export class ComponentRegistry {
         return this.components[name] != null;
     }
 
-    public load<T>(name: string): Rx.Observable<IComponentDescriptor<T>> {
-        let result = this.getDescriptor<T>(name);
-        result = result.map(x => <IComponentDescriptor<T>> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel });
+    public load(name: string): Rx.Observable<IComponentDescriptor> {
+        let result = this.getDescriptor(name);
+        result = result.map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel });
         result.do(x => this.components[name] = x ); // cache descriptor
         return result;
     }
 
-    private getDescriptor<T>(name: string): Rx.Observable<IComponentDescriptor<T>> {
+    private getDescriptor(name: string): Rx.Observable<IComponentDescriptor> {
         const descriptor = this.components[name];
         if (descriptor != null) {
             if (typeof descriptor === "string") {
-                return observableRequire<IComponentDescriptor<T>>(descriptor);
+                return observableRequire<IComponentDescriptor>(descriptor);
             } else {
-                return Rx.Observable.of<IComponentDescriptor<T>>(descriptor);
+                return Rx.Observable.of<IComponentDescriptor>(descriptor);
             }
         } else {
             throw new Error(`No component with name '${name}' is registered`);
         }
     }
 
-    public initialize<T extends Object>(descriptor: IComponentDescriptor<T>, params: T): IViewModel<T> | null {
+    public initialize<T extends Object>(descriptor: IComponentDescriptor, params: T): IViewModel | null {
         let vm = descriptor.viewModel || null;
         if (isFunction(vm)) {
-            let model: IViewModel<T> | null = null;
+            let model: IViewModel | null = null;
             try {
                 model = new vm(params);
             } catch (e) {

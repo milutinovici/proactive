@@ -15,10 +15,10 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
     }
 
     public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState, ctx: IDataContext) {
-        const descriptor = observable.mergeMap(name => components.load<T>(name));
+        const descriptor = observable.mergeMap(name => components.load(name));
         const params = this.getParams(state, ctx);
         const viewModel = this.getViewModel(element, state, ctx, descriptor, params);
-        const component = descriptor.combineLatest(viewModel, (desc, vm) => <IComponent<T>> { template: desc.template, viewModel: vm });
+        const component = descriptor.combineLatest(viewModel, (desc, vm) => <IComponent> { template: desc.template, viewModel: vm });
 
         let internal: Subscription;
         function doCleanup() {
@@ -66,7 +66,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         state.cleanup.add(doCleanup);
     }
 
-    protected applyTemplate(element: HTMLElement, ctx: IDataContext, cleanup: Subscription, template: Node[], vm?: IViewModel<T>) {
+    protected applyTemplate(element: HTMLElement, ctx: IDataContext, cleanup: Subscription, template: Node[], vm?: IViewModel) {
         if (template) {
             // clear
             while (element.firstChild) {
@@ -101,9 +101,9 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         return params as T;
     }
 
-    private getViewModel(element: HTMLElement, state: INodeState, ctx: IDataContext, descriptor: Observable<IComponentDescriptor<T>>, params: T): Observable<IViewModel<T>|null> {
+    private getViewModel(element: HTMLElement, state: INodeState, ctx: IDataContext, descriptor: Observable<IComponentDescriptor>, params: T): Observable<IViewModel|null> {
         return state.bindings["with"] ?
-               state.bindings["with"][0].evaluate(ctx, element, false) as Observable<IViewModel<T>> :
+               state.bindings["with"][0].evaluate(ctx, element, false) as Observable<IViewModel> :
                descriptor.map(x => components.initialize(x, params));
     }
 }

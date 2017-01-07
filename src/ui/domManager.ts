@@ -24,7 +24,7 @@ export class DomManager {
         this.registerCoreBindings();
     }
 
-    public applyBindings(model: IViewModel<any>, rootNode: Element): void {
+    public applyBindings(model: IViewModel, rootNode: Element): void {
         if (rootNode === undefined || !isElement(rootNode)) {
             throw Error("first parameter should be your model, second parameter should be a DOM node!");
         }

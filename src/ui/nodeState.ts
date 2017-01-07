@@ -3,12 +3,12 @@ import { IDataContext, INodeState, IViewModel, IBindingAttribute } from "./inter
 import { Group } from "./utils";
 
 export class NodeState implements INodeState {
-    public model: IViewModel<any>;        // scope model
+    public model: IViewModel;        // scope model
     public readonly cleanup: Rx.Subscription;
     public isolate = false;
     public bindings: Group<IBindingAttribute<any>>;
 
-    constructor(model: IViewModel<any>) {
+    constructor(model: IViewModel) {
         this.model = model;
         this.cleanup = new Rx.Subscription();
     }
@@ -17,7 +17,7 @@ export class NodeState implements INodeState {
 export class ForEachNodeState extends NodeState {
     public readonly index: Rx.BehaviorSubject<number>;
 
-    constructor(model: IViewModel<any>, index: number) {
+    constructor(model: IViewModel, index: number) {
         super(model);
         this.index = new Rx.BehaviorSubject(index);
         this.cleanup.add(this.index);
@@ -31,7 +31,7 @@ export class NodeStateManager {
     constructor() {
         this.weakMap = new WeakMap<Node, INodeState>();
     }
-    public create(model: IViewModel<any>): NodeState {
+    public create(model: IViewModel): NodeState {
         return new NodeState(model);
     }
 
@@ -92,12 +92,12 @@ export class NodeStateManager {
 }
 
 export class DataContext implements IDataContext {
-    public readonly $data: IViewModel<any>;
-    public readonly $root: IViewModel<any>;
-    public readonly $parent?: IViewModel<any>;
-    public readonly $parents: IViewModel<any>[];
+    public readonly $data: IViewModel;
+    public readonly $root: IViewModel;
+    public readonly $parent?: IViewModel;
+    public readonly $parents: IViewModel[];
 
-    constructor(models: IViewModel<any>[]) {
+    constructor(models: IViewModel[]) {
         if (models.length > 0) {
             this.$data = models[0];
             this.$root = models[models.length - 1];
@@ -106,7 +106,7 @@ export class DataContext implements IDataContext {
         }
     }
 
-    public createChildContext(model: IViewModel<any>): IDataContext {
+    public createChildContext(model: IViewModel): IDataContext {
         return new DataContext(this.$parents.concat(this.$data).concat([model]));
     }
 }
