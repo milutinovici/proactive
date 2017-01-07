@@ -9,7 +9,7 @@ export class CssBinding extends SimpleBinding<string> {
         super(name, domManager);
     }
 
-    protected apply(el: HTMLElement, observable: Observable<string>, className: string): Subscription {
+    public apply(el: HTMLElement, observable: Observable<string>, className: string): Subscription {
         return observable.subscribe(value => {
             if (className) {
                 const classes = className.split(/\s+/).map(x => x.trim()).filter(x => x);
@@ -31,7 +31,7 @@ export class AttrBinding extends SimpleBinding<string | number | boolean> {
         this.priority = 5;
     }
 
-    protected apply(el: HTMLElement, observable: Observable<string|number|boolean>, attributeName: string): Subscription {
+    public apply(el: HTMLElement, observable: Observable<string|number|boolean>, attributeName: string): Subscription {
         return observable.subscribe(value => {
             // To cover cases like "attr: { checked:someProp }", we want to remove the attribute entirely
             // when someProp is a "no value"-like value (strictly null, false, or undefined)
@@ -51,7 +51,7 @@ export class StyleBinding extends SimpleBinding<string | number | boolean> {
         super(name, domManager);
     }
 
-    protected apply(el: HTMLElement, observable: Observable<string|number|boolean>, styleName: string): Subscription {
+    public apply(el: HTMLElement, observable: Observable<string|number|boolean>, styleName: string): Subscription {
         return observable.subscribe(value => {
             if (value === null || value === undefined || value === false) {
                 // Empty string removes the value, whereas null/undefined have no effect
@@ -69,7 +69,7 @@ export class TextBinding extends SimpleBinding<string> {
         super(name, domManager);
     }
 
-    protected apply(el: HTMLElement, observable: Observable<string>): Subscription {
+    public apply(el: HTMLElement, observable: Observable<string>): Subscription {
         return observable.subscribe(value => {
             if ((value === null) || (value === undefined)) {
                 value = "";
@@ -87,7 +87,7 @@ export class HtmlBinding extends SimpleBinding<string> {
         super(name, domManager);
     }
 
-    protected apply(el: HTMLElement, observable: Observable<string>): Subscription {
+    public apply(el: HTMLElement, observable: Observable<string>): Subscription {
         return observable.subscribe(value => {
             if ((value === null) || (value === undefined)) {
                 value = "";

@@ -3,6 +3,7 @@ import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
 import { INodeState, IDataContext, IComponentDescriptor, IComponent, IViewModel } from "../interfaces";
 import { SingleBindingBase } from "./bindingBase";
+import { AttrBinding } from "./oneWay";
 import { components } from "../components/registry";
 
 export class ComponentBinding<T> extends SingleBindingBase<string> {
@@ -37,15 +38,25 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
                 componentState.model = comp.viewModel;
                 this.domManager.nodeState.set(element, componentState);
                 ctx = this.domManager.nodeState.getDataContext(element);
-                // auto-dispose view-model
-                if (comp.viewModel.cleanup !== undefined) {
-                    internal.add(comp.viewModel.cleanup);
-                }
-                // wire custom events
 
+                // wire custom events
                 if (comp.viewModel.emitter !== undefined && isRxObservable(comp.viewModel.emitter)) {
                     const subscription = comp.viewModel.emitter.subscribe(evt => element.dispatchEvent(evt));
                     internal.add(subscription);
+                }
+                // apply attributes to component
+                const attributes = comp.viewModel.attributes;
+                if (attributes !== undefined) {
+                    const attrHandler = this.domManager.getBindingHandler("attr") as AttrBinding;
+                    Object.getOwnPropertyNames(attributes).forEach(prop => {
+                        if (isRxObservable(attributes[prop])) {
+                            attrHandler.apply(element, attributes[prop], prop);
+                        }
+                    });
+                }
+                // auto-dispose view-model
+                if (comp.viewModel.cleanup !== undefined) {
+                    internal.add(comp.viewModel.cleanup);
                 }
             }
 

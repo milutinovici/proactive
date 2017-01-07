@@ -257,3 +257,20 @@ it("component: Components emit custom events", expect => {
     expect.equal(value, "myPulse");
     expect.end();
 });
+
+it("component: Components can set attributes on themselves", expect => {
+    const str = `<test-component></test-component>`;
+    const el = <HTMLElement> util.parse(str)[0];
+    const template = `<input type="text" x-on-value="attributes.value"/>`;
+    const subject = new Rx.BehaviorSubject(10);
+    ui.components.register("test-component", {
+        template: template,
+        viewModel: { attributes: { value: subject } },
+    });
+
+    const vm = { };
+
+    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    expect.equal(el.attributes["value"].value, "10");
+    expect.end();
+});

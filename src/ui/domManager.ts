@@ -103,7 +103,7 @@ export class DomManager {
             this.nodeState.set(el, state);
         }
         state.bindings = bindings;
-        const handlers = this.getBindingHandlers(Object.keys(bindings));
+        const handlers = this.getHandlers(Object.keys(bindings));
         const controlsDescendants = handlers.some(x => x.controlsDescendants);
 
         // apply all bindings
@@ -130,8 +130,14 @@ export class DomManager {
     public registerHandler(handler: IBindingHandler) {
         this.bindingHandlers[handler.name] = handler;
     }
-
-    private getBindingHandlers(handlerNames: string[]) {
+    public getBindingHandler(name: string) {
+        const handler = this.bindingHandlers[name];
+        if (!handler) {
+            throw new Error(`Binding handler "${name}" has not been registered.`);
+        }
+        return handler;
+    }
+    private getHandlers(handlerNames: string[]) {
         // lookup handlers
         const handlers: IBindingHandler[] = [];
         for (const name of handlerNames) {

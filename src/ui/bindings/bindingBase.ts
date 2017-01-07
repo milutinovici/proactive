@@ -57,5 +57,5 @@ export abstract class SimpleBinding<T> extends BindingBase {
         }
     }
 
-    protected abstract apply(el: Element, observable: Observable<T> | Observer<T>, parameter?: string): Subscription|undefined;
+    public abstract apply(el: Element, observable: Observable<T> | Observer<T>, parameter?: string): Subscription|undefined;
 }
