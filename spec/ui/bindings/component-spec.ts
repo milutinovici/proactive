@@ -275,3 +275,17 @@ it("component: Components can set attributes on themselves", expect => {
     expect.equal(el.attributes["value"].value, "10");
     expect.end();
 });
+
+it("component: Components support basic transclusion", expect => {
+    const str = `<test-component><span x-text="transclusion"></span></test-component>`;
+    const el = <HTMLElement> util.parse(str)[0];
+    const template = `<header>Will it succeed?</header><slot>Oh noo!!!</slot><footer>Thank you for your patronage</footer>`;
+
+    ui.components.register("test-component", { template: template });
+
+    const vm = { transclusion: "Oh Yeah!!!" };
+
+    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    expect.equal(el.childNodes[1]["innerText"], vm.transclusion);
+    expect.end();
+});

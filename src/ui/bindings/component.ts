@@ -1,6 +1,6 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { isRxObservable } from "../utils";
+import { isRxObservable, nodeListToArray } from "../utils";
 import { INodeState, IDataContext, IComponentDescriptor, IComponent, IViewModel } from "../interfaces";
 import { SingleBindingBase } from "./bindingBase";
 import { AttrBinding } from "./oneWay";
@@ -19,6 +19,13 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         const params = this.getParams(state, ctx);
         const viewModel = this.getViewModel(element, state, ctx, descriptor, params);
         const component = descriptor.combineLatest(viewModel, (desc, vm) => <IComponent> { template: desc.template, viewModel: vm });
+
+        // transclusion
+        const children = new Array<Node>();
+        this.domManager.applyBindingsToDescendants(ctx, element);
+        while (element.firstChild) {
+            children.push(element.removeChild(element.firstChild));
+        }
 
         let internal: Subscription;
         function doCleanup() {
@@ -61,35 +68,43 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
             }
 
             // done
-            this.applyTemplate(element, ctx, state.cleanup, comp.template, comp.viewModel);
+            this.applyTemplate(element, ctx, state.cleanup, comp, children);
         }));
         state.cleanup.add(doCleanup);
     }
 
-    protected applyTemplate(element: HTMLElement, ctx: IDataContext, cleanup: Subscription, template: Node[], vm?: IViewModel) {
-        if (template) {
+    protected applyTemplate(element: HTMLElement, ctx: IDataContext, cleanup: Subscription, component: IComponent, children: Node[]) {
+        if (component.template) {
             // clear
             while (element.firstChild) {
                 this.domManager.cleanNode(<Element> element.firstChild);
                 element.removeChild(element.firstChild);
             }
             // clone template and inject
-            for (const node of template) {
-                element.appendChild(node.cloneNode(true));
+            for (const node of component.template) {
+                if (node.nodeName === "SLOT") {
+                    if (children.length !== 0) {
+                        children.forEach(x => element.appendChild(x));
+                    } else {
+                        nodeListToArray(node.childNodes).forEach(x => element.appendChild(x));
+                    }
+                } else {
+                    element.appendChild(node.cloneNode(true));
+                }
             }
         }
 
         // invoke preBindingInit
-        if (vm && vm.hasOwnProperty("preInit")) {
-            (<any> vm).preInit(element, ctx);
+        if (component.viewModel && component.viewModel.hasOwnProperty("preInit")) {
+            (<any> component.viewModel).preInit(element, ctx);
         }
 
         // done
         this.domManager.applyBindingsToDescendants(ctx, element);
 
         // invoke postBindingInit
-        if (vm && vm.hasOwnProperty("postInit")) {
-            (<any> vm).postInit(element, ctx);
+        if (component.viewModel && component.viewModel.hasOwnProperty("postInit")) {
+            (<any> component.viewModel).postInit(element, ctx);
         }
     }
 
