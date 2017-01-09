@@ -7,26 +7,30 @@ export interface Delta<T> {
 
 function findMovesInArrayComparison<T>(left: Delta<T>[], right: Delta<T>[], limitFailedCompares: number) {
     if (left.length && right.length) {
-        let failedCompares: number;
-        let l: number;
+        const moves: Delta<T>[] = [];
+        let failedCompares = 0;
         let r: number;
-        let leftItem: Delta<T>;
-        let rightItem: Delta<T>;
-        for (failedCompares = l = 0; (!limitFailedCompares || failedCompares < limitFailedCompares) && (leftItem = left[l]); ++l) {
-            for (r = 0; rightItem = right[r]; ++r) {
+        for (let l = 0; (!limitFailedCompares || failedCompares < limitFailedCompares) && left[l]; ++l) {
+            let leftItem = left[l];
+            for (r = 0; right[r]; ++r) {
+                let rightItem = right[r];
                 if (leftItem.value === rightItem.value) {
                     leftItem.moved = rightItem.index;
                     rightItem.moved = leftItem.index;
                     leftItem.status = "moved";
                     rightItem.status = "moved";
-                    right.splice(r, 1);         // This item is marked as moved; so remove it from right list
+                    left.splice(l, 1);
+                    l -= 1;
+                    moves.push(...right.splice(r, 1));         // This item is marked as moved; so remove it from right list
                     failedCompares = r = 0;     // Reset failed compares count because we're checking for consecutive failures
                     break;
                 }
             }
             failedCompares += r;
         }
+        return moves;
     }
+    return [];
 };
 
 export const compareLists = (function compareArrays() {
@@ -48,7 +52,7 @@ export const compareLists = (function compareArrays() {
         }
     }
 
-    function compareSmallArrayToBigArray<T>(smlArray: T[], bigArray: T[], statusNotInSml: string, statusNotInBig: string, options: any) {
+    function compareSmallArrayToBigArray<T>(smlArray: T[], bigArray: T[], statusNotInSml: "added"|"deleted", statusNotInBig: "added"|"deleted", options: any) {
         const myMin = Math.min;
         const myMax = Math.max;
         const editDistanceMatrix: number[] = [];
@@ -90,12 +94,12 @@ export const compareLists = (function compareArrays() {
         for (smlIndex = smlIndexMax, bigIndex = bigIndexMax; smlIndex || bigIndex; ) {
             meMinusOne = editDistanceMatrix[smlIndex][bigIndex] - 1;
             if (bigIndex && meMinusOne === editDistanceMatrix[smlIndex][bigIndex - 1]) {
-                notInSml.push(<Delta<T>> {     // added
+                notInSml.push(<Delta<T>> {     // added/deleted
                     "status": statusNotInSml,
                     "value": bigArray[--bigIndex],
                     "index": bigIndex });
             } else if (smlIndex && meMinusOne === editDistanceMatrix[smlIndex - 1][bigIndex]) {
-                notInBig.push(<Delta<T>> {     // deleted
+                notInBig.push(<Delta<T>> {     // deleted/added
                     "status": statusNotInBig,
                     "value": smlArray[--smlIndex],
                     "index": smlIndex });
@@ -107,9 +111,9 @@ export const compareLists = (function compareArrays() {
 
         // Set a limit on the number of consecutive non-matching comparisons; having it a multiple of
         // smlIndexMax keeps the time complexity of this algorithm linear.
-        findMovesInArrayComparison(notInBig, notInSml, <any> !options["dontLimitMoves"] && smlIndexMax * 10);
-        editScript.push(...notInBig, ...notInSml);
-        return editScript.reverse();
+        const moves = findMovesInArrayComparison(notInBig, notInSml, <any> !options["dontLimitMoves"] && smlIndexMax * 10);
+        editScript.push(...notInBig, ...notInSml.reverse(), ...moves);
+        return editScript;
     }
 
     return compareArrays;
