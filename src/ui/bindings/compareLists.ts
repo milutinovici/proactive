@@ -4,6 +4,11 @@ export interface Delta<T> {
     index: number;
     moved?: number;
 }
+export interface Changes<T> {
+    added: Delta<T>[];
+    deleted: Delta<T>[];
+    moved: Delta<T>[];
+}
 
 function findMovesInArrayComparison<T>(left: Delta<T>[], right: Delta<T>[], limitFailedCompares: number) {
     if (left.length && right.length) {
@@ -52,7 +57,7 @@ export const compareLists = (function compareArrays() {
         }
     }
 
-    function compareSmallArrayToBigArray<T>(smlArray: T[], bigArray: T[], statusNotInSml: "added"|"deleted", statusNotInBig: "added"|"deleted", options: any) {
+    function compareSmallArrayToBigArray<T>(smlArray: T[], bigArray: T[], statusNotInSml: "added"|"deleted", statusNotInBig: "added"|"deleted", options: any): Changes<T> {
         const myMin = Math.min;
         const myMax = Math.max;
         const editDistanceMatrix: number[] = [];
@@ -87,7 +92,6 @@ export const compareLists = (function compareArrays() {
             }
         }
 
-        const editScript: Delta<T>[] = [];
         let meMinusOne: number;
         const notInSml: Delta<T>[] = [];
         const notInBig: Delta<T>[] = [];
@@ -112,8 +116,11 @@ export const compareLists = (function compareArrays() {
         // Set a limit on the number of consecutive non-matching comparisons; having it a multiple of
         // smlIndexMax keeps the time complexity of this algorithm linear.
         const moves = findMovesInArrayComparison(notInBig, notInSml, <any> !options["dontLimitMoves"] && smlIndexMax * 10);
-        editScript.push(...notInBig, ...notInSml.reverse(), ...moves);
-        return editScript;
+        if ((notInSml.length > 0 && notInSml[0].status === "added") || (notInBig.length > 0 && notInBig[0].status === "deleted")) {
+            return { added: notInSml.reverse(), deleted: notInBig, moved: moves };
+        } else {
+            return { added: notInBig.reverse(), deleted: notInSml, moved: moves };
+        }
     }
 
     return compareArrays;
