@@ -57,3 +57,18 @@ export function triggerEvent(element: Element, eventType: string, keyCode?: any)
         throw new Error("Browser doesn't support triggering events");
     }
 }
+
+export function toArray(collection: HTMLCollection | NodeListOf<Element>) {
+    const array: Element[] = [];
+    for (let i = 0; i < collection.length; i++) {
+        array.push(collection[i]);
+    }
+    return array;
+}
+export function range(start: number, end: number) {
+    const array: number[] = [];
+    for (let i = start; i < end; i++) {
+        array.push(i);
+    }
+    return array;
+}
