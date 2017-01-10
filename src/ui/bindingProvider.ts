@@ -2,7 +2,7 @@ import { BindingAttribute } from "./bindingAttribute";
 import { isElement } from "./utils";
 import { components } from "./components/registry";
 
-const bindingPrefix = /^x-/;
+const bindingPrefix = "x-";
 
 export class BindingProvider {
 
@@ -10,7 +10,7 @@ export class BindingProvider {
         if (!isElement(element)) {
              return [this.handleBarsToBinding(element)];
         }
-        const bindings = this.getAttributeValues(element, bindingPrefix);
+        const bindings = this.getAttributeValues(element);
         const tagName = element.tagName.toLowerCase();
         // check if element is custom element (component)
         if (tagName.indexOf("-") !== -1 && components.isRegistered(tagName)) {
@@ -19,13 +19,16 @@ export class BindingProvider {
         return bindings;
     }
 
-    private getAttributeValues(element: Element, prefix: RegExp): BindingAttribute<any>[] {
-
-        const attributes: Attr[] = [].filter.call(element.attributes, (at: Attr) => prefix.test(at.name));
-        return attributes.map(x => {
-            const array = x.name.split("-");
-            return new BindingAttribute<any>(element.tagName.toLowerCase(), array[1], x.value, array.slice(2, array.length).join("-") || undefined);
-        });
+    private getAttributeValues(element: Element): BindingAttribute<any>[] {
+        const bindings: BindingAttribute<any>[] = [];
+        const tagName = element.tagName.toLowerCase();
+        for (let i = 0; i < element.attributes.length; i++) {
+            if (element.attributes[i].name.indexOf(bindingPrefix) === 0) {
+                const array = element.attributes[i].name.split("-");
+                bindings.push(new BindingAttribute<any>(tagName, array[1], element.attributes[i].value, array.slice(2, array.length).join("-") || undefined));
+            }
+        }
+        return bindings;
     }
 
     private customElementToBinding(element: Element): BindingAttribute<string> {
