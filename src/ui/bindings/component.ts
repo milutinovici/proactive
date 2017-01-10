@@ -80,18 +80,20 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
                 this.domManager.cleanNode(<Element> element.firstChild);
                 element.removeChild(element.firstChild);
             }
+            const fragment = document.createDocumentFragment();
             // clone template and inject
             for (const node of component.template) {
                 if (node.nodeName === "SLOT") {
                     if (children.length !== 0) {
-                        children.forEach(x => element.appendChild(x));
+                        children.forEach(x => fragment.appendChild(x));
                     } else {
-                        nodeListToArray(node.childNodes).forEach(x => element.appendChild(x));
+                        nodeListToArray(node.childNodes).forEach(x => fragment.appendChild(x));
                     }
                 } else {
-                    element.appendChild(node.cloneNode(true));
+                    fragment.appendChild(node.cloneNode(true));
                 }
             }
+            element.appendChild(fragment);
         }
 
         // invoke preBindingInit

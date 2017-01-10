@@ -46,12 +46,11 @@ export class RepeatBinding<T> extends BindingBase {
 
     protected applyValue(parent: Element, template: Element, newArray: T[], oldArray: T[], placeholder: Node): void {
         let changes = compareLists(oldArray, newArray);
-
-        if (changes.added.length > 0) {
-            this.addRow(parent, template, changes.added, placeholder, newArray.length);
-        }
         if (changes.deleted.length > 0) {
             this.removeRow(parent, changes.deleted, placeholder, newArray.length);
+        }
+        if (changes.added.length > 0) {
+            this.addRow(parent, template, changes.added, placeholder, newArray.length);
         }
         if (changes.moved.length > 0) {
             this.moveRow(parent, changes.moved, placeholder, newArray.length);
@@ -60,6 +59,7 @@ export class RepeatBinding<T> extends BindingBase {
 
     private addRow(parent: Element, template: Element, additions: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
+        // const fragment = document.createDocumentFragment();
         for (const addition of additions) {
             let node = <Element> template.cloneNode(true);
             let state = new ForEachNodeState(addition.value, addition.index);

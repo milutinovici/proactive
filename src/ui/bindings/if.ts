@@ -2,7 +2,6 @@ import * as Rx from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
 import { IDataContext, INodeState } from "../interfaces";
-import { nodeListToArray } from "../utils";
 
 export class IfBinding extends SingleBindingBase<boolean> {
 
@@ -31,21 +30,25 @@ export class IfBinding extends SingleBindingBase<boolean> {
     protected applyValue(el: HTMLElement, value: boolean, template: Array<Node>, ctx: IDataContext) {
         if (value) {
             const nodes = template.map(x => x.cloneNode(true));
-            for (const node of nodes) {
-                el.appendChild(node);
-            }
+            this.addChildren(el, nodes);
             this.domManager.applyBindingsToDescendants(ctx, el);
         } else {
             this.removeChildren(el);
         }
 
     }
-    private removeChildren(el: HTMLElement) {
-        const oldElements = nodeListToArray(el.childNodes);
-        oldElements.forEach(x => {
-            this.domManager.cleanNode(<HTMLElement> x);
-            el.removeChild(x);
-        });
+    private addChildren(el: HTMLElement, nodes: Node[]) {
+        const fragment = document.createDocumentFragment();
+        for (const node of nodes) {
+            fragment.appendChild(node);
+        }
+        el.appendChild(fragment);
+    }
+    private removeChildren(element: HTMLElement) {
+        while (element.firstChild) {
+            this.domManager.cleanNode(<Element> element.firstChild);
+            element.removeChild(element.firstChild);
+        }
     }
 }
 
