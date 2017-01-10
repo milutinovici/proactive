@@ -1,6 +1,6 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { isRxObservable, nodeListToArray } from "../utils";
+import { isRxObservable } from "../utils";
 import { INodeState, IDataContext, IComponentDescriptor, IComponent, IViewModel } from "../interfaces";
 import { SingleBindingBase } from "./bindingBase";
 import { AttrBinding } from "./oneWay";
@@ -87,7 +87,9 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
                     if (children.length !== 0) {
                         children.forEach(x => fragment.appendChild(x));
                     } else {
-                        nodeListToArray(node.childNodes).forEach(x => fragment.appendChild(x));
+                        for (let i = 0; i < node.childNodes.length; i++) {
+                            fragment.appendChild(node.childNodes[i]);
+                        }
                     }
                 } else {
                     fragment.appendChild(node.cloneNode(true));
