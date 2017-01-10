@@ -1,5 +1,5 @@
 import { NodeStateManager } from "./nodeState";
-import { isElement, isTextNode, startsWith, endsWith } from "./utils";
+import { isElement, isTextNode, startsWith, endsWith, groupBy } from "./utils";
 import { BindingProvider } from "./bindingProvider";
 import { IDataContext, IBindingHandler, IViewModel } from "./interfaces";
 import { EventBinding } from "./bindings/event";
@@ -95,7 +95,7 @@ export class DomManager {
     private applyBindingsInternal(ctx: IDataContext, el: Node): boolean {
         const bindingProvider = new BindingProvider();
         const bindings = bindingProvider.getBindings(el);
-        if ((bindings["length"] as any) === 0) {
+        if (bindings.length === 0) {
             return false;
         }
         // get or create elment-state
@@ -105,8 +105,8 @@ export class DomManager {
             state = this.nodeState.create(ctx.$data);
             this.nodeState.set(el, state);
         }
-        state.bindings = bindings;
-        const handlers = this.getHandlers(Object.keys(bindings));
+        state.bindings = groupBy(bindings, x => x.name);
+        const handlers = this.getHandlers(Object.keys(state.bindings));
         const controlsDescendants = handlers.some(x => x.controlsDescendants);
 
         // apply all bindings

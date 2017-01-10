@@ -1,14 +1,14 @@
 import { BindingAttribute } from "./bindingAttribute";
-import { isElement, groupBy, Group } from "./utils";
+import { isElement } from "./utils";
 import { components } from "./components/registry";
 
 const bindingPrefix = /^x-/;
 
 export class BindingProvider {
 
-    public getBindings(element: Node): Group<BindingAttribute<any>> {
+    public getBindings(element: Node): BindingAttribute<any>[] {
         if (!isElement(element)) {
-             return groupBy([this.handleBarsToBinding(element)], x => x.name);
+             return [this.handleBarsToBinding(element)];
         }
         const bindings = this.getAttributeValues(element, bindingPrefix);
         const tagName = element.tagName.toLowerCase();
@@ -16,7 +16,7 @@ export class BindingProvider {
         if (tagName.indexOf("-") !== -1 && components.isRegistered(tagName)) {
             bindings.push(this.customElementToBinding(element));
         }
-        return groupBy(bindings, x => x.name);
+        return bindings;
     }
 
     private getAttributeValues(element: Element, prefix: RegExp): BindingAttribute<any>[] {

@@ -175,7 +175,6 @@ export function groupBy<T>(array: T[], selector: (x: T) => any): Group<T>  {
         }
         groups[key].push(element);
     }
-    groups.length = array.length;
     return groups as Group<T>;
 };
 
