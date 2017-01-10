@@ -1,5 +1,4 @@
 import { Observable, Observer, Subscription } from "rxjs";
-import { isElement } from "../utils";
 import { DomManager } from "../domManager";
 import { IDataContext, IBindingHandler, INodeState } from "../interfaces";
 import { exception } from "../exceptionHandlers";
@@ -20,17 +19,12 @@ export abstract class BindingBase implements IBindingHandler {
         this.domManager = domManager;
     }
 
-    public applyBinding(node: Element, state: INodeState, ctx: IDataContext): void {
-        if (!isElement(node)) {
-            throw Error("binding only operates on elements!");
-        }
-    }
+    public abstract applyBinding(node: Element, state: INodeState, ctx: IDataContext): void;
 
 }
 
 export abstract class SingleBindingBase<T> extends BindingBase {
     public applyBinding(el: Element, state: INodeState, ctx: IDataContext): void {
-        super.applyBinding(el, state, ctx);
         if (state.bindings[this.name].length > 1) {
             exception.next(new Error(`more than 1 ${this.name} binding on element ${el}`));
             return;
@@ -47,7 +41,6 @@ export abstract class SingleBindingBase<T> extends BindingBase {
 export abstract class SimpleBinding<T> extends BindingBase {
 
     public applyBinding(el: Element, state: INodeState, ctx: IDataContext): void {
-        super.applyBinding(el, state, ctx);
         for (const binding of state.bindings[this.name]) {
             const observable = binding.evaluate(ctx, el, this.twoWay) as Observable<T>;
             const subscription = this.apply(el, observable, binding.parameter);

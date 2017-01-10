@@ -1,10 +1,11 @@
 import { NodeStateManager } from "./nodeState";
-import { isElement, nodeListToArray } from "./utils";
+import { isElement, isTextNode, startsWith, endsWith } from "./utils";
 import { BindingProvider } from "./bindingProvider";
 import { IDataContext, IBindingHandler, IViewModel } from "./interfaces";
 import { EventBinding } from "./bindings/event";
 import { IfBinding } from "./bindings/if";
-import { AttrBinding, CssBinding, StyleBinding, HtmlBinding, TextBinding } from "./bindings/oneWay";
+import { TextBinding } from "./bindings/text";
+import { AttrBinding, CssBinding, StyleBinding, HtmlBinding } from "./bindings/oneWay";
 import { RepeatBinding } from "./bindings/repeat";
 import { WithBinding } from "./bindings/with";
 import { ValueBinding } from "./bindings/value";
@@ -44,13 +45,14 @@ export class DomManager {
 
     public applyBindingsToDescendants(ctx: IDataContext, node: Element): void {
         if (node.hasChildNodes()) {
-            const children = nodeListToArray(node.children);
-            children.forEach(child => this.applyBindingsRecursive(ctx, child as Element));
+            for (let i = 0; i < node.childNodes.length; i++) {
+                this.applyBindingsRecursive(ctx, node.childNodes[i] as Element);
+            }
         }
     }
 
     public cleanNode(rootNode: Element): void {
-        if (!isElement(rootNode)) {
+        if (!isElement(rootNode) && !isTextNode(rootNode)) {
             return;
         }
         this.cleanNodeRecursive(rootNode);
@@ -58,43 +60,44 @@ export class DomManager {
 
     public cleanDescendants(node: Element): void {
         if (node.hasChildNodes()) {
-            for (let i = 0; i < node.children.length; i++) {
-                this.cleanNodeRecursive(node.children[i]);
-                this.nodeState.clear(node.children[i]);
+            for (let i = 0; i < node.childNodes.length; i++) {
+                this.cleanNodeRecursive(node.childNodes[i]);
+                this.nodeState.clear(node.childNodes[i]);
             }
         }
     }
 
-    private applyBindingsRecursive(ctx: IDataContext, el: Element): void {
+    private applyBindingsRecursive(ctx: IDataContext, el: Node): void {
         if (this.shouldBind(el) && !this.applyBindingsInternal(ctx, el) && el.hasChildNodes()) {
-            let child = el.firstElementChild;
+            let child = el.firstChild;
             // iterate over descendants
             while (child) {
                 this.applyBindingsRecursive(ctx, child);
-                child = child.nextElementSibling;
+                child = child.nextSibling;
             }
         }
     }
 
-    private cleanNodeRecursive(node: Element): void {
+    private cleanNodeRecursive(node: Node): void {
         if (node.hasChildNodes()) {
-            let length = node.children.length;
-            for (let i = 0; i < length; i++) {
+            for (let i = 0; i < node.childNodes.length; i++) {
                 // only elements
-                if (!isElement(node.children[i])) {
+                if (!isElement(node.childNodes[i]) && !isTextNode(node.childNodes[i])) {
                     continue;
                 }
-                this.cleanNodeRecursive(node.children[i]);
+                this.cleanNodeRecursive(node.childNodes[i]);
             }
         }
         // clear parent after childs
         this.nodeState.clear(node);
     }
 
-    private applyBindingsInternal(ctx: IDataContext, el: Element): boolean {
+    private applyBindingsInternal(ctx: IDataContext, el: Node): boolean {
         const bindingProvider = new BindingProvider();
         const bindings = bindingProvider.getBindings(el);
-
+        if ((bindings["length"] as any) === 0) {
+            return false;
+        }
         // get or create elment-state
         let state = this.nodeState.get(el);
         // create and set if necessary
@@ -123,8 +126,9 @@ export class DomManager {
         return controlsDescendants;
     }
 
-    private shouldBind(el: Element): boolean {
-        return this.ignore.indexOf(el.tagName) === -1;
+    private shouldBind(el: Node): boolean {
+        return (isElement(el) && this.ignore.indexOf(el.tagName) === -1) ||
+               (isTextNode(el) && el.nodeValue !== null && startsWith(el.nodeValue, "{{") && endsWith(el.nodeValue, "}}"));
     }
 
     public registerHandler(handler: IBindingHandler) {

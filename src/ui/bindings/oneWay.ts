@@ -63,24 +63,6 @@ export class StyleBinding extends SimpleBinding<string | number | boolean> {
     }
 }
 
-export class TextBinding extends SimpleBinding<string> {
-    public controlsDescendants = true;
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
-    }
-
-    public apply(el: HTMLElement, observable: Observable<string>): Subscription {
-        return observable.subscribe(value => {
-            if ((value === null) || (value === undefined)) {
-                value = "";
-            } else if (Array.isArray(value)) {
-                value = value.join(", ");
-            }
-            el.textContent = value;
-        });
-    }
-}
-
 export class HtmlBinding extends SimpleBinding<string> {
     public controlsDescendants = true;
     constructor(name: string, domManager: DomManager) {

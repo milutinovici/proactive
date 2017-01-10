@@ -30,6 +30,13 @@ export function isElement(target: Node): target is Element {
     return target.nodeType === 1;
 }
 /**
+* Determines if Node is an instance of a Element
+* @param {any} target
+*/
+export function isTextNode(target: Node): boolean {
+    return target.nodeType === 3;
+}
+/**
 * Determines if Node is an instance of a HTMLInputElement
 * @param {any} target
 */
@@ -157,10 +164,10 @@ export function nodeIndex(node: Node) {
     return node.parentElement ? Array.prototype.indexOf.call(node.parentElement.children, node) : -1;
 }
 
-export type Group<T> = { [name: string]: T[] };
+export type Group<T> = { readonly [name: string]: T[] };
 
 export function groupBy<T>(array: T[], selector: (x: T) => any): Group<T>  {
-    const groups: Group<T> = { };
+    const groups: any = { };
     for (const element of array) {
         const key: string = selector(element).toString();
         if (!groups[key]) {
@@ -168,5 +175,15 @@ export function groupBy<T>(array: T[], selector: (x: T) => any): Group<T>  {
         }
         groups[key].push(element);
     }
-    return groups;
+    groups.length = array.length;
+    return groups as Group<T>;
 };
+
+export function startsWith(subject: string, search: string) {
+    return subject.indexOf(search) === 0;
+}
+
+export function endsWith(subject: string, search: string) {
+    const lastIndex = subject.lastIndexOf(search, subject.length);
+    return lastIndex === subject.length - search.length;
+}

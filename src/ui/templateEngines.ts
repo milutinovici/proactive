@@ -4,8 +4,8 @@ export class HtmlTemplateEngine {
         const container = document.createElement("div");
         container.insertAdjacentHTML("afterbegin", data);
         const arr: Node[] = [];
-        for (let i = 0, n: Node; n = container.childNodes[i]; ++i) {
-            arr.push(n);
+        for (let i = 0; container.childNodes[i] !== undefined; i++) {
+            arr.push(container.childNodes[i]);
         }
         return arr;
     }
