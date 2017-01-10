@@ -2,11 +2,9 @@ import { BindingAttribute } from "./bindingAttribute";
 import { isElement } from "./utils";
 import { components } from "./components/registry";
 
-const bindingPrefix = "x-";
-
 export class BindingProvider {
 
-    public getBindings(element: Node): BindingAttribute<any>[] {
+    public static getBindings(element: Node): BindingAttribute<any>[] {
         if (!isElement(element)) {
              return [this.handleBarsToBinding(element)];
         }
@@ -19,11 +17,11 @@ export class BindingProvider {
         return bindings;
     }
 
-    private getAttributeValues(element: Element): BindingAttribute<any>[] {
+    private static getAttributeValues(element: Element): BindingAttribute<any>[] {
         const bindings: BindingAttribute<any>[] = [];
         const tagName = element.tagName.toLowerCase();
         for (let i = 0; i < element.attributes.length; i++) {
-            if (element.attributes[i].name.indexOf(bindingPrefix) === 0) {
+            if (element.attributes[i].name.indexOf("x-") === 0) {
                 const array = element.attributes[i].name.split("-");
                 bindings.push(new BindingAttribute<any>(tagName, array[1], element.attributes[i].value, array.slice(2, array.length).join("-") || undefined));
             }
@@ -31,13 +29,13 @@ export class BindingProvider {
         return bindings;
     }
 
-    private customElementToBinding(element: Element): BindingAttribute<string> {
+    private static customElementToBinding(element: Element): BindingAttribute<string> {
         // when a component is referenced as custom-element, apply a virtual 'component' binding
         const tagName = element.tagName.toLowerCase();
         return new BindingAttribute<string>(tagName, "component", `'${tagName}'`);
     }
 
-    private handleBarsToBinding(node: Node): BindingAttribute<string> {
+    private static handleBarsToBinding(node: Node): BindingAttribute<string> {
         const trimmed = (node.nodeValue as string).trim();
         const expression = trimmed.slice(2, trimmed.length - 2);
         return new BindingAttribute<string>("text", "text", expression);

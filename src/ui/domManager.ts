@@ -93,8 +93,7 @@ export class DomManager {
     }
 
     private applyBindingsInternal(ctx: IDataContext, el: Node): boolean {
-        const bindingProvider = new BindingProvider();
-        const bindings = bindingProvider.getBindings(el);
+        const bindings = BindingProvider.getBindings(el);
         if (bindings.length === 0) {
             return false;
         }
