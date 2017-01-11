@@ -23,22 +23,23 @@ export class ArrayImpl<T> extends ComputedArrayImpl<T> implements Rx.Observer<T[
     public complete() {
         this.source.complete();
     }
-
+    public [Rx.Symbol.rxSubscriber]() {
+        return this;
+    }
     public static createArray<T>(initial: T[]): ObservableArray<T> {
-        const accessor: any = function<T>(value: T[]) {
+        const accessor: ArrayImpl<T> = function(value: T[]) {
             if (arguments.length > 0) {
-                accessor.setValue(value);
+                return accessor.setValue(value);
             } else {
                 return accessor.getValue();
             }
-        };
-        const observable = new ArrayImpl(initial);
-        for (const attrname in observable) {
-            accessor[attrname] = observable[attrname];
-        }
-        accessor[Rx.Symbol.observable] = () => accessor;
-        accessor[Rx.Symbol.rxSubscriber] = () => accessor;
-        return accessor;
+        } as any;
+        const call = accessor["call"];
+        const apply = accessor["apply"];
+        Object["setPrototypeOf"](accessor, new ArrayImpl(initial));
+        accessor["call"] = call;
+        accessor["apply"] = apply;
+        return accessor as ObservableArray<T>;
     }
 
     public push(...items: T[]): void {

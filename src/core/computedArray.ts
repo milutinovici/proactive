@@ -1,4 +1,4 @@
-import { Observable, Symbol } from "rxjs";
+import { Observable } from "rxjs";
 import { ComputedValueImpl } from "./computed";
 import { Func, Disposable, ComputedValue } from "./interfaces";
 import "./observableExtensions";
@@ -10,15 +10,13 @@ export class ComputedArrayImpl<T> extends ComputedValueImpl<T[]> {
     }
 
     public static createComputedArray<T>(source: Observable<T[]>): ComputedArray<T> {
-        const accessor: any = function<T>() {
-            return <T> accessor.getValue();
-        };
-        const observable = new ComputedArrayImpl(source);
-        for (const attrname in observable) {
-            accessor[attrname] = observable[attrname];
-        }
-        accessor.subscription = accessor.subscribe((val: T) => accessor.value = val, console.error);
-        accessor[Symbol.observable] = () => accessor;
+        const accessor: ComputedArray<T> = (() => accessor.getValue()) as any;
+        const call = accessor["call"];
+        const apply = accessor["apply"];
+        Object["setPrototypeOf"](accessor, new ComputedArrayImpl(source));
+        accessor["call"] = call;
+        accessor["apply"] = apply;
+        accessor.subscription = accessor.subscribe(val => accessor.value = val, console.error);
         return accessor;
     }
 

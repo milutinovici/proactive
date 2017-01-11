@@ -23,16 +23,14 @@ export class ComputedValueImpl<T> extends Rx.Observable<T> {
         if ("call" in source && "source" in source) {
             return <ComputedValue<T>> source;
         }
-        const accessor: any = function(): T {
-            return accessor.getValue();
-        };
-        const observable = new ComputedValueImpl(source, initial);
-        for (const attrname in observable) {
-            accessor[attrname] = observable[attrname];
-        }
-        accessor.subscription = accessor.subscribe((val: T) => accessor.value = val, console.error);
-        accessor[Rx.Symbol.observable] = () => accessor;
-        return accessor;
+        const accessor: ComputedValueImpl<T> = (() => accessor.getValue()) as any;
+        const call = accessor["call"];
+        const apply = accessor["apply"];
+        Object["setPrototypeOf"](accessor, new ComputedValueImpl(source, initial));
+        accessor["call"] = call;
+        accessor["apply"] = apply;
+        accessor["subscription"] = accessor.subscribe(val => accessor.value = val, console.error);
+        return accessor as any;
     }
     public toString(): string {
         return `${this.getValue()}`;

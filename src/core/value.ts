@@ -23,21 +23,23 @@ export class ObservableValueImpl<T> extends ComputedValueImpl<T> implements Rx.O
     public complete() {
         this.source.complete();
     }
+    public [Rx.Symbol.rxSubscriber]() {
+        return this;
+    }
 
     public static createValue<T>(initial?: T): ObservableValue<T> {
-        const accessor: any = function<T>(value: T) {
+        const accessor: ObservableValueImpl<T> = function(value: T) {
             if (arguments.length > 0) {
-                accessor.setValue(value);
+                return accessor.setValue(value);
             } else {
                 return accessor.getValue();
             }
-        };
-        const observable = new ObservableValueImpl(initial);
-        for (const attrname in observable) {
-            accessor[attrname] = observable[attrname];
-        }
-        accessor[Rx.Symbol.observable] = () => accessor;
-        accessor[Rx.Symbol.rxSubscriber] = () => accessor;
-        return accessor;
+        } as any;
+        const call = accessor["call"];
+        const apply = accessor["apply"];
+        Object["setPrototypeOf"](accessor, new ObservableValueImpl(initial));
+        accessor["call"] = call;
+        accessor["apply"] = apply;
+        return accessor as any;
     }
 }
