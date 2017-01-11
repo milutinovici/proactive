@@ -4,6 +4,8 @@ import { IDataContext, IBindingAttribute } from "./interfaces";
 import { isRxObservable, isRxObserver, isFunction } from "./utils";
 
 export class BindingAttribute<T> implements IBindingAttribute<T> {
+    private static expressionCache = new Map<string, Function>();
+    private static writeCache = new Map<string, Function>();
     public readonly tag: string;
     public readonly name: string;
     public readonly text: string;
@@ -37,9 +39,15 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
 
     public expression(ctx: IDataContext): T | null {
         try {
-            const readBody = this.text ? `with($context){with($data||{}){return ${this.text};}}` : "return null;";
-            let read = new Function("$context", "exception", readBody) as (ctx: IDataContext, ex: Observer<Error>) => T | null;
-            return read(ctx, exception);
+            const fn = BindingAttribute.expressionCache.get(this.text);
+            if (fn !== undefined) {
+                return fn(ctx);
+            } else {
+                const readBody = this.text ? `with($context){with($data||{}){return ${this.text};}}` : "return null;";
+                let read = new Function("$context", readBody) as (ctx: IDataContext) => T | null;
+                BindingAttribute.expressionCache.set(this.text, read);
+                return read(ctx);
+            }
         } catch (e) {
             exception.next(new Error(`Binding expression "${this.text}" on element ${this.tag} failed. ${e.message}`));
             return null;
@@ -58,8 +66,15 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
     private write(ctx: IDataContext): (value: any) => void {
         try {
             if (this.canWrite(this.text)) {
-                const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
-                return new Function("$context", writeBody)(ctx) as (value: T) => void;
+                const fn = BindingAttribute.writeCache.get(this.text);
+                if (fn !== undefined) {
+                    return fn(ctx);
+                } else {
+                    const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
+                    const write = new Function("$context", writeBody)(ctx) as (value: T) => void;
+                    BindingAttribute.writeCache.set(this.text, write);
+                    return write;
+                }
             } else {
                 return (value: T) => {};
             }
