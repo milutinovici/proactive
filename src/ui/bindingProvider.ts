@@ -8,31 +8,28 @@ export class BindingProvider {
         if (!isElement(element)) {
              return [this.handleBarsToBinding(element)];
         }
-        const bindings = this.getAttributeValues(element);
-        const tagName = element.tagName.toLowerCase();
+        const tag = element.tagName;
+        const bindings = this.getAttributeValues(element, tag);
         // check if element is custom element (component)
-        if (tagName.indexOf("-") !== -1 && components.isRegistered(tagName)) {
-            bindings.push(this.customElementToBinding(element));
+        if (tag.indexOf("-") !== -1 && components.isRegistered(tag)) {
+            // when a component is referenced as custom-element, apply a virtual 'component' binding
+            bindings.push(new BindingAttribute<string>(tag, "component", `'${tag}'`));
         }
         return bindings;
     }
 
-    private static getAttributeValues(element: Element): BindingAttribute<any>[] {
+    private static getAttributeValues(element: Element, tag: string): BindingAttribute<any>[] {
         const bindings: BindingAttribute<any>[] = [];
-        const tagName = element.tagName.toLowerCase();
         for (let i = 0; i < element.attributes.length; i++) {
-            if (element.attributes[i].name.indexOf("x-") === 0) {
-                const array = element.attributes[i].name.split("-");
-                bindings.push(new BindingAttribute<any>(tagName, array[1], element.attributes[i].value, array.slice(2, array.length).join("-") || undefined));
+            const attribute = element.attributes[i];
+            const array = attribute.name.split("-");
+            if (array[0] === "x") {
+                array.shift();
+                const binding = array.shift() as string;
+                bindings.push(new BindingAttribute<any>(tag, binding , attribute.value, array.join("-") || undefined));
             }
         }
         return bindings;
-    }
-
-    private static customElementToBinding(element: Element): BindingAttribute<string> {
-        // when a component is referenced as custom-element, apply a virtual 'component' binding
-        const tagName = element.tagName.toLowerCase();
-        return new BindingAttribute<string>(tagName, "component", `'${tagName}'`);
     }
 
     private static handleBarsToBinding(node: Node): BindingAttribute<string> {

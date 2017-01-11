@@ -12,14 +12,15 @@ export class ComponentRegistry {
         if (name.indexOf("-") === -1) {
             throw new Error(`Component name "${name}" must contain a dash (-)` );
         }
-        this.components[name] = component;
+        this.components[name.toUpperCase()] = component;
     }
 
     public isRegistered(name: string): boolean {
-        return this.components[name] != null;
+        return this.components[name.toUpperCase()] != null;
     }
 
     public load(name: string): Rx.Observable<IComponentDescriptor> {
+        name = name.toUpperCase();
         let result = this.getDescriptor(name);
         result = result.map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel });
         result.do(x => this.components[name] = x ); // cache descriptor

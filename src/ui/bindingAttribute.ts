@@ -65,19 +65,17 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
 
     private write(ctx: IDataContext): (value: any) => void {
         try {
-            if (this.canWrite(this.text)) {
-                const fn = BindingAttribute.writeCache.get(this.text);
-                if (fn !== undefined) {
-                    return fn(ctx);
-                } else {
-                    const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
-                    const write = new Function("$context", writeBody)(ctx) as (value: T) => void;
-                    BindingAttribute.writeCache.set(this.text, write);
-                    return write;
-                }
+            const fn = BindingAttribute.writeCache.get(this.text);
+            if (fn !== undefined) {
+                return fn(ctx);
+            } else if (this.canWrite(this.text)) {
+                const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
+                const write = new Function("$context", writeBody)(ctx) as (value: T) => void;
+                BindingAttribute.writeCache.set(this.text, write);
+                return write;
             } else {
-                return (value: T) => {};
-            }
+            return (value: T) => {};
+          }
         } catch (e) {
             exception.next(new Error(`Binding expression "${this.text}" on element ${this.tag} failed. ${e.message}`));
             return (value: T) => {};
