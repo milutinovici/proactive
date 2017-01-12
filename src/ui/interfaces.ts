@@ -1,4 +1,4 @@
-import { Observable, Subscription, Observer } from "rxjs";
+import { Observable, Subscription, Observer, BehaviorSubject } from "rxjs";
 import { Group } from "./utils";
 
 export interface IBindingAttribute<T> {
@@ -32,20 +32,18 @@ export interface IBindingHandler {
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
-        applyBinding(node: Node, state: INodeState, ctx: IDataContext): void;
+        applyBinding(node: Node, state: INodeState<IDataContext>, ctx: IDataContext): void;
 
 }
 
 export interface IDataContext {
-    readonly $data: any;
-    readonly $root: IViewModel;
-    readonly $parent?: IViewModel;
-    readonly $parents: IViewModel[];
+    readonly $data: IViewModel;
+    readonly $index?: BehaviorSubject<number>;
+    extend(name: string, model: IViewModel, index?: number): IDataContext;
 }
-export interface INodeState {
+export interface INodeState<T extends IDataContext> {
     readonly cleanup: Subscription;
-    model: IViewModel;        // scope model
-    isolate: boolean;
+    context: T;        // scope model
     bindings: Group<IBindingAttribute<any>>;
 }
 export interface IViewModel {
@@ -56,11 +54,11 @@ export interface IViewModel {
 
 export interface IComponentDescriptor {
     name?: string;
-    template: Node[] | string;
+    template: DocumentFragment | string;
     viewModel?: IViewModel|(new (params?: Object) => IViewModel);
 }
 
 export interface IComponent {
-    template: Node[];
+    template: DocumentFragment;
     viewModel?: IViewModel;
 }

@@ -1,7 +1,8 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
-import { INodeState, IDataContext, IComponentDescriptor, IComponent, IViewModel } from "../interfaces";
+import { INodeState, IComponentDescriptor, IComponent, IViewModel, IDataContext } from "../interfaces";
+import { DataContext } from "../nodeState";
 import { SingleBindingBase } from "./bindingBase";
 import { AttrBinding } from "./oneWay";
 import { components } from "../components/registry";
@@ -14,17 +15,17 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         super(name, domManager);
     }
 
-    public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState, ctx: IDataContext) {
+    public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState<IDataContext>) {
         const descriptor = observable.mergeMap(name => components.load(name));
-        const params = this.getParams(state, ctx);
-        const viewModel = this.getViewModel(element, state, ctx, descriptor, params);
+        const params = this.getParams(state);
+        const viewModel = this.getViewModel(element, state, descriptor, params);
         const component = descriptor.combineLatest(viewModel, (desc, vm) => <IComponent> { template: desc.template, viewModel: vm });
 
         // transclusion
-        const children = new Array<Node>();
-        this.domManager.applyBindingsToDescendants(ctx, element);
+        const children = document.createDocumentFragment();
+        this.domManager.applyBindingsToDescendants(state.context, element);
         while (element.firstChild) {
-            children.push(element.removeChild(element.firstChild));
+            children.appendChild(element.removeChild(element.firstChild));
         }
 
         let internal: Subscription;
@@ -39,12 +40,9 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
             doCleanup();
             internal = new Subscription();
             // isolated nodestate and ctx
+            let newContext = state.context;
             if (comp.viewModel) {
-                const componentState = this.domManager.nodeState.get(element) || this.domManager.nodeState.create(comp.viewModel);
-                componentState.isolate = true;
-                componentState.model = comp.viewModel;
-                this.domManager.nodeState.set(element, componentState);
-                ctx = this.domManager.nodeState.getDataContext(element);
+                newContext = new DataContext(comp.viewModel);
 
                 // wire custom events
                 if (comp.viewModel.emitter !== undefined && isRxObservable(comp.viewModel.emitter)) {
@@ -68,61 +66,53 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
             }
 
             // done
-            this.applyTemplate(element, ctx, state.cleanup, comp, children);
+            this.applyTemplate(element, newContext, comp, children);
         }));
         state.cleanup.add(doCleanup);
     }
 
-    protected applyTemplate(element: HTMLElement, ctx: IDataContext, cleanup: Subscription, component: IComponent, children: Node[]) {
+    protected applyTemplate(element: HTMLElement, newContext: IDataContext, component: IComponent, children: DocumentFragment) {
         if (component.template) {
             // clear
             while (element.firstChild) {
                 this.domManager.cleanNode(<Element> element.firstChild);
                 element.removeChild(element.firstChild);
             }
-            const fragment = document.createDocumentFragment();
-            // clone template and inject
-            for (const node of component.template) {
-                if (node.nodeName === "SLOT") {
-                    if (children.length !== 0) {
-                        children.forEach(x => fragment.appendChild(x));
-                    } else {
-                        for (let i = 0; i < node.childNodes.length; i++) {
-                            fragment.appendChild(node.childNodes[i]);
-                        }
-                    }
-                } else {
-                    fragment.appendChild(node.cloneNode(true));
-                }
-            }
-            element.appendChild(fragment);
+            element.appendChild(component.template);
         }
 
         // invoke preBindingInit
         if (component.viewModel && component.viewModel.hasOwnProperty("preInit")) {
-            (<any> component.viewModel).preInit(element, ctx);
+            (<any> component.viewModel).preInit(element, newContext);
         }
 
-        // done
-        this.domManager.applyBindingsToDescendants(ctx, element);
+        this.domManager.applyBindingsToDescendants(newContext, element);
+        // transclusion
+        for (let i = 0; i < element.childNodes.length; i++) {
+            const child = element.childNodes[i] as HTMLElement;
+            if (child.tagName === "SLOT") {
+                element.insertBefore(children, child);
+                this.domManager.cleanNode(element.removeChild(child) as HTMLElement);
+            }
+        }
 
         // invoke postBindingInit
         if (component.viewModel && component.viewModel.hasOwnProperty("postInit")) {
-            (<any> component.viewModel).postInit(element, ctx);
+            (<any> component.viewModel).postInit(element, newContext);
         }
     }
 
-    private getParams(state: INodeState, ctx: IDataContext): T {
+    private getParams(state: INodeState<IDataContext>): T {
         const params = {};
         if (state.bindings["attr"] !== undefined) {
-            state.bindings["attr"].filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(ctx));
+            state.bindings["attr"].filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(state.context));
         }
         return params as T;
     }
 
-    private getViewModel(element: HTMLElement, state: INodeState, ctx: IDataContext, descriptor: Observable<IComponentDescriptor>, params: T): Observable<IViewModel|null> {
-        return state.bindings["with"] ?
-               state.bindings["with"][0].evaluate(ctx, element, false) as Observable<IViewModel> :
+    private getViewModel(element: HTMLElement, state: INodeState<IDataContext>, descriptor: Observable<IComponentDescriptor>, params: T): Observable<IViewModel|null> {
+        return state.bindings["as"] ?
+               state.bindings["as"][0].evaluate(state.context, element, false) as Observable<IViewModel> :
                descriptor.map(x => components.initialize(x, params));
     }
 }

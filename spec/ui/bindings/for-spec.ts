@@ -4,33 +4,33 @@ import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
 it("binding to a standard array", expect => {
-    const template = `<ul><li x-repeat="src" x-text="$data"></li></ul>`;
+    const template = `<ul><li x-for-number="array" x-text="number"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
-    let list = [1, 5, 7];
+    let array = [1, 5, 7];
 
-    expect.doesNotThrow(() => ui.applyBindings({ src: list }, el));
+    expect.doesNotThrow(() => ui.applyBindings({ array }, el));
 
-    expect.equal(el.children.length, list.length);
-    expect.isEquivalent(util.toArray(el.children).map(node => parseInt(node.textContent || "")), list);
+    expect.equal(el.children.length, array.length);
+    expect.isEquivalent(util.toArray(el.children).map(node => parseInt(node.textContent || "")), array);
     expect.end();
 });
 
 it("binding to a standard array and template accessing index", expect => {
-    const template = `<ul><li x-repeat="src" x-text="$index"></li></ul>`;
+    const template = `<ul><li x-for="array" x-text="$index"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
-    let list = [1, 5, 7];
+    let array = [1, 5, 7];
 
-    expect.doesNotThrow(() => ui.applyBindings({ src: list }, el));
-    expect.equal(el.children.length, list.length);
+    expect.doesNotThrow(() => ui.applyBindings({ array }, el));
+    expect.equal(el.children.length, array.length);
 
-    expect.isEquivalent(util.toArray(el.children).map(node => parseInt(node.textContent || "")), util.range(0, list.length));
+    expect.isEquivalent(util.toArray(el.children).map(node => parseInt(node.textContent || "")), util.range(0, array.length));
     expect.end();
 });
 
 it("binding to a value yielding an array", expect => {
-    const template = `<ul><li x-repeat="src" x-text="$index"></li></ul>`;
+    const template = `<ul><li x-for="src" x-text="$index"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let prop = px.value<number[]>([]);
@@ -47,37 +47,37 @@ it("binding to a value yielding an array", expect => {
 });
 
 it("binding to a observable list containing numbers", expect => {
-    const template = `<ul><li x-repeat="src" x-text="$index"></li></ul>`;
+    const template = `<ul><li x-for="array" x-text="$index"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
-    let list = px.array([1, 5, 7]);
-    expect.doesNotThrow(() => ui.applyBindings({ src: list }, el));
+    let array = px.array([1, 5, 7]);
+    expect.doesNotThrow(() => ui.applyBindings({ array }, el));
 
-    expect.equal(el.children.length, list().length);
-    expect.isEquivalent(util.toArray(el.children).map(node => parseInt(node.textContent || "")), util.range(0, list().length));
+    expect.equal(el.children.length, array().length);
+    expect.isEquivalent(util.toArray(el.children).map(node => parseInt(node.textContent || "")), util.range(0, array().length));
     expect.end();
 });
 
 it("binding to a observable list containing numbers without initialContents", expect => {
-    const template = `<ul><li x-repeat="src" x-text="$data"></li></ul>`;
+    const template = `<ul><li x-for-value="src" x-text="value"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
-    let list = px.array();
+    let array = px.array();
 
     for (let i = 0; i < 10; i++) {
-        list.push(i);
+        array.push(i);
     }
 
-    expect.equal(list().length, 10);
-    expect.doesNotThrow(() => ui.applyBindings({ src: list }, el));
+    expect.equal(array().length, 10);
+    expect.doesNotThrow(() => ui.applyBindings({ src: array }, el));
 
-    expect.equal(el.children.length, list().length);
-    expect.isEquivalent(util.toArray(el.children).map(node => parseInt(node.textContent || "")), util.range(0, list().length));
+    expect.equal(el.children.length, array().length);
+    expect.isEquivalent(util.toArray(el.children).map(node => parseInt(node.textContent || "")), util.range(0, array().length));
     expect.end();
 });
 
 it("binding to a observable list adding/removing", expect => {
-    const template = `<ul><li x-repeat="src" x-text="$data"></li></ul>`;
+    const template = `<ul><li x-for-value="src" x-text="value"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let list = px.array([1, 3, 5]);
@@ -103,7 +103,7 @@ it("binding to a observable list adding/removing", expect => {
 });
 
 it("binding to a observable list moving", expect => {
-    const template = `<ul><li x-repeat="$data" x-text="$data"></li></ul>`;
+    const template = `<ul><li x-for-item="$data" x-text="item"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let list = px.array([1, 3, 5]);
@@ -119,8 +119,8 @@ it("binding to a observable list moving", expect => {
 });
 
 it("binding to a observable list containing model", expect => {
-    const template = `<ul><li x-repeat="$data">
-                        <span class="part1" x-text="foo"></span>
+    const template = `<ul><li x-for-item="$data">
+                        <span class="part1" x-text="item.foo"></span>
                       </li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
@@ -134,8 +134,8 @@ it("binding to a observable list containing model", expect => {
 });
 
 it("observable list of observables", expect => {
-    const template = `<ul><li x-repeat="src">
-                        <span class="part1" x-text="foo"></span>
+    const template = `<ul><li x-for-item="src">
+                        <span class="part1" x-text="item.foo"></span>
                       </li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 

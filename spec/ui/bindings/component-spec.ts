@@ -1,7 +1,7 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
 import * as ui from "../../../src/ui/app";
-import { IViewModel } from "../../../src/ui/interfaces";
+import { IViewModel, IDataContext } from "../../../src/ui/interfaces";
 import * as util from "../spec-utils";
 
 it("component: Loads a component using simple string options", expect => {
@@ -50,6 +50,23 @@ it("component: Loads a component through an AMD module loader", expect => {
     expect.end();
 });
 
+it("component: Loads a template through an AMD module loader", expect => {
+    const str = `<div x-component="'test-component'"></div>`;
+    const el = <HTMLElement> util.parse(str)[0];
+
+    let vm = {
+        init: function () {
+            expect.equal(el.innerHTML, "<span>foo</span>");
+            expect.end();
+        },
+    };
+
+    ui.components.register("test-component", "text!src/ui/components/my-select.html");
+
+    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    expect.end();
+});
+
 it("component: Loads a template from a string", expect => {
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> util.parse(str)[0];
@@ -68,7 +85,7 @@ it("component: Loads a template from a node-array", expect => {
 
     const template = "<span>foo</span>";
     ui.components.register("test-component", {
-        template: util.parse(template),
+        template: util.parseFrag(template),
     });
 
     expect.doesNotThrow(() => ui.applyBindings({ }, el));
@@ -86,23 +103,6 @@ it("component: Loads a template from a selector", expect => {
 
     expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.equal(el.innerHTML, "bar");
-    expect.end();
-});
-
-it("component: Loads a template through an AMD module loader", expect => {
-    const str = `<div x-component="'test-component'"></div>`;
-    const el = <HTMLElement> util.parse(str)[0];
-
-    let vm = {
-        init: function () {
-            expect.equal(el.innerHTML, "<span>foo</span>");
-            expect.end();
-        },
-    };
-
-    ui.components.register("test-component", "text!src/ui/components/my-select.html");
-
-    expect.doesNotThrow(() => ui.applyBindings(vm, el));
     expect.end();
 });
 
@@ -221,22 +221,22 @@ it("component: Unsubscribes a component's viewmodel if has cleanup subscription"
 });
 
 it("component: Components are properly isolated", expect => {
-    const str = `<div x-with="foo"><test-component></test-component></div>`;
+    const str = `<div x-as="foo"><test-component></test-component></div>`;
     const el = <HTMLElement> util.parse(str)[0];
     const template = `<span x-text="bar">invalid</span>`;
-    let value = "baz";
-
+    const value = "baz";
+    const viewModel = { foo: 42 };
     ui.components.register("test-component", {
         template: template,
         viewModel: { bar: value,
-            preInit: (element: any, ctx: any) => {
-                expect.equal(ctx.$root, ctx.$data);
-                expect.true(ctx.$data.foo === undefined);
+            preInit: (element: HTMLElement, ctx: IDataContext) => {
+                expect.notEqual(ctx.$data, viewModel, "viewModel of component is not equal to root viewModel");
+                expect.equal(ctx.$data["bar"], value);
             },
         },
     });
 
-    expect.doesNotThrow(() => ui.applyBindings({ foo: 42 }, el));
+    expect.doesNotThrow(() => ui.applyBindings(viewModel, el));
     expect.equal(el.childNodes[0].childNodes[0].textContent, value);
     expect.end();
 });

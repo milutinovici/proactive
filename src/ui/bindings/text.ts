@@ -11,7 +11,7 @@ export class TextBinding extends SingleBindingBase<string> {
         this.twoWay = true;
     }
 
-    public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<string>, state: INodeState, ctx: IDataContext) {
+    public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<string>, state: INodeState<IDataContext>) {
         const textExpression = state.bindings[this.name][0].text;
         const isText = isTextNode(el);
         const sub = observable.subscribe(value => {

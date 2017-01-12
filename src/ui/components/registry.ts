@@ -1,6 +1,6 @@
 import * as Rx from "rxjs";
 import { IComponentDescriptor, IViewModel } from "../interfaces";
-import { observableRequire, isFunction, nodeListToArray } from "../utils";
+import { observableRequire, isFunction, nodeListToFragment } from "../utils";
 import { html } from "../templateEngines";
 import { exception } from "../exceptionHandlers";
 export class ComponentRegistry {
@@ -54,14 +54,14 @@ export class ComponentRegistry {
         return vm;
     }
 
-    private compileTemplate(template: Node[] | string): Node[] {
+    private compileTemplate(template: DocumentFragment | string): DocumentFragment {
         if (typeof template === "string") {
             if (template[0] === "#") {
                 const tmp = document.getElementById(template.slice(1, template.length));
                 if (tmp instanceof HTMLTemplateElement) {
-                    return nodeListToArray(tmp.content.childNodes);
+                    return nodeListToFragment(tmp.content.childNodes);
                 } else if (tmp !== null) {
-                    return nodeListToArray(tmp.childNodes);
+                    return nodeListToFragment(tmp.childNodes);
                 } else {
                     throw Error(`No template with id: "${template}" found`);
                 }
@@ -69,8 +69,11 @@ export class ComponentRegistry {
                 return html.parse(template);
             }
         } else if (Array.isArray(template)) {
-            return <Node[]> template;
-        } else { throw Error("invalid template descriptor");
+            return nodeListToFragment(template as any);
+        } else if (template instanceof DocumentFragment) {
+            return template;
+        } else {
+            throw Error("invalid template descriptor");
         }
     }
 

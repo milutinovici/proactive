@@ -80,19 +80,19 @@ it("text: binding to a observable model value", expect => {
     expect.end();
 });
 
-it("text: binding to a view computed observable", expect => {
-    const template = `<span x-text="'hello ' + observableString">invalid</span>`;
-    const el = <HTMLElement> util.parse(template)[0];
+// it("text: binding to a view computed observable", expect => {
+//     const template = `<span x-text="'hello ' + observableString">invalid</span>`;
+//     const el = <HTMLElement> util.parse(template)[0];
 
-    let model = { observableString: px.value("foo") };
+//     let model = { observableString: px.value("foo") };
 
-    expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => ui.applyBindings(model, el));
-    expect.equal(el.textContent, "hello " + model.observableString());
-    model.observableString("bar");
-    expect.equal(el.textContent, "hello " + model.observableString());
-    expect.end();
-});
+//     expect.equal(el.textContent, "invalid");
+//     expect.doesNotThrow(() => ui.applyBindings(model, el));
+//     expect.equal(el.textContent, "hello " + model.observableString());
+//     model.observableString("bar");
+//     expect.equal(el.textContent, "hello " + model.observableString());
+//     expect.end();
+// });
 
 it("text: handlebar binding works", expect => {
     const template = `<div>{{observableString}}</div>"`;

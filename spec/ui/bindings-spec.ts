@@ -6,5 +6,5 @@ import "./bindings/css-spec";
 import "./bindings/event-spec";
 import "./bindings/if-spec";
 import "./bindings/value-spec";
-import "./bindings/with-spec";
-import "./bindings/repeat-spec";
+import "./bindings/as-spec";
+import "./bindings/for-spec";

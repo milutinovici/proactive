@@ -70,9 +70,9 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
                 return fn(ctx);
             } else if (this.canWrite(this.text)) {
                 const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
-                const write = new Function("$context", writeBody)(ctx) as (value: T) => void;
+                const write = new Function("$context", writeBody);
                 BindingAttribute.writeCache.set(this.text, write);
-                return write;
+                return write(ctx) as (value: T) => void;
             } else {
             return (value: T) => {};
           }

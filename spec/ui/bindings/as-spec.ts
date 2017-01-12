@@ -3,33 +3,33 @@ import * as px from "../../../src/core/proactive";
 import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
-it("with: bound to a non-observable value", expect => {
-    const template = `<div x-with="childModel"><span x-text="foo">invalid</span></div>`;
+it("as: bound to a non-observable value", expect => {
+    const template = `<div x-as-child="childModel"><span x-text="child.foo">invalid</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let childModel = {
         foo: px.value("bar"),
     };
 
-    let model = {
+    let viewModel = {
         childModel: childModel,
     };
 
-    expect.doesNotThrow(() => ui.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(viewModel, el));
 
-    expect.equal(el.children[0].textContent, model.childModel.foo());
-    model.childModel.foo("foo");
-    expect.equal(el.children[0].textContent, model.childModel.foo());
+    expect.equal(el.children[0].textContent, viewModel.childModel.foo());
+    viewModel.childModel.foo("foo");
+    expect.equal(el.children[0].textContent, viewModel.childModel.foo());
 
     // try it again
     ui.cleanNode(el);
-    model.childModel.foo("baz");
-    expect.notEqual(el.children[0].textContent, model.childModel.foo());
+    viewModel.childModel.foo("baz");
+    expect.notEqual(el.children[0].textContent, viewModel.childModel.foo());
     expect.end();
 });
 
-it("with: bound to an observable value", expect => {
-    const template = `<div x-with="childModel"><span x-text="foo">invalid</span></div>`;
+it("as: bound to an observable value", expect => {
+    const template = `<div x-as-child="childModel"><span x-text="child.foo">invalid</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let childModel1 = {
@@ -40,22 +40,22 @@ it("with: bound to an observable value", expect => {
         foo: px.value("magic"),
     };
 
-    let model = {
+    let viewModel = {
         childModel: px.value<any>(childModel1),
     };
 
-    expect.doesNotThrow(() => ui.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.applyBindings(viewModel, el));
     expect.equal(el.children[0].textContent, childModel1.foo());
 
-    model.childModel().foo("foo");
+    viewModel.childModel().foo("foo");
     expect.equal(el.children[0].textContent, childModel1.foo());
 
-    model.childModel(childModel2);
+    viewModel.childModel(childModel2);
     expect.equal(el.children[0].textContent, childModel2.foo());
 
     // try it again
     ui.cleanNode(el);
-    model.childModel().foo("baz");
+    viewModel.childModel().foo("baz");
     expect.notEqual(el.children[0].textContent, childModel2.foo());
     expect.end();
 });

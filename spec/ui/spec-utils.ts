@@ -1,6 +1,10 @@
 import { html } from "../../src/ui/templateEngines";
+import { nodeListToArray } from "../../src/ui/utils";
 
 export function parse(template: string): Node[] {
+    return nodeListToArray(html.parse(template).childNodes);
+}
+export function parseFrag(template: string): DocumentFragment {
     return html.parse(template);
 }
 

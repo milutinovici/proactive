@@ -85,16 +85,6 @@ it("css: binding multiple css classes to multiple observable model properties", 
     expect.end();
 });
 
-it("css: When class is not defined, error is thrown", expect => {
-    const template = `<div x-css="constantString">empty</div>`;
-    const el = <HTMLElement> util.parse(template)[0];
-
-    let model = createCssModel();
-    model.constantString = "foo";
-    expect.throws(() => ui.applyBindings(model, el));
-    expect.end();
-});
-
 function createCssModel() {
     return {
         constantBool: true,

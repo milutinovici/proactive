@@ -80,28 +80,28 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
     expect.end();
 });
 
-it("value: Should be able to write to observable subproperties of an observable, even after the parent observable has changed", expect => {
-    // This spec represents https://github.com/SteveSanderson/knockout/issues#issue/13
-    // Set up a text box whose value is linked to the subproperty of the observable's current value
-    const template = `<input type="text" x-value="myprop.subproperty" />`;
-    const el = <HTMLInputElement> util.parse(template)[0];
+// it("value: Should be able to write to observable subproperties of an observable, even after the parent observable has changed", expect => {
+//     // This spec represents https://github.com/SteveSanderson/knockout/issues#issue/13
+//     // Set up a text box whose value is linked to the subproperty of the observable's current value
+//     const template = `<input type="text" x-value="myprop.subproperty" />`;
+//     const el = <HTMLInputElement> util.parse(template)[0];
 
-    let originalSubproperty = px.value("original value");
-    let newSubproperty = px.value<string>();
-    let model = { myprop: px.value<any>({ subproperty: originalSubproperty }) };
+//     let originalSubproperty = px.value("original value");
+//     let newSubproperty = px.value<string>();
+//     let model = { myprop: px.value<any>({ subproperty: originalSubproperty }) };
 
-    ui.applyBindings(model, el);
-    expect.equal(el.value, "original value");
+//     ui.applyBindings(model, el);
+//     expect.equal(el.value, "original value");
 
-    model.myprop({ subproperty: newSubproperty }); // Note that myprop (and hence its subproperty) is changed *after* the bindings are applied
-    el.value = "Some new value";
-    util.triggerEvent(el, "change");
+//     model.myprop({ subproperty: newSubproperty }); // Note that myprop (and hence its subproperty) is changed *after* the bindings are applied
+//     el.value = "Some new value";
+//     util.triggerEvent(el, "change");
 
-    // Verify that the change was written to the *new* subproperty, not the one referenced when the bindings were first established
-    expect.equal(newSubproperty(), "Some new value");
-    expect.equal(originalSubproperty(), "original value");
-    expect.end();
-});
+//     // Verify that the change was written to the *new* subproperty, not the one referenced when the bindings were first established
+//     expect.equal(newSubproperty(), "Some new value");
+//     expect.equal(originalSubproperty(), "original value");
+//     expect.end();
+// });
 
 it("value: Should only register one single onchange handler", expect => {
     const template = `<input type="text" x-value="someProp" />`;

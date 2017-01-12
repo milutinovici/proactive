@@ -12,7 +12,7 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
         this.twoWay = true;
     }
 
-    public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, state: INodeState, ctx: IDataContext, event = "change") {
+    public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, state: INodeState<IDataContext>, event = "change") {
         let sub1: Subscription;
         let sub2: Subscription | undefined;
 

@@ -19,19 +19,19 @@ export abstract class BindingBase implements IBindingHandler {
         this.domManager = domManager;
     }
 
-    public abstract applyBinding(node: Element, state: INodeState, ctx: IDataContext): void;
+    public abstract applyBinding(node: Element, state: INodeState<IDataContext>): void;
 
 }
 
 export abstract class SingleBindingBase<T> extends BindingBase {
-    public applyBinding(el: Element, state: INodeState, ctx: IDataContext): void {
+    public applyBinding(el: Element, state: INodeState<IDataContext>): void {
         if (state.bindings[this.name].length > 1) {
             exception.next(new Error(`more than 1 ${this.name} binding on element ${el}`));
             return;
         }
-        this.applySingleBinding(el, state.bindings[this.name][0].evaluate(ctx, el, this.twoWay), state, ctx, state.bindings[this.name][0].parameter);
+        this.applySingleBinding(el, state.bindings[this.name][0].evaluate(state.context, el, this.twoWay), state, state.bindings[this.name][0].parameter);
     }
-    protected abstract applySingleBinding(el: Element, observable: Observable<T> | Observer<T>, state: INodeState, ctx: IDataContext, parameter?: string): void;
+    protected abstract applySingleBinding(el: Element, observable: Observable<T> | Observer<T>, state: INodeState<IDataContext>, parameter?: string): void;
 }
 
 /**
@@ -40,9 +40,9 @@ export abstract class SingleBindingBase<T> extends BindingBase {
 */
 export abstract class SimpleBinding<T> extends BindingBase {
 
-    public applyBinding(el: Element, state: INodeState, ctx: IDataContext): void {
+    public applyBinding(el: Element, state: INodeState<IDataContext>): void {
         for (const binding of state.bindings[this.name]) {
-            const observable = binding.evaluate(ctx, el, this.twoWay) as Observable<T>;
+            const observable = binding.evaluate(state.context, el, this.twoWay) as Observable<T>;
             const subscription = this.apply(el, observable, binding.parameter);
             if (subscription !== undefined) {
                 state.cleanup.add(subscription);

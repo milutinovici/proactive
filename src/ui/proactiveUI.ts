@@ -18,8 +18,8 @@ export class ProactiveUI {
     * @param {Object} model The model to bind to
     * @param {Node} rootNode The node to be bound
     */
-    public applyBindings(model: Object, node: Element = document.documentElement) {
-        this.domManager.applyBindings(model, node);
+    public applyBindings(viewModel: Object, node: Element = document.documentElement) {
+        this.domManager.applyBindings(viewModel, node);
         const sub = Rx.Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
             this.domManager.cleanDescendants(node);
             sub.unsubscribe();
@@ -33,16 +33,16 @@ export class ProactiveUI {
         this.domManager.cleanNode(node);
     }
 
-    public contextFor(node: Element): IDataContext {
-        return this.domManager.nodeState.getDataContext(node);
+    public contextFor(node: Element): IDataContext | undefined {
+        const nodeState = this.domManager.nodeStateManager.get(node);
+        if (nodeState !== undefined) {
+            return nodeState.context;
+        }
+        return undefined;
     }
 
     public dataFor(node: Element): any {
-        const state = this.domManager.nodeState.get(node);
-        if (state !== undefined) {
-            return state.model;
-        }
-        return undefined;
+        return this.domManager.nodeStateManager.getDataContext(node);
     }
 
 }

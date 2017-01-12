@@ -1,13 +1,13 @@
-import { NodeStateManager } from "./nodeState";
+import { NodeStateManager, DataContext, NodeState } from "./nodeState";
 import { isElement, isTextNode, startsWith, endsWith, groupBy } from "./utils";
 import { BindingProvider } from "./bindingProvider";
-import { IDataContext, IBindingHandler, IViewModel } from "./interfaces";
+import { IDataContext, IBindingHandler, IViewModel, INodeState } from "./interfaces";
 import { EventBinding } from "./bindings/event";
 import { IfBinding } from "./bindings/if";
 import { TextBinding } from "./bindings/text";
 import { AttrBinding, CssBinding, StyleBinding, HtmlBinding } from "./bindings/oneWay";
-import { RepeatBinding } from "./bindings/repeat";
-import { WithBinding } from "./bindings/with";
+import { ForBinding } from "./bindings/for";
+import { AsBinding } from "./bindings/as";
 import { ValueBinding } from "./bindings/value";
 import { ComponentBinding } from "./bindings/component";
 import { KeyPressBinding } from "./bindings/keypress";
@@ -15,13 +15,13 @@ import { FocusBinding } from "./bindings/focus";
 import { exception } from "./exceptionHandlers";
 
 export class DomManager {
-    public readonly nodeState: NodeStateManager;
+    public readonly nodeStateManager: NodeStateManager;
 
     private readonly ignore = ["SCRIPT", "TEXTAREA", "TEMPLATE"];
     private readonly bindingHandlers: { [name: string]: IBindingHandler } = {};
 
     constructor(nodeState: NodeStateManager) {
-        this.nodeState = nodeState;
+        this.nodeStateManager = nodeState;
         this.registerCoreBindings();
     }
 
@@ -30,17 +30,17 @@ export class DomManager {
             throw Error("first parameter should be your model, second parameter should be a DOM node!");
         }
         // create or update node state for root node
-        let state = this.nodeState.get(rootNode);
-        if (state) {
-            state.model = model;
+        const context = new DataContext(model);
+        let state = this.nodeStateManager.get(rootNode) as INodeState<IDataContext>;
+        if (state === undefined) {
+            state = new NodeState(context);
+            this.nodeStateManager.set(rootNode, state);
         } else {
-            state = this.nodeState.create(model);
-            this.nodeState.set(rootNode, state);
+            state.context = context;
         }
 
         // calculate resulting data-context and apply bindings
-        let ctx = this.nodeState.getDataContext(rootNode);
-        this.applyBindingsRecursive(ctx, rootNode);
+        this.applyBindingsRecursive(state.context, rootNode);
     }
 
     public applyBindingsToDescendants(ctx: IDataContext, node: Element): void {
@@ -62,12 +62,12 @@ export class DomManager {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
                 this.cleanNodeRecursive(node.childNodes[i]);
-                this.nodeState.clear(node.childNodes[i]);
+                this.nodeStateManager.clear(node.childNodes[i]);
             }
         }
     }
 
-    private applyBindingsRecursive(ctx: IDataContext, el: Node): void {
+    public applyBindingsRecursive(ctx: IDataContext, el: Node): void {
         if (this.shouldBind(el) && !this.applyBindingsInternal(ctx, el) && el.hasChildNodes()) {
             let child = el.firstChild;
             // iterate over descendants
@@ -89,7 +89,7 @@ export class DomManager {
             }
         }
         // clear parent after childs
-        this.nodeState.clear(node);
+        this.nodeStateManager.clear(node);
     }
 
     private applyBindingsInternal(ctx: IDataContext, el: Node): boolean {
@@ -98,11 +98,11 @@ export class DomManager {
             return false;
         }
         // get or create elment-state
-        let state = this.nodeState.get(el);
+        let state = this.nodeStateManager.get(el);
         // create and set if necessary
         if (!state) {
-            state = this.nodeState.create(ctx.$data);
-            this.nodeState.set(el, state);
+            state = new NodeState(ctx);
+            this.nodeStateManager.set(el, state);
         }
         state.bindings = groupBy(bindings, x => x.name);
         const handlers = this.getHandlers(Object.keys(state.bindings));
@@ -110,12 +110,12 @@ export class DomManager {
 
         // apply all bindings
         for (const handler of handlers) {
-            // prevent recursive applying of repeat
-            if (handler.name === "repeat" && state["index"] !== undefined) {
+            // prevent recursive applying of for
+            if (handler.name === "for" && state.context.$index !== undefined) {
                 continue;
             }
-            // apply repeat before anything else, then imediately return
-            if (handler.name === "repeat" && state["index"] === undefined) {
+            // apply for before anything else, then imediately return
+            if (handler.name === "for" && state.context.$index === undefined) {
                 handler.applyBinding(el, state, ctx);
                 return true;
             }
@@ -170,10 +170,10 @@ export class DomManager {
         this.registerHandler(new EventBinding("on", this));
         this.registerHandler(new KeyPressBinding("key", this));
         this.registerHandler(new IfBinding("if", this));
-        this.registerHandler(new WithBinding("with", this));
+        this.registerHandler(new AsBinding("as", this));
         this.registerHandler(new TextBinding("text", this));
         this.registerHandler(new HtmlBinding("html", this));
-        this.registerHandler(new RepeatBinding("repeat", this));
+        this.registerHandler(new ForBinding("for", this));
 
         this.registerHandler(new ComponentBinding("component", this));
         this.registerHandler(new ValueBinding("value", this));

@@ -13,7 +13,7 @@ export class IfBinding extends SingleBindingBase<boolean> {
         super(name, domManager);
     }
 
-    protected applySingleBinding(el: HTMLElement, observable: Rx.Observable<boolean>, state: INodeState, ctx: IDataContext) {
+    protected applySingleBinding(el: HTMLElement, observable: Rx.Observable<boolean>, state: INodeState<IDataContext>) {
         // backup inner HTML
         const template = new Array<Node>();
         // template
@@ -23,7 +23,7 @@ export class IfBinding extends SingleBindingBase<boolean> {
         const visibility = observable.map(x => !!x).distinctUntilChanged();
         // subscribe
         state.cleanup.add(visibility.subscribe((x => {
-            this.applyValue(el, x, template, ctx);
+            this.applyValue(el, x, template, state.context);
         })));
     }
 
