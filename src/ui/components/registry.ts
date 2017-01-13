@@ -5,30 +5,34 @@ import { html } from "../templateEngines";
 import { exception } from "../exceptionHandlers";
 export class ComponentRegistry {
 
-    private readonly components: { [name: string]: IComponentDescriptor | string } = {};
+    private readonly components = new Map<string, IComponentDescriptor | string>();
 
     // component is either a descriptor or a require string
     public register(name: string, component: IComponentDescriptor | string) {
         if (name.indexOf("-") === -1) {
             throw new Error(`Component name "${name}" must contain a dash (-)` );
         }
-        this.components[name.toUpperCase()] = component;
+        this.components.set(name.toUpperCase(), component);
     }
 
     public isRegistered(name: string): boolean {
-        return this.components[name.toUpperCase()] != null;
+        return this.components.has(name.toUpperCase());
+    }
+
+    public registered(name: string) {
+        return this.components.has(name);
     }
 
     public load(name: string): Rx.Observable<IComponentDescriptor> {
         name = name.toUpperCase();
         let result = this.getDescriptor(name);
         result = result.map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel });
-        result.do(x => this.components[name] = x ); // cache descriptor
+        result.do(x => this.components.set(name, x)); // cache descriptor
         return result;
     }
 
     private getDescriptor(name: string): Rx.Observable<IComponentDescriptor> {
-        const descriptor = this.components[name];
+        const descriptor = this.components.get(name);
         if (descriptor != null) {
             if (typeof descriptor === "string") {
                 return observableRequire<IComponentDescriptor>(descriptor);

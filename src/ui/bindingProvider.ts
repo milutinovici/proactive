@@ -11,7 +11,7 @@ export class BindingProvider {
         const tag = element.tagName;
         const bindings = this.getAttributeValues(element, tag);
         // check if element is custom element (component)
-        if (tag.indexOf("-") !== -1 && components.isRegistered(tag)) {
+        if (components.registered(tag)) {
             // when a component is referenced as custom-element, apply a virtual 'component' binding
             bindings.push(new BindingAttribute<string>(tag, "component", `'${tag}'`));
         }
