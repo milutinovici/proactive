@@ -18,7 +18,7 @@ export class DomManager {
     public readonly nodeStateManager: NodeStateManager;
 
     private readonly ignore = ["SCRIPT", "TEXTAREA", "TEMPLATE"];
-    private readonly bindingHandlers: { [name: string]: IBindingHandler } = {};
+    private readonly bindingHandlers = new Map<string, IBindingHandler>();
 
     constructor(nodeState: NodeStateManager) {
         this.nodeStateManager = nodeState;
@@ -105,9 +105,8 @@ export class DomManager {
             this.nodeStateManager.set(el, state);
         }
         state.bindings = groupBy(bindings, x => x.name);
-        const handlers = this.getHandlers(state.bindings);
-        const controlsDescendants = handlers.some(x => x.controlsDescendants);
-
+        const handlers: IBindingHandler[] = [];
+        const controlsDescendants = this.getHandlers(state.bindings, handlers);
         // apply all bindings
         for (const handler of handlers) {
             // prevent recursive applying of for
@@ -122,7 +121,7 @@ export class DomManager {
             handler.applyBinding(el, state, ctx);
         }
 
-        return controlsDescendants;
+        return controlsDescendants !== 0;
     }
 
     private shouldBind(el: Node): boolean {
@@ -131,36 +130,35 @@ export class DomManager {
     }
 
     public registerHandler(handler: IBindingHandler) {
-        this.bindingHandlers[handler.name] = handler;
+        this.bindingHandlers.set(handler.name, handler);
     }
     public getBindingHandler(name: string) {
-        const handler = this.bindingHandlers[name];
+        const handler = this.bindingHandlers.get(name);
         if (!handler) {
             throw new Error(`Binding handler "${name}" has not been registered.`);
         }
         return handler;
     }
-    private getHandlers(attributes: Map<string, IBindingAttribute<any>[]>) {
-        // lookup handlers
-        const handlers: IBindingHandler[] = [];
+    private getHandlers(attributes: Map<string, IBindingAttribute<any>[]>, handlers: IBindingHandler[]) {
+        let controlsDescendants = 0;
         attributes.forEach((val, name) => {
-            const handler = this.bindingHandlers[name];
+            const handler = this.bindingHandlers.get(name);
             if (!handler) {
                 exception.next(new Error(`Binding handler "${name}" has not been registered.`));
             } else {
+                if (handler.controlsDescendants) {
+                    controlsDescendants += 1;
+                }
                 handlers.push(handler);
             }
         });
-
         // sort by priority
         handlers.sort((a, b) => b.priority - a.priority);
 
-        // check if there's binding-handler competition for descendants (which is illegal)
-        const hd = handlers.filter(x => x.controlsDescendants).map(x => `'${x.name}'`);
-        if (hd.length > 1) {
-            throw Error(`bindings ${hd.join(", ")} are competing for descendants of target element!`);
+        if (controlsDescendants > 1) {
+            throw Error(`bindings are competing for descendants of target element!`);
         }
-        return handlers;
+        return controlsDescendants;
     }
 
     private registerCoreBindings() {
