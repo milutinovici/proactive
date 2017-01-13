@@ -1,7 +1,7 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { SingleBindingBase } from "./bindingBase";
-import { IDataContext, INodeState } from "../interfaces";
+import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
 import { isTextNode } from "../utils";
 
 export class TextBinding extends SingleBindingBase<string> {
@@ -12,7 +12,7 @@ export class TextBinding extends SingleBindingBase<string> {
     }
 
     public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<string>, state: INodeState<IDataContext>) {
-        const textExpression = state.bindings[this.name][0].text;
+        const textExpression = (state.bindings.get(this.name) as IBindingAttribute<any>[])[0].text;
         const isText = isTextNode(el);
         const sub = observable.subscribe(value => {
             if ((value === null) || (value === undefined)) {

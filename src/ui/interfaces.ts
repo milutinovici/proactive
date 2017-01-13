@@ -1,5 +1,4 @@
 import { Observable, Subscription, Observer, BehaviorSubject } from "rxjs";
-import { Group } from "./utils";
 
 export interface IBindingAttribute<T> {
     readonly tag: string;
@@ -44,7 +43,7 @@ export interface IDataContext {
 export interface INodeState<T extends IDataContext> {
     readonly cleanup: Subscription;
     context: T;        // scope model
-    bindings: Group<IBindingAttribute<any>>;
+    bindings: Map<string, IBindingAttribute<any>[]>;
 }
 export interface IViewModel {
     readonly cleanup?: Subscription;

@@ -1,7 +1,7 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
-import { INodeState, IComponentDescriptor, IComponent, IViewModel, IDataContext } from "../interfaces";
+import { INodeState, IComponentDescriptor, IComponent, IViewModel, IDataContext, IBindingAttribute } from "../interfaces";
 import { DataContext } from "../nodeState";
 import { SingleBindingBase } from "./bindingBase";
 import { AttrBinding } from "./oneWay";
@@ -104,15 +104,15 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
 
     private getParams(state: INodeState<IDataContext>): T {
         const params = {};
-        if (state.bindings["attr"] !== undefined) {
-            state.bindings["attr"].filter(x => x.parameter !== undefined).forEach(x => params[<string> x.parameter] = x.expression(state.context));
+        if (state.bindings.has("attr")) {
+            (state.bindings.get("attr") as IBindingAttribute<any>[]).forEach(x => params[x.parameter as string] = x.expression(state.context));
         }
         return params as T;
     }
 
     private getViewModel(element: HTMLElement, state: INodeState<IDataContext>, descriptor: Observable<IComponentDescriptor>, params: T): Observable<IViewModel|null> {
-        return state.bindings["as"] ?
-               state.bindings["as"][0].evaluate(state.context, element, false) as Observable<IViewModel> :
+        return state.bindings.has("as") ?
+               (state.bindings.get("as") as IBindingAttribute<any>[])[0].evaluate(state.context, element, false) as Observable<IViewModel> :
                descriptor.map(x => components.initialize(x, params));
     }
 }

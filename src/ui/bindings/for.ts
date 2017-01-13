@@ -13,7 +13,7 @@ export class ForBinding<T> extends BindingBase {
     }
 
     public applyBinding(node: Element, state: INodeState<IDataContext>): void {
-        const binding = state.bindings[this.name][0] as IBindingAttribute<T[]>;
+        const binding = (state.bindings.get(this.name) as IBindingAttribute<T[]>[])[0];
         const childContextName = binding.parameter as string;
         const parent = node.parentElement as HTMLElement;
         const placeholder: Comment = document.createComment(`for ${binding.text}`);

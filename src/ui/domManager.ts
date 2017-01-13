@@ -1,7 +1,7 @@
 import { NodeStateManager, DataContext, NodeState } from "./nodeState";
 import { isElement, isTextNode, startsWith, endsWith, groupBy } from "./utils";
 import { BindingProvider } from "./bindingProvider";
-import { IDataContext, IBindingHandler, IViewModel, INodeState } from "./interfaces";
+import { IDataContext, IBindingHandler, IViewModel, INodeState, IBindingAttribute } from "./interfaces";
 import { EventBinding } from "./bindings/event";
 import { IfBinding } from "./bindings/if";
 import { TextBinding } from "./bindings/text";
@@ -105,7 +105,7 @@ export class DomManager {
             this.nodeStateManager.set(el, state);
         }
         state.bindings = groupBy(bindings, x => x.name);
-        const handlers = this.getHandlers(Object.keys(state.bindings));
+        const handlers = this.getHandlers(state.bindings);
         const controlsDescendants = handlers.some(x => x.controlsDescendants);
 
         // apply all bindings
@@ -140,17 +140,17 @@ export class DomManager {
         }
         return handler;
     }
-    private getHandlers(handlerNames: string[]) {
+    private getHandlers(attributes: Map<string, IBindingAttribute<any>[]>) {
         // lookup handlers
         const handlers: IBindingHandler[] = [];
-        for (const name of handlerNames) {
+        attributes.forEach((val, name) => {
             const handler = this.bindingHandlers[name];
             if (!handler) {
                 exception.next(new Error(`Binding handler "${name}" has not been registered.`));
-                continue;
+            } else {
+                handlers.push(handler);
             }
-            handlers.push(handler);
-        }
+        });
 
         // sort by priority
         handlers.sort((a, b) => b.priority - a.priority);

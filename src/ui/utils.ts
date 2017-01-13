@@ -147,18 +147,16 @@ export function nodeIndex(node: Node) {
     return node.parentElement ? Array.prototype.indexOf.call(node.parentElement.children, node) : -1;
 }
 
-export type Group<T> = { readonly [name: string]: T[] };
-
-export function groupBy<T>(array: T[], selector: (x: T) => any): Group<T>  {
-    const groups: any = { };
+export function groupBy<T>(array: T[], selector: (x: T) => any): Map<string, T[]>  {
+    const groups = new Map<string, T[]>();
     for (const element of array) {
         const key: string = selector(element).toString();
-        if (!groups[key]) {
-            groups[key] = [];
+        if (!groups.has(key)) {
+            groups.set(key, []);
         }
-        groups[key].push(element);
+        (groups.get(key) as T[]).push(element);
     }
-    return groups as Group<T>;
+    return groups;
 };
 
 export function startsWith(subject: string, search: string) {

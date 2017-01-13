@@ -1,6 +1,6 @@
 import { Observable, Observer, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { IDataContext, IBindingHandler, INodeState } from "../interfaces";
+import { IDataContext, IBindingHandler, INodeState, IBindingAttribute } from "../interfaces";
 import { exception } from "../exceptionHandlers";
 
 /**
@@ -25,11 +25,12 @@ export abstract class BindingBase implements IBindingHandler {
 
 export abstract class SingleBindingBase<T> extends BindingBase {
     public applyBinding(el: Element, state: INodeState<IDataContext>): void {
-        if (state.bindings[this.name].length > 1) {
+        const bindings = state.bindings.get(this.name) as IBindingAttribute<any>[];
+        if (bindings.length > 1) {
             exception.next(new Error(`more than 1 ${this.name} binding on element ${el}`));
             return;
         }
-        this.applySingleBinding(el, state.bindings[this.name][0].evaluate(state.context, el, this.twoWay), state, state.bindings[this.name][0].parameter);
+        this.applySingleBinding(el, bindings[0].evaluate(state.context, el, this.twoWay), state, bindings[0].parameter);
     }
     protected abstract applySingleBinding(el: Element, observable: Observable<T> | Observer<T>, state: INodeState<IDataContext>, parameter?: string): void;
 }
@@ -41,7 +42,8 @@ export abstract class SingleBindingBase<T> extends BindingBase {
 export abstract class SimpleBinding<T> extends BindingBase {
 
     public applyBinding(el: Element, state: INodeState<IDataContext>): void {
-        for (const binding of state.bindings[this.name]) {
+        const bindings = state.bindings.get(this.name) as IBindingAttribute<any>[];
+        for (const binding of bindings) {
             const observable = binding.evaluate(state.context, el, this.twoWay) as Observable<T>;
             const subscription = this.apply(el, observable, binding.parameter);
             if (subscription !== undefined) {

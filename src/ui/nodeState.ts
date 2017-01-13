@@ -1,11 +1,10 @@
 import * as Rx from "rxjs";
 import { IDataContext, INodeState, IViewModel, IBindingAttribute } from "./interfaces";
-import { Group } from "./utils";
 
 export class NodeState<T extends IDataContext> implements INodeState<T> {
     public context: T;        // scope model
     public readonly cleanup: Rx.Subscription;
-    public bindings: Group<IBindingAttribute<any>>;
+    public bindings: Map<string, IBindingAttribute<any>[]>;
 
     constructor(context: T) {
         this.context = context;
