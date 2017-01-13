@@ -23,29 +23,6 @@ it("get bindings from element with multiple bindings", expect => {
     expect.end();
 });
 
-// it("get binding handlers from element with a single binding", expect => {
-//     const template = `<div x-text="'hello'"></div>`;
-//     const el = <HTMLElement> util.parse(template)[0];
-//     const provider = new BindingProvider();
-//     const bindings = provider.getBindings(el);
-//     const handlers = provider.getBindingHandlers(bindings);
-//     expect.equal(handlers.length, 1, "1 handler");
-//     expect.assert(handlers[0].handler);
-//     expect.end();
-// });
-
-// it("get binding handlers from element with multiple bindings", expect => {
-//     const template = `<div x-text="'hello'" x-attr-id="1"></div>`;
-//     const el = <HTMLElement> util.parse(template)[0];
-//     const provider = new BindingProvider();
-//     const bindings = provider.getBindings(el);
-//     const handlers = provider.getBindingHandlers(bindings);
-//     expect.equal(handlers.length, 2, "2 handlers");
-//     expect.assert(handlers[0].handler, "1st handler");
-//     expect.assert(handlers[1].handler, "2nd handler");
-//     expect.end();
-// });
-
 // it("get binding handlers from element with a non registered binding handler", expect => {
 //     const template = `<div x-texxt="'hello'"></div>`;
 //     const el = <HTMLElement> util.parse(template)[0];
