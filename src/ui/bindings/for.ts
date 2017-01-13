@@ -49,13 +49,13 @@ export class ForBinding<T> extends BindingBase {
         let current = 0;
         while (current <= additions.length) {
             const merger = this.mergeConsecutiveRows(additions, template, current);
-            let before = parent.childNodes[start + current];
+            let before = parent.childNodes[start + current + additions[0].index];
             parent.insertBefore(merger.fragment, before);
 
             for (let i = current; i < merger.stopped; i++) {
                 let childState = new NodeState(context.extend(childContextName, additions[i].value, additions[i].index)) as INodeState<IndexedDataContext>;
-                this.domManager.nodeStateManager.set(parent.childNodes[i + start], childState);
-                this.domManager.applyBindingsRecursive(childState.context, parent.childNodes[i + start]);
+                this.domManager.nodeStateManager.set(parent.childNodes[i + start + additions[0].index], childState);
+                this.domManager.applyBindingsRecursive(childState.context, parent.childNodes[i + start + additions[0].index]);
             }
             for (let i = merger.stopped + 1; i < newLength; i++) {
                 let siblingState = this.domManager.nodeStateManager.get(parent.childNodes[start + i]) as INodeState<IndexedDataContext>;
