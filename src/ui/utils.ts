@@ -49,35 +49,6 @@ export function isInputElement(target: Node): target is HTMLInputElement {
 }
 
 /**
-* Toggles one ore more css classes on the specified DOM element
-* @param {Node} node The target element
-* @param {boolean} shouldHaveClass True if the classes should be added to the element, false if they should be removed
-* @param {string[]} classNames The list of classes to process
-*/
-export function toggleCssClass(node: Element, shouldHaveClass: boolean, ...classNames: string[]): void {
-    if (classNames) {
-        const currentClassNames: string[] = node.className.match(regexCssClassName) || [];
-        let index: number;
-
-        if (shouldHaveClass) {
-            for (const className of classNames) {
-                index = currentClassNames.indexOf(className);
-                if (index === -1) {
-                    currentClassNames.push(className);
-                }
-            }
-        } else {
-            for (const className of classNames) {
-                index = currentClassNames.indexOf(className);
-                if (index !== -1) {
-                    currentClassNames.splice(index, 1);
-                }
-            }
-        }
-        node.className = currentClassNames.join(" ");
-    }
-}
-/**
 * Determines if the specified DOM element has the specified CSS-Class
 * @param {Node} node The target element
 * @param {string} className The classe to check

@@ -1,26 +1,26 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { toggleCssClass } from "../utils";
 import { SimpleBinding } from "./bindingBase";
 import { exception } from "../exceptionHandlers";
 
-export class CssBinding extends SimpleBinding<string> {
+export class CssBinding extends SimpleBinding<boolean> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
     }
 
-    public apply(el: HTMLElement, observable: Observable<string>, className: string): Subscription {
+    public apply(el: HTMLElement, observable: Observable<boolean>, className: string): Subscription {
+        if (!className) {
+            exception.next(new Error(`Class name for binding is undefined on ${el.tagName}`));
+            return Subscription.EMPTY;
+        } else {
         return observable.subscribe(value => {
-            if (className) {
-                const classes = className.split(/\s+/).map(x => x.trim()).filter(x => x);
-
-                if (classes.length) {
-                    toggleCssClass(el, !!value, ...classes);
-                }
+            if (value) {
+                el.classList.add(className);
             } else {
-                exception.next(new Error(`Class name for binding is undefined on ${el.tagName}`));
+                el.classList.remove(className);
             }
         });
+        }
     }
 }
 
