@@ -1,5 +1,5 @@
 import { NodeStateManager, DataContext, NodeState } from "./nodeState";
-import { isElement, isTextNode, startsWith, endsWith, groupBy } from "./utils";
+import { isElement, isTextNode, isHandlebarExpression, groupBy } from "./utils";
 import { BindingProvider } from "./bindingProvider";
 import { IDataContext, IBindingHandler, IViewModel, INodeState, IBindingAttribute } from "./interfaces";
 import { EventBinding } from "./bindings/event";
@@ -126,7 +126,7 @@ export class DomManager {
 
     private shouldBind(el: Node): boolean {
         return (isElement(el) && this.ignore.indexOf(el.tagName) === -1) ||
-               (isTextNode(el) && el.nodeValue !== null && startsWith(el.nodeValue, "{{") && endsWith(el.nodeValue, "}}"));
+               (isTextNode(el) && isHandlebarExpression(el.nodeValue));
     }
 
     public registerHandler(handler: IBindingHandler) {

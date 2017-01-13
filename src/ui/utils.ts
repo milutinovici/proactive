@@ -153,11 +153,10 @@ export function groupBy<T>(array: T[], selector: (x: T) => any): Map<string, T[]
     return groups;
 };
 
-export function startsWith(subject: string, search: string) {
-    return subject.indexOf(search) === 0;
-}
-
-export function endsWith(subject: string, search: string) {
-    const lastIndex = subject.lastIndexOf(search, subject.length);
-    return lastIndex === subject.length - search.length;
+export function isHandlebarExpression(expression: string | null) {
+    const open = "{";
+    const closed = "}";
+    return expression !== null && expression.length > 4 &&
+           expression[0] === open && expression[1] === open &&
+           expression[expression.length - 1] === closed && expression[expression.length - 2] === closed;
 }
