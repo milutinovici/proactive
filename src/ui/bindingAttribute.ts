@@ -20,19 +20,19 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
 
     public evaluate(ctx: IDataContext, element: Element, twoWay: boolean): Observable<T> | Observer<T> {
         let obs: any = this.expression(ctx);
-        if (isRxObservable(obs) || isRxObserver(obs)) {
-            obs = obs;
-        } else if (isFunction(obs)) {
-            const fn: (t: T, element: Element, ctx: IDataContext) => void = obs.bind(ctx.$data);
-            obs = new Subscriber<T>(x => fn(x, element, ctx), exception.error);
-        } else {
-            obs = this.toObservable(ctx);
+        const isFunc = isFunction(obs);
+        const isObs = obs != null && (isRxObservable(obs) || isRxObserver(obs));
+        if (!isObs && !isFunc) {
+            obs = Observable.of(obs);
             if (twoWay) {
                 obs.next = this.write(ctx);
                 // obs.error = exception.error;
                 obs.complete = () => {};
                 obs[Symbol.rxSubscriber] = () => obs;
             }
+        } else if (isFunc && !isObs) {
+            const fn: (t: T, element: Element, ctx: IDataContext) => void = obs.bind(ctx.$data);
+            obs = new Subscriber<T>(x => fn(x, element, ctx), exception.error);
         }
         return obs;
     }
@@ -53,15 +53,6 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
             return null;
         }
     };
-
-    private toObservable(ctx: IDataContext): Observable<T | null> {
-        let result = this.expression(ctx);
-        if (isRxObservable(result)) {
-            return result;
-        } else { // wrap it
-            return Observable.of(result);
-        }
-    }
 
     private write(ctx: IDataContext): (value: any) => void {
         try {

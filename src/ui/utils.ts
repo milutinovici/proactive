@@ -7,9 +7,6 @@ const regexCssClassName = /\S+/g;
 * @param {any} target
 */
 export function isRxObservable<T>(target: T | Rx.Observable<T>): target is Rx.Observable<T> {
-    if (target == null) {
-        return false;
-    }
     return target[Rx.Symbol.observable] !== undefined;
 }
 /**
@@ -17,9 +14,6 @@ export function isRxObservable<T>(target: T | Rx.Observable<T>): target is Rx.Ob
 * @param {any} target
 */
 export function isRxObserver<T>(target: T | Rx.Observer<T> | Rx.Observable<T>): target is Rx.Observer<T> {
-    if (target == null) {
-        return false;
-    }
     return target[Rx.Symbol.rxSubscriber] !== undefined;
 }
 /**
