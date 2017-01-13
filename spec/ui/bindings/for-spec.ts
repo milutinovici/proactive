@@ -3,7 +3,7 @@ import * as px from "../../../src/core/proactive";
 import * as ui from "../../../src/ui/app";
 import * as util from "../spec-utils";
 
-it("binding to a standard array", expect => {
+it("for: binding to a standard array", expect => {
     const template = `<ul><li x-for-number="array" x-text="number"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
@@ -16,7 +16,7 @@ it("binding to a standard array", expect => {
     expect.end();
 });
 
-it("binding to a standard array and template accessing index", expect => {
+it("for: binding to a standard array and template accessing index", expect => {
     const template = `<ul><li x-for="array" x-text="$index"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
@@ -29,7 +29,7 @@ it("binding to a standard array and template accessing index", expect => {
     expect.end();
 });
 
-it("binding to a value yielding an array", expect => {
+it("for: binding to a value yielding an array", expect => {
     const template = `<ul><li x-for="src" x-text="$index"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
@@ -46,7 +46,7 @@ it("binding to a value yielding an array", expect => {
     expect.end();
 });
 
-it("binding to a observable list containing numbers", expect => {
+it("for: binding to a observable list containing numbers", expect => {
     const template = `<ul><li x-for="array" x-text="$index"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
@@ -58,7 +58,7 @@ it("binding to a observable list containing numbers", expect => {
     expect.end();
 });
 
-it("binding to a observable list containing numbers without initialContents", expect => {
+it("for: binding to a observable list containing numbers without initialContents", expect => {
     const template = `<ul><li x-for-value="src" x-text="value"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
@@ -76,7 +76,7 @@ it("binding to a observable list containing numbers without initialContents", ex
     expect.end();
 });
 
-it("binding to a observable list adding/removing", expect => {
+it("for: binding to a observable list adding/removing", expect => {
     const template = `<ul><li x-for-value="src" x-text="value"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
@@ -102,7 +102,7 @@ it("binding to a observable list adding/removing", expect => {
     expect.end();
 });
 
-it("binding to a observable list moving", expect => {
+it("for: binding to a observable list moving", expect => {
     const template = `<ul><li x-for-item="$data" x-text="item"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
@@ -118,7 +118,7 @@ it("binding to a observable list moving", expect => {
     expect.end();
 });
 
-it("binding to a observable list containing model", expect => {
+it("for: binding to a observable list containing model", expect => {
     const template = `<ul><li x-for-item="$data">
                         <span class="part1" x-text="item.foo"></span>
                       </li></ul>`;
@@ -133,7 +133,7 @@ it("binding to a observable list containing model", expect => {
     expect.end();
 });
 
-it("observable list of observables", expect => {
+it("for: observable list of observables", expect => {
     const template = `<ul><li x-for-item="src">
                         <span class="part1" x-text="item.foo"></span>
                       </li></ul>`;

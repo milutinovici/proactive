@@ -34,41 +34,40 @@ export class ForBinding<T> extends BindingBase {
     protected applyValue(parent: Element, template: Element, context: IDataContext, childContextName: string, newArray: T[], oldArray: T[], placeholder: Node): void {
         let changes = compareLists(oldArray, newArray);
         if (changes.deleted.length > 0) {
-            this.removeRow(parent, changes.deleted, placeholder, newArray.length);
+            this.removeRows(parent, changes.deleted, placeholder, newArray.length);
         }
         if (changes.added.length > 0) {
-            this.addRow(parent, template, context, childContextName, changes.added, placeholder, newArray.length);
+            this.addRows(parent, template, context, childContextName, changes.added, placeholder, newArray.length);
         }
         if (changes.moved.length > 0) {
-            this.moveRow(parent, changes.moved, placeholder, newArray.length);
+            this.moveRows(parent, changes.moved, placeholder, newArray.length);
         }
     }
 
-    private addRow(parent: Element, template: Element, context: IDataContext, childContextName: string, additions: Delta<T>[], placeholder: Node, newLength: number) {
+    private addRows(parent: Element, template: Element, context: IDataContext, childContextName: string, additions: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
-        // const fragment = document.createDocumentFragment();
-        for (const addition of additions) {
-            let node = <Element> template.cloneNode(true);
+        let current = 0;
+        while (current <= additions.length) {
+            const merger = this.mergeConsecutiveRows(additions, template, current);
+            let before = parent.childNodes[start + current];
+            parent.insertBefore(merger.fragment, before);
 
-            let childState = new NodeState(context.extend(childContextName, addition.value, addition.index));
-
-            let before = parent.childNodes[start + addition.index];
-            parent.insertBefore(node, before);
-
-            this.domManager.nodeStateManager.set(node, childState);
-            this.domManager.applyBindingsRecursive(childState.context, node);
-
-            for (let i = addition.index + 1; i < newLength; i++) {
+            for (let i = current; i < merger.stopped; i++) {
+                let childState = new NodeState(context.extend(childContextName, additions[i].value, additions[i].index)) as INodeState<IndexedDataContext>;
+                this.domManager.nodeStateManager.set(parent.childNodes[i + start], childState);
+                this.domManager.applyBindingsRecursive(childState.context, parent.childNodes[i + start]);
+            }
+            for (let i = merger.stopped + 1; i < newLength; i++) {
                 let siblingState = this.domManager.nodeStateManager.get(parent.childNodes[start + i]) as INodeState<IndexedDataContext>;
                 if (siblingState !== undefined) {
                     siblingState.context.$index.next(siblingState.context.$index.getValue() + 1);
                 }
             }
+            current = merger.stopped + 1;
         }
-        // parent.appendChild(fragment);
     }
 
-    private removeRow(parent: Element, deletions: Delta<T>[], placeholder: Node, newLength: number) {
+    private removeRows(parent: Element, deletions: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
         for (const deletion of deletions) {
             let row = <HTMLElement> parent.childNodes[start + deletion.index];
@@ -85,7 +84,7 @@ export class ForBinding<T> extends BindingBase {
         }
     }
 
-    private moveRow(parent: Element, moves: Delta<T>[], placeholder: Node, newLength: number) {
+    private moveRows(parent: Element, moves: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
         for (const move of moves) {
             let node = parent.childNodes[start + move.index];
@@ -103,4 +102,19 @@ export class ForBinding<T> extends BindingBase {
         }
     }
 
+    private mergeConsecutiveRows(additions: Delta<T>[], template: Element, start: number): Merger {
+        let fragment = document.createDocumentFragment();
+        for (let i = start; i < additions.length; i++) {
+            fragment.appendChild(template.cloneNode(true));
+            if (additions[i - 1] !== undefined && additions[i].index - additions[i - 1].index !== 1) {
+                return { fragment: fragment, stopped: i + 1 };
+            }
+        }
+        return { fragment: fragment, stopped: additions.length };
+    }
+}
+
+interface Merger {
+    fragment: DocumentFragment;
+    stopped: number;
 }
