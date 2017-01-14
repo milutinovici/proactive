@@ -1,6 +1,6 @@
 import { Observable, Subject, Subscription } from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
-import { IDataContext, INodeState } from "../interfaces";
+import { INodeState } from "../interfaces";
 import { DomManager } from "../domManager";
 import { isRxObserver, nodeListToArray, tryParse } from "../utils";
 
@@ -12,7 +12,7 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
         this.twoWay = true;
     }
 
-    public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, state: INodeState<IDataContext>, event = "change") {
+    public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, state: INodeState, event = "change") {
         let sub1: Subscription;
         let sub2: Subscription | undefined;
 

@@ -31,7 +31,7 @@ export class DomManager {
         }
         // create or update node state for root node
         const context = new DataContext(model);
-        let state = this.nodeStateManager.get(rootNode) as INodeState<IDataContext>;
+        let state = this.nodeStateManager.get(rootNode) as INodeState;
         if (state === undefined) {
             state = new NodeState(context);
             this.nodeStateManager.set(rootNode, state);
@@ -110,15 +110,15 @@ export class DomManager {
         // apply all bindings
         for (const handler of handlers) {
             // prevent recursive applying of for
-            if (handler.name === "for" && state.context.$index !== undefined) {
+            if (handler.name === "for" && state.for) {
                 continue;
             }
             // apply for before anything else, then imediately return
-            if (handler.name === "for" && state.context.$index === undefined) {
-                handler.applyBinding(el, state, ctx);
+            if (handler.name === "for" && !state.for) {
+                handler.applyBinding(el, state);
                 return true;
             }
-            handler.applyBinding(el, state, ctx);
+            handler.applyBinding(el, state);
         }
 
         return controlsDescendants !== 0;

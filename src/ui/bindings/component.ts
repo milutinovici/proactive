@@ -15,7 +15,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         super(name, domManager);
     }
 
-    public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState<IDataContext>) {
+    public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState) {
         const descriptor = observable.mergeMap(name => components.load(name));
         const params = this.getParams(state);
         const viewModel = this.getViewModel(element, state, descriptor, params);
@@ -102,7 +102,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         }
     }
 
-    private getParams(state: INodeState<IDataContext>): T {
+    private getParams(state: INodeState): T {
         const params = {};
         if (state.bindings.has("attr")) {
             (state.bindings.get("attr") as IBindingAttribute<any>[]).forEach(x => params[x.parameter as string] = x.expression(state.context));
@@ -110,7 +110,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         return params as T;
     }
 
-    private getViewModel(element: HTMLElement, state: INodeState<IDataContext>, descriptor: Observable<IComponentDescriptor>, params: T): Observable<IViewModel|null> {
+    private getViewModel(element: HTMLElement, state: INodeState, descriptor: Observable<IComponentDescriptor>, params: T): Observable<IViewModel|null> {
         return state.bindings.has("as") ?
                (state.bindings.get("as") as IBindingAttribute<any>[])[0].evaluate(state.context, element, false) as Observable<IViewModel> :
                descriptor.map(x => components.initialize(x, params));

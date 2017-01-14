@@ -1,29 +1,29 @@
 import * as Rx from "rxjs";
 import { IDataContext, INodeState, IViewModel, IBindingAttribute } from "./interfaces";
 
-export class NodeState<T extends IDataContext> implements INodeState<T> {
-    public context: T;        // scope model
+export class NodeState implements INodeState {
+    public context: IDataContext;        // scope model
     public readonly cleanup: Rx.Subscription;
     public bindings: Map<string, IBindingAttribute<any>[]>;
-
-    constructor(context: T) {
+    public for?: boolean;
+    constructor(context: IDataContext) {
         this.context = context;
         this.cleanup = new Rx.Subscription();
     }
 }
 
 export class NodeStateManager {
-    private readonly weakMap: WeakMap<Node, INodeState<IDataContext>>;
+    private readonly weakMap: WeakMap<Node, INodeState>;
 
     constructor() {
-        this.weakMap = new WeakMap<Node, INodeState<IDataContext>>();
+        this.weakMap = new WeakMap<Node, INodeState>();
     }
 
-    public set(node: Node, state: INodeState<IDataContext>): void {
+    public set(node: Node, state: INodeState): void {
         this.weakMap.set(node, state);
     }
 
-    public get(node: Node): INodeState<IDataContext> | undefined {
+    public get(node: Node): INodeState | undefined {
         return this.weakMap.get(node);
     }
 
@@ -61,24 +61,12 @@ export class DataContext implements IDataContext {
         this.$data = model;
     }
 
-    public extend(name: string, model: IViewModel, index?: number): IDataContext {
-        let childContext;
-        if (index !== undefined) {
-            childContext = new IndexedDataContext(this.$data, index);
-        } else {
-            childContext = new DataContext(this.$data);
-        }
+    public extend(name: string, model: IViewModel, indexName?: string, index?: number): IDataContext {
+        let childContext = new DataContext(this.$data);
         childContext[name] = model;
+        if (indexName !== undefined && index !== undefined) {
+            childContext[indexName] = new Rx.BehaviorSubject<number>(index);
+        }
         return childContext;
     }
-}
-
-export class IndexedDataContext extends DataContext {
-    public readonly $index: Rx.BehaviorSubject<number>;
-
-    constructor(model: IViewModel, index: number) {
-        super(model);
-        this.$index = new Rx.BehaviorSubject<number>(index);
-    }
-
 }

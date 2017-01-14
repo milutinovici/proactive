@@ -1,50 +1,50 @@
-import * as Rx from "rxjs";
-import { BindingBase } from "./bindingBase";
+import { Observable } from "rxjs";
+import { SingleBindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
-import { NodeState, IndexedDataContext } from "../nodeState";
-import { IDataContext, INodeState, IBindingAttribute } from "../interfaces";
+import { NodeState } from "../nodeState";
+import { IDataContext, INodeState } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
-export class ForBinding<T> extends BindingBase {
+export class ForBinding<T> extends SingleBindingBase<T[]> {
     public priority = 40;
 
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
     }
 
-    public applyBinding(node: Element, state: INodeState<IDataContext>): void {
-        const binding = (state.bindings.get(this.name) as IBindingAttribute<T[]>[])[0];
-        const childContextName = binding.parameter as string;
+    public applySingleBinding(node: Element, observable: Observable<T[]>, state: INodeState, parameter: string): void {
+        const childContextNames = parameter.split("-"); // item and index name
+        const itemName = childContextNames[0];
+        const indexName = childContextNames[1];
         const parent = node.parentElement as HTMLElement;
-        const placeholder: Comment = document.createComment(`for ${binding.text}`);
+        const placeholder: Comment = document.createComment(`for ${parameter}`);
         // backup inner HTML
         parent.insertBefore(placeholder, node);
         parent.removeChild(node);
 
         let oldArray: T[] = [];
-        const obs = binding.evaluate(state.context, node, this.twoWay) as Rx.Observable<T[]>;
         // subscribe
-        state.cleanup.add(obs.subscribe(array => {
-            this.applyValue(parent, node, state.context, childContextName, array, oldArray, placeholder);
+        state.cleanup.add(observable.subscribe(array => {
+            this.applyValue(parent, node, state.context, itemName, indexName, array, oldArray, placeholder);
             oldArray = array;
         }));
         state.cleanup.add(() => parent.removeChild(placeholder));
     }
 
-    protected applyValue(parent: Element, template: Element, context: IDataContext, childContextName: string, newArray: T[], oldArray: T[], placeholder: Node): void {
+    protected applyValue(parent: Element, template: Element, context: IDataContext, itemName: string, indexName: string, newArray: T[], oldArray: T[], placeholder: Node): void {
         let changes = compareLists(oldArray, newArray);
         if (changes.deleted.length > 0) {
-            this.removeRows(parent, changes.deleted, placeholder, newArray.length);
+            this.removeRows(parent, indexName, changes.deleted, placeholder, newArray.length);
         }
         if (changes.added.length > 0) {
-            this.addRows(parent, template, context, childContextName, changes.added, placeholder, newArray.length);
+            this.addRows(parent, template, context, itemName, indexName, changes.added, placeholder, newArray.length);
         }
         if (changes.moved.length > 0) {
-            this.moveRows(parent, changes.moved, placeholder, newArray.length);
+            this.moveRows(parent, indexName, changes.moved, placeholder, newArray.length);
         }
     }
 
-    private addRows(parent: Element, template: Element, context: IDataContext, childContextName: string, additions: Delta<T>[], placeholder: Node, newLength: number) {
+    private addRows(parent: Element, template: Element, context: IDataContext, itemName: string, indexName: string, additions: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
         let current = 0;
         while (current <= additions.length) {
@@ -53,21 +53,26 @@ export class ForBinding<T> extends BindingBase {
             parent.insertBefore(merger.fragment, before);
 
             for (let i = current; i < merger.stopped; i++) {
-                let childState = new NodeState(context.extend(childContextName, additions[i].value, additions[i].index)) as INodeState<IndexedDataContext>;
+                let childState = indexName ?
+                                 new NodeState(context.extend(itemName, additions[i].value, indexName, additions[i].index)) :
+                                 new NodeState(context.extend(itemName, additions[i].value));
+                childState.for = true;
                 this.domManager.nodeStateManager.set(parent.childNodes[i + start + additions[0].index], childState);
                 this.domManager.applyBindingsRecursive(childState.context, parent.childNodes[i + start + additions[0].index]);
             }
-            for (let i = merger.stopped + 1; i < newLength; i++) {
-                let siblingState = this.domManager.nodeStateManager.get(parent.childNodes[start + i]) as INodeState<IndexedDataContext>;
-                if (siblingState !== undefined) {
-                    siblingState.context.$index.next(siblingState.context.$index.getValue() + 1);
+            if (indexName) {
+                for (let i = merger.stopped + 1; i < newLength; i++) {
+                    let siblingState = this.domManager.nodeStateManager.get(parent.childNodes[start + i]);
+                    if (siblingState !== undefined) {
+                        siblingState.context[indexName].next(siblingState.context[indexName].getValue() + 1);
+                    }
                 }
             }
             current = merger.stopped + 1;
         }
     }
 
-    private removeRows(parent: Element, deletions: Delta<T>[], placeholder: Node, newLength: number) {
+    private removeRows(parent: Element, indexName: string, deletions: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
         for (const deletion of deletions) {
             let row = <HTMLElement> parent.childNodes[start + deletion.index];
@@ -75,28 +80,32 @@ export class ForBinding<T> extends BindingBase {
 
             parent.removeChild(row);
 
-            for (let i = deletion.index; i < newLength; i++) {
-                let siblingState  = this.domManager.nodeStateManager.get(parent.childNodes[start + i]) as INodeState<IndexedDataContext>;
-                if (siblingState !== undefined) {
-                    siblingState.context.$index.next(siblingState.context.$index.getValue() - 1);
+            if (indexName) {
+                for (let i = deletion.index; i < newLength; i++) {
+                    let siblingState  = this.domManager.nodeStateManager.get(parent.childNodes[start + i]);
+                    if (siblingState !== undefined) {
+                        siblingState.context[indexName].next(siblingState.context[indexName].getValue() - 1);
+                    }
                 }
             }
         }
     }
 
-    private moveRows(parent: Element, moves: Delta<T>[], placeholder: Node, newLength: number) {
+    private moveRows(parent: Element, indexName: string, moves: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
         for (const move of moves) {
             let node = parent.childNodes[start + move.index];
             let before = parent.childNodes[start + move.moved];
             parent.insertBefore(node, before);
-            let state = this.domManager.nodeStateManager.get(node) as INodeState<IndexedDataContext>;
-            state.context.$index.next(move.moved as number);
+            if (indexName) {
+                let state = this.domManager.nodeStateManager.get(node) as INodeState;
+                state.context[indexName].next(move.moved as number);
 
-            for (let i = Math.min(move.index, move.moved as number); i < Math.max(move.index, move.moved as number); i++) {
-                let siblingState  = this.domManager.nodeStateManager.get(parent.childNodes[start + i]) as INodeState<IndexedDataContext>;
-                if (siblingState !== undefined) {
-                    siblingState.context.$index.next(siblingState.context.$index.getValue() + 1);
+                for (let i = Math.min(move.index, move.moved as number); i < Math.max(move.index, move.moved as number); i++) {
+                    let siblingState  = this.domManager.nodeStateManager.get(parent.childNodes[start + i]);
+                    if (siblingState !== undefined) {
+                        siblingState.context[indexName].next(siblingState.context[indexName].getValue() + 1);
+                    }
                 }
             }
         }

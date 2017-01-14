@@ -17,7 +17,7 @@ it("for: binding to a standard array", expect => {
 });
 
 it("for: binding to a standard array and template accessing index", expect => {
-    const template = `<ul><li x-for="array" x-text="$index"></li></ul>`;
+    const template = `<ul><li x-for-item-i="array" x-text="i"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let array = [1, 5, 7];
@@ -30,7 +30,7 @@ it("for: binding to a standard array and template accessing index", expect => {
 });
 
 it("for: binding to a value yielding an array", expect => {
-    const template = `<ul><li x-for="src" x-text="$index"></li></ul>`;
+    const template = `<ul><li x-for-item-i="src" x-text="i"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let prop = px.value<number[]>([]);
@@ -47,7 +47,7 @@ it("for: binding to a value yielding an array", expect => {
 });
 
 it("for: binding to a observable list containing numbers", expect => {
-    const template = `<ul><li x-for="array" x-text="$index"></li></ul>`;
+    const template = `<ul><li x-for-item-i="array" x-text="i"></li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let array = px.array([1, 5, 7]);

@@ -1,4 +1,4 @@
-import { Observable, Subscription, Observer, BehaviorSubject } from "rxjs";
+import { Observable, Subscription, Observer } from "rxjs";
 
 export interface IBindingAttribute<T> {
     readonly tag: string;
@@ -31,19 +31,19 @@ export interface IBindingHandler {
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
-        applyBinding(node: Node, state: INodeState<IDataContext>, ctx: IDataContext): void;
+        applyBinding(node: Node, state: INodeState): void;
 
 }
 
 export interface IDataContext {
     readonly $data: IViewModel;
-    readonly $index?: BehaviorSubject<number>;
-    extend(name: string, model: IViewModel, index?: number): IDataContext;
+    extend(name: string, model: IViewModel, indexName?: string, index?: number): IDataContext;
 }
-export interface INodeState<T extends IDataContext> {
+export interface INodeState {
     readonly cleanup: Subscription;
-    context: T;        // scope model
     bindings: Map<string, IBindingAttribute<any>[]>;
+    context: IDataContext;
+    for?: boolean;
 }
 export interface IViewModel {
     readonly cleanup?: Subscription;
