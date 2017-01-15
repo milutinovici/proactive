@@ -54,7 +54,7 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
         }
     };
 
-    private write(ctx: IDataContext): (value: any) => void {
+    private write(ctx: IDataContext): (value: T) => void {
         try {
             const fn = BindingAttribute.writeCache.get(this.text);
             if (fn !== undefined) {
