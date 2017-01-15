@@ -55,7 +55,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
                     const attrHandler = this.domManager.getBindingHandler("attr") as AttrBinding;
                     Object.getOwnPropertyNames(attributes).forEach(prop => {
                         if (isRxObservable(attributes[prop])) {
-                            attrHandler.apply(element, attributes[prop], prop);
+                            internal.add(attrHandler.apply(element, attributes[prop], prop));
                         }
                     });
                 }
