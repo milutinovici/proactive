@@ -81,7 +81,7 @@ export class DomManager {
     private cleanNodeRecursive(node: Node): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
-                // only elements
+                // only elements and handlebars
                 if (!isElement(node.childNodes[i]) && !isTextNode(node.childNodes[i])) {
                     continue;
                 }
@@ -139,9 +139,9 @@ export class DomManager {
         }
         return handler;
     }
-    private getHandlers(attributes: Map<string, IBindingAttribute<any>[]>, handlers: IBindingHandler[]) {
+    private getHandlers(bindings: Map<string, IBindingAttribute<any>[]>, handlers: IBindingHandler[]) {
         let controlsDescendants = 0;
-        attributes.forEach((val, name) => {
+        bindings.forEach((val, name) => {
             const handler = this.bindingHandlers.get(name);
             if (!handler) {
                 exception.next(new Error(`Binding handler "${name}" has not been registered.`));
