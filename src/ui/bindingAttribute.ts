@@ -14,7 +14,7 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
     constructor(tag: string, name: string, text: string, parameter?: string) {
         this.tag = tag;
         this.name = name;
-        this.text = text.trim();
+        this.text = text;
         this.parameter = parameter;
     }
 

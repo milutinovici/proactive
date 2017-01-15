@@ -9,7 +9,7 @@ export class BindingProvider {
              return [this.handleBarsToBinding(element)];
         }
         const tag = element.tagName;
-        const bindings = this.getAttributeValues(element, tag);
+        const bindings = element.hasAttributes() ? this.getAttributeValues(element, tag) : [];
         // check if element is custom element (component)
         if (components.registered(tag)) {
             // when a component is referenced as custom-element, apply a virtual 'component' binding
