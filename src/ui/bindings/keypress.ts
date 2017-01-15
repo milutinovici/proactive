@@ -30,14 +30,14 @@ export class KeyPressBinding extends SimpleBinding<KeyboardEvent> {
         super(name, domManager);
     }
 
-    public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription|undefined {
+    public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription {
             if (parameter === undefined) {
                 exception.next(new Error(`key must be defined for ${this.name} binding on ${el.tagName}`));
-                return;
+                return Subscription.EMPTY;
             }
             if (!isRxObserver(observer)) {
                 exception.next(new Error(`must supply function or observer for ${this.name} binding on ${el.tagName}`));
-                return;
+                return Subscription.EMPTY;
             }
 
             const obs = Observable.fromEvent<KeyboardEvent>(el, "keydown")
