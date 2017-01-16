@@ -1,7 +1,7 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
-import { INodeState, IComponentDescriptor, IComponent, IViewModel, IDataContext, IBindingAttribute } from "../interfaces";
+import { INodeState, IComponentDescriptor, IComponent, IViewModel, IDataContext, IBindingAttribute, DataFlow } from "../interfaces";
 import { DataContext } from "../nodeState";
 import { SingleBindingBase } from "./bindingBase";
 import { AttrBinding } from "./oneWay";
@@ -112,7 +112,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
 
     private getViewModel(element: HTMLElement, state: INodeState, descriptor: Observable<IComponentDescriptor>, params: T): Observable<IViewModel|null> {
         return state.bindings.has("as") ?
-               (state.bindings.get("as") as IBindingAttribute<any>[])[0].evaluate(state.context, element, false) as Observable<IViewModel> :
+               (state.bindings.get("as") as IBindingAttribute<any>[])[0].evaluate(state.context, element, DataFlow.Out) as Observable<IViewModel> :
                descriptor.map(x => components.initialize(x, params));
     }
 }

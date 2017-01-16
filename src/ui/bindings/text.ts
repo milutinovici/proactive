@@ -8,7 +8,6 @@ export class TextBinding extends SingleBindingBase<string> {
 
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
-        this.twoWay = true;
     }
 
     public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<string>, state: INodeState) {

@@ -1,7 +1,7 @@
 import * as Rx from "rxjs";
 import { DomManager } from "../domManager";
 import { SingleBindingBase } from "./bindingBase";
-import { INodeState } from "../interfaces";
+import { INodeState, DataFlow } from "../interfaces";
 import { isRxObserver } from "../utils";
 
 export class FocusBinding extends SingleBindingBase<boolean> {
@@ -10,7 +10,7 @@ export class FocusBinding extends SingleBindingBase<boolean> {
 
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
-        this.twoWay = true;
+        this.dataFlow = DataFlow.Out | DataFlow.In;
     }
 
     public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, state: INodeState, parameter?: string) {

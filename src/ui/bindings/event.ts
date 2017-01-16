@@ -1,4 +1,5 @@
 import { Observable, Observer, Subscription } from "rxjs";
+import { DataFlow } from "../interfaces";
 import { DomManager } from "../domManager";
 import { SimpleBinding } from "./bindingBase";
 import { isRxObserver } from "../utils";
@@ -10,6 +11,7 @@ export class EventBinding extends SimpleBinding<Event> {
 
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
+        this.dataFlow = DataFlow.In;
     }
 
     public apply(el: Element, observer: Observer<Event>, parameter: string): Subscription {

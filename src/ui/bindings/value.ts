@@ -1,6 +1,6 @@
 import { Observable, Subject, Subscription } from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
-import { INodeState } from "../interfaces";
+import { INodeState, DataFlow } from "../interfaces";
 import { DomManager } from "../domManager";
 import { isRxObserver, nodeListToArray, tryParse } from "../utils";
 
@@ -9,7 +9,7 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
 
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
-        this.twoWay = true;
+        this.dataFlow = DataFlow.Out | DataFlow.In;
     }
 
     public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, state: INodeState, event = "change") {

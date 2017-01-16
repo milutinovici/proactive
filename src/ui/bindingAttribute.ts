@@ -1,6 +1,6 @@
 import { exception } from "./exceptionHandlers";
 import { Observable, Observer, Subscriber, Symbol } from "rxjs";
-import { IDataContext, IBindingAttribute } from "./interfaces";
+import { IDataContext, IBindingAttribute, DataFlow } from "./interfaces";
 import { isRxObservable, isRxObserver, isFunction } from "./utils";
 
 export class BindingAttribute<T> implements IBindingAttribute<T> {
@@ -18,13 +18,13 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
         this.parameter = parameter;
     }
 
-    public evaluate(ctx: IDataContext, element: Element, twoWay: boolean): Observable<T> | Observer<T> {
+    public evaluate(ctx: IDataContext, element: Element, dataFlow: DataFlow): Observable<T> | Observer<T> {
         let obs: any = this.expression(ctx);
         const isFunc = isFunction(obs);
         const isObs = obs != null && (isRxObservable(obs) || isRxObserver(obs));
         if (!isObs && !isFunc) {
             obs = Observable.of(obs);
-            if (twoWay) {
+            if (dataFlow & DataFlow.In) {
                 obs.next = this.write(ctx);
                 // obs.error = exception.error;
                 obs.complete = () => {};

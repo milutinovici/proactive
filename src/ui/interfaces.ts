@@ -6,8 +6,10 @@ export interface IBindingAttribute<T> {
     readonly text: string;
     readonly parameter?: string;
     readonly expression: (scope: IDataContext) => T | null;
-    evaluate(ctx: IDataContext, element: Element, twoWay: boolean): Observable<T> | Observer<T>;
+    evaluate(ctx: IDataContext, element: Element, dataFlow: DataFlow): Observable<T> | Observer<T>;
 }
+
+export enum DataFlow { Out = 1, In = 2 }
 
 export interface IBindingHandler {
         readonly name: string;
@@ -16,7 +18,7 @@ export interface IBindingHandler {
         * sometimes it is necessary to specify the order in which the bindings are applied.
         */
         readonly priority: number;
-        readonly twoWay: boolean;
+        readonly dataFlow: DataFlow;
        /**
         * If set to true then bindings won't be applied to children
         * of the element such binding is encountered on. Instead

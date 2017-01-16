@@ -1,4 +1,5 @@
 import { Observable, Observer, Subscription } from "rxjs";
+import { DataFlow } from "../interfaces";
 import { DomManager } from "../domManager";
 import { SimpleBinding } from "./bindingBase";
 import { isRxObserver } from "../utils";
@@ -28,6 +29,7 @@ export class KeyPressBinding extends SimpleBinding<KeyboardEvent> {
 
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
+        this.dataFlow = DataFlow.In;
     }
 
     public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription {
