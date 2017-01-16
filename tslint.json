@@ -18,6 +18,8 @@
     "variable-name": [
       false
     ],
-    "forin": false
+    "forin": false,
+    "no-bitwise": false,
+    "no-empty": false
   }
 }
