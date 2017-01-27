@@ -58,7 +58,7 @@ export function hasCssClass(node: HTMLElement, className: string): boolean {
 export function tryParse(str: string): number|boolean|string {
     if (isBoolean(str)) {
         return str === "true";
-    } else if (!isNaN(str as any)) {
+    } else if (!isNaN(parseFloat(str))) {
         return parseFloat(str);
     }
     return str;
