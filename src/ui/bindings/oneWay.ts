@@ -12,7 +12,7 @@ export class CssBinding extends SimpleBinding<boolean> {
         if (!className) {
             exception.next(new Error(`Class name for binding is undefined on ${el.tagName}`));
             return Subscription.EMPTY;
-        } else {
+        }
         return observable.subscribe(value => {
             if (value) {
                 el.classList.add(className);
@@ -20,7 +20,6 @@ export class CssBinding extends SimpleBinding<boolean> {
                 el.classList.remove(className);
             }
         });
-        }
     }
 }
 
@@ -32,6 +31,10 @@ export class AttrBinding extends SimpleBinding<string | number | boolean> {
     }
 
     public apply(el: HTMLElement, observable: Observable<string|number|boolean>, attributeName: string): Subscription {
+        if (!attributeName) {
+            exception.next(new Error(`Attribute name for binding is undefined on ${el.tagName}`));
+            return Subscription.EMPTY;
+        }
         return observable.subscribe(value => {
             // To cover cases like "attr: { checked:someProp }", we want to remove the attribute entirely
             // when someProp is a "no value"-like value (strictly null, false, or undefined)
@@ -52,6 +55,10 @@ export class StyleBinding extends SimpleBinding<string | number | boolean> {
     }
 
     public apply(el: HTMLElement, observable: Observable<string|number|boolean>, styleName: string): Subscription {
+        if (!styleName) {
+            exception.next(new Error(`Style name for binding is undefined on ${el.tagName}`));
+            return Subscription.EMPTY;
+        }
         return observable.subscribe(value => {
             if (value === null || value === undefined || value === false) {
                 // Empty string removes the value, whereas null/undefined have no effect
