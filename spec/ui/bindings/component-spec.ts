@@ -1,7 +1,7 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
 import * as ui from "../../../src/ui/app";
-import { IViewModel, IDataContext } from "../../../src/ui/interfaces";
+import { IDataContext } from "../../../src/ui/interfaces";
 import * as util from "../spec-utils";
 
 it("component: Loads a component using simple string options", expect => {
@@ -245,7 +245,7 @@ it("component: Components emit custom events", expect => {
     const str = `<test-component x-on-pulse="log"></test-component>`;
     const el = <HTMLElement> util.parse(str)[0];
     const template = `<span>pulse</span>`;
-    const emitter = new Rx.Subject<Event>();
+    const emitter = new Rx.Subject<CustomEvent>();
     ui.components.register("test-component", {
         template: template,
         viewModel: { emitter },
@@ -256,23 +256,6 @@ it("component: Components emit custom events", expect => {
     expect.doesNotThrow(() => ui.applyBindings(vm, el));
     emitter.next(new CustomEvent("pulse", { detail: "myPulse" }));
     expect.equal(value, "myPulse");
-    expect.end();
-});
-
-it("component: Components can set attributes on themselves", expect => {
-    const str = `<test-component></test-component>`;
-    const el = <HTMLElement> util.parse(str)[0];
-    const template = `<input type="text" x-on-value="attributes.value"/>`;
-    const subject = new Rx.BehaviorSubject(10);
-    ui.components.register("test-component", {
-        template: template,
-        viewModel: { attributes: { value: subject } } as IViewModel,
-    });
-
-    const vm = { };
-
-    expect.doesNotThrow(() => ui.applyBindings(vm, el));
-    expect.equal(el.attributes["value"].value, "10");
     expect.end();
 });
 
@@ -288,4 +271,22 @@ it("component: Components support basic transclusion", expect => {
     expect.doesNotThrow(() => ui.applyBindings(vm, el));
     expect.equal(el.childNodes[1]["innerText"], vm.transclusion);
     expect.end();
+});
+
+it("component: Components support value binding", expect => {
+    const str = `<test-component x-value="obs"></test-component>`;
+    const el = <HTMLElement> util.parse(str)[0];
+
+    const template = `<input type="text" x-value="name"/><input type="text" x-value="surname"/>`;
+    const name = new Rx.BehaviorSubject("Hello");
+    const surname = new Rx.BehaviorSubject("World");
+    const component = { viewModel: { name, surname, value: name.combineLatest(surname, (n, s) => `${n} ${s}`) }, template: template };
+    ui.components.register("test-component", component);
+
+    const vm = { obs: new Rx.BehaviorSubject("") };
+
+    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    expect.equal("Hello World", vm.obs.getValue());
+    expect.end();
+
 });

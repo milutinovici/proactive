@@ -49,8 +49,8 @@ export interface INodeState {
 }
 export interface IViewModel {
     readonly cleanup?: Subscription;
-    readonly attributes?: { [name: string]: Observable<any> };
-    readonly emitter?: Observable<Event>;
+    readonly value?: Observable<string>;
+    readonly emitter?: Observable<CustomEvent>;
 }
 
 export interface IComponentDescriptor {

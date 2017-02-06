@@ -5,7 +5,7 @@ import { DomManager } from "../domManager";
 import { isRxObserver, nodeListToArray, tryParse } from "../utils";
 
 export class ValueBinding extends SingleBindingBase<string|number|boolean|string[]> {
-    public priority = 5;
+    public priority = 30;
 
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
@@ -51,8 +51,8 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
     }
 
     private static getEvents(el: Element, event: string, isCheckboxOrRadio: boolean): Observable<Event> {
-        return isCheckboxOrRadio ? Observable.merge<Event>(Observable.fromEvent(el, "click"), Observable.fromEvent(el, event)) :
-                                   Observable.fromEvent<Event>(el, event);
+        return (isCheckboxOrRadio ? Observable.merge<Event>(Observable.fromEvent(el, "click"), Observable.fromEvent(el, event)) :
+        Observable.fromEvent<Event>(el, event)).filter(evt => evt.target === el);
     }
     private static isCheckbox(element: HTMLElement): element is HTMLInputElement {
         const tag = element.tagName.toLowerCase();

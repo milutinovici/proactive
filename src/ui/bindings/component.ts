@@ -4,11 +4,10 @@ import { isRxObservable } from "../utils";
 import { INodeState, IComponentDescriptor, IComponent, IViewModel, IDataContext, IBindingAttribute, DataFlow } from "../interfaces";
 import { DataContext } from "../nodeState";
 import { SingleBindingBase } from "./bindingBase";
-import { AttrBinding } from "./oneWay";
 import { components } from "../components/registry";
 
 export class ComponentBinding<T> extends SingleBindingBase<string> {
-    public priority = 30;
+    public priority = 20;
     public controlsDescendants = true;
 
     constructor(name: string, domManager: DomManager) {
@@ -49,16 +48,15 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
                     const subscription = comp.viewModel.emitter.subscribe(evt => element.dispatchEvent(evt));
                     internal.add(subscription);
                 }
-                // apply attributes to component
-                const attributes = comp.viewModel.attributes;
-                if (attributes !== undefined) {
-                    const attrHandler = this.domManager.getBindingHandler("attr") as AttrBinding;
-                    Object.getOwnPropertyNames(attributes).forEach(prop => {
-                        if (isRxObservable(attributes[prop])) {
-                            internal.add(attrHandler.apply(element, attributes[prop], prop));
-                        }
+                // apply custom component value
+                if (comp.viewModel.value !== undefined && isRxObservable(comp.viewModel.value)) {
+                    const subscription = comp.viewModel.value.subscribe(val => {
+                        element["value"] = val;
+                        element.dispatchEvent(new Event("change"));
                     });
+                    internal.add(subscription);
                 }
+
                 // auto-dispose view-model
                 if (comp.viewModel.cleanup !== undefined) {
                     internal.add(comp.viewModel.cleanup);
