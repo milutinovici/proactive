@@ -81,8 +81,9 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
     }
     private static setMultiSelect(el: HTMLSelectElement, value: string|number|boolean|string[]) {
         if (Array.isArray(value)) {
+            const stringy = value.map(x => x.toString());
             const options = nodeListToArray(el["options"]) as HTMLOptionElement[];
-            options.forEach(x => x.selected = value.indexOf(x.value) !== -1);
+            options.forEach(x => x.selected = stringy.indexOf(x.value) !== -1);
         } else {
             ValueBinding.setElementValue(el, value);
         }
