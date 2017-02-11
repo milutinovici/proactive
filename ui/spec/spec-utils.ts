@@ -1,5 +1,5 @@
-import { html } from "../../src/ui/templateEngines";
-import { nodeListToArray } from "../../src/ui/utils";
+import { html } from "../src/templateEngines";
+import { nodeListToArray } from "../src/utils";
 
 export function parse(template: string): Node[] {
     return nodeListToArray(html.parse(template).childNodes);

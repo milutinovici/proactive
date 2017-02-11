@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
-import * as ui from "../../../src/ui/app";
+import * as ui from "../../src/app";
 import * as util from "../spec-utils";
 
 it("event: this is bound to $data", expect => {
@@ -142,7 +142,7 @@ it("event: binds multiple events to observers", expect => {
 });
 
 it("event: binds a single key to a handler function", expect => {
-    const template = `<div x-key-enter="clickHandler">Click me</div>`;
+    const template = `<input x-key-enter="clickHandler"/>`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let calledWithValidContext = false;
@@ -180,7 +180,7 @@ it("event: binds a single key to a handler function", expect => {
 });
 
 it("event: binds multiple keys to handler functions", expect => {
-    const template = `<div type="text" x-key-tab="clickHandler" x-key-enter="inputHandler"></div>`;
+    const template = `<input type="text" x-key-tab="clickHandler" x-key-enter="inputHandler"/>`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
     let clickCallCount = 0;
@@ -218,6 +218,22 @@ it("event: binds multiple keys to handler functions", expect => {
     el.value = "old";
     util.triggerEvent(el, "keydown", 13);
     expect.equal(inputCallCount, 0);
+    expect.end();
+});
+
+it("event: event delegation works", expect => {
+    const template = `<ul x-on-click-item="selected">
+                        <li><a item="1">Click to select</a></li>
+                        <li><a item="2">Click to select</a></li>
+                      </ul>`;
+    const el = <HTMLInputElement> util.parse(template)[0];
+
+    const viewModel = {
+        selected: new Rx.BehaviorSubject(0),
+    };
+
+    expect.doesNotThrow(() => ui.applyBindings(viewModel, el));
+
     expect.end();
 });
 

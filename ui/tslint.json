@@ -1,0 +1,25 @@
+{
+  "extends": "tslint:latest",
+  "rules": {
+    "ordered-imports": false,
+    "max-line-length": [
+      140
+    ],
+    "no-string-literal": false,
+    "radix": false,
+    "jsdoc-format": false,
+    "interface-name": [
+      false
+    ],
+    "member-ordering": [
+      false
+    ],
+    "object-literal-sort-keys": false,
+    "variable-name": [
+      false
+    ],
+    "forin": false,
+    "no-bitwise": false,
+    "no-empty": false
+  }
+}

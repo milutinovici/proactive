@@ -1,6 +1,6 @@
 import * as it from "tape";
 
-import { BindingProvider } from "../../src/ui/bindingProvider";
+import { BindingProvider } from "../src/bindingProvider";
 import * as util from "./spec-utils";
 
 it("get bindings from element with a single binding", expect => {

@@ -1,7 +1,7 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
-import * as px from "../../../src/core/proactive";
-import * as ui from "../../../src/ui/app";
+import * as px from "../../../core/src/proactive";
+import * as ui from "../../src/app";
 import * as util from "../spec-utils";
 
 it("value: Should treat null values as empty strings", expect => {
@@ -66,17 +66,19 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
     const template = `<input type="text" x-value="prop" />`;
     const el = <HTMLInputElement> util.parse(template)[0];
 
-    let computedValue = Rx.Observable.of("zzz").toComputed();
-    let vm = { prop: computedValue };
-
+    let observable = Rx.Observable.of("zzz");
+    let vm = { prop: observable };
+    let value = "";
+    observable.subscribe(x => value = x);
     ui.applyBindings(vm, el);
     expect.equal(el.value, "zzz");
 
     // Change the input value and trigger change event; verify that the view model wasn't changed
     el.value = "yyy";
     util.triggerEvent(el, "change");
-    expect.equal(vm.prop, computedValue);
-    expect.equal(computedValue(), "zzz");
+    expect.equal(vm.prop, observable);
+    observable.subscribe(x => value = x);
+    expect.equal(value, "zzz");
     expect.end();
 });
 

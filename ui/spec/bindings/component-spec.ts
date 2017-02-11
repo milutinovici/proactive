@@ -1,7 +1,7 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
-import * as ui from "../../../src/ui/app";
-import { IDataContext } from "../../../src/ui/interfaces";
+import * as ui from "../../src/app";
+import { IDataContext } from "../../src/interfaces";
 import * as util from "../spec-utils";
 
 it("component: Loads a component using simple string options", expect => {

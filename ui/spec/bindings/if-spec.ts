@@ -1,7 +1,7 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
-import * as px from "../../../src/core/proactive";
-import * as ui from "../../../src/ui/app";
+import * as px from "../../../core/src/proactive";
+import * as ui from "../../src/app";
 import * as util from "../spec-utils";
 
 it("if: binding to a boolean constant (true) using static template", expect => {
