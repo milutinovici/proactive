@@ -11,16 +11,26 @@ const tsify = require("tsify");
 const vendors = ["rxjs"];
 
 gulp.task("build",  () => 
-                        browserify({ debug: true })
-                        .add("spec/array-spec.ts").add("spec/computed-spec.ts")
-                        .add("spec/computedArray-spec.ts").add("spec/value-spec.ts")
-                        .add("spec/whenAny-spec.ts")
-                        .plugin(tsify).bundle()
-                        .pipe(source("spec.js"))
-                        .pipe(buffer())
-                        .pipe(gulp.dest("./dist/"))
-                        );
+    browserify({ debug: true })
+    .external(vendors)
+    .add("src/proactive.ts")
+    .plugin(tsify).bundle()
+    .pipe(source("core.js"))
+    .pipe(buffer())
+    .pipe(uglify())
+    .pipe(gulp.dest("./dist/"))
+);
  
-gulp.task("test", ["build"], () => gulp.src("./dist/spec.js").pipe(tape({ reporter: spec() })));
+gulp.task("test", () => 
+    browserify({ debug: true })
+    .add("spec/array-spec.ts").add("spec/computed-spec.ts")
+    .add("spec/computedArray-spec.ts").add("spec/value-spec.ts")
+    .add("spec/whenAny-spec.ts")
+    .plugin(tsify).bundle()
+    .pipe(source("spec.js"))
+    .pipe(buffer())
+    .pipe(gulp.dest("./dist/"))
+    .pipe(tape({ reporter: spec() }))
+);
 
 gulp.task("bench", () => gulp.src("./dist/perf/**/*.js", {read: false}).pipe(benchmark()));

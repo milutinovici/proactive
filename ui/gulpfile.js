@@ -6,6 +6,7 @@ const source = require("vinyl-source-stream");
 const buffer = require("vinyl-buffer");
 const tsify = require("tsify");
 const stringify = require("stringify");
+
 const vendors = ["rxjs"];
 
 gulp.task("build", () => browserify({ debug: true })
