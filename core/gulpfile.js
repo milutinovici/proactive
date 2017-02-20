@@ -23,9 +23,7 @@ gulp.task("build",  () =>
  
 gulp.task("test", () => 
     browserify({ debug: true })
-    .add("spec/array-spec.ts").add("spec/computed-spec.ts")
-    .add("spec/computedArray-spec.ts").add("spec/value-spec.ts")
-    .add("spec/whenAny-spec.ts")
+    .add("spec/spec.ts")
     .plugin(tsify).bundle()
     .pipe(source("spec.js"))
     .pipe(buffer())
