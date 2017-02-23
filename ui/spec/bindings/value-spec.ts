@@ -166,9 +166,9 @@ it("value: select multiple can be bound to an array", expect => {
     const viewModel = { selected };
     ui.applyBindings(viewModel, el);
     selected.push("A");
-    expect.equal(el.options[0].selected, true);
+    expect.equal(el.options[0]["selected"], true);
 
-    el.options[1].selected = true;
+    el.options[1]["selected"] = true;
     util.triggerEvent(el, "change");
     expect.equal(selected().length, 2);
 
