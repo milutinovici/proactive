@@ -69,7 +69,7 @@ export function tryParse(str: string): number | boolean | string {
  * @param obj
  */
 export function isBoolean(str: string): boolean {
-    return typeof str === "true" || str === "false";
+    return str === "true" || str === "false";
 }
 
 /**
