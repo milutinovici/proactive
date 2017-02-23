@@ -11,10 +11,10 @@
   "author": "Ivan Milutinović",
   "license": "MIT",
   "dependencies": {
-    "rxjs": "^5.1.0"
+    "rxjs": "^5.2.0"
   },
   "devDependencies": {
-    "typescript": "^2.1.5",
+    "typescript": "^2.2.1",
     "tape": "^4.6.3",
     "tape-dom": "^0.0.12",
     "tsify": "^3.0.1",
