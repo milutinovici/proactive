@@ -20,6 +20,7 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
         const placeholder: Comment = document.createComment(`for ${parameter}`);
         // backup inner HTML
         parent.insertBefore(placeholder, node);
+        let sibling = node.nextSibling;
         parent.removeChild(node);
 
         let oldArray: T[] = [];
@@ -28,6 +29,11 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
             this.applyValue(parent, node, state.context, itemName, indexName, array, oldArray, placeholder);
             oldArray = array;
         }));
+        // apply bindings after repeated elements
+        while (sibling !== null) {
+            this.domManager.applyBindingsRecursive(state.context, sibling);
+            sibling = sibling.nextSibling;
+        }
         state.cleanup.add(() => parent.removeChild(placeholder));
     }
 

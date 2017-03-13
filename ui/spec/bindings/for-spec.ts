@@ -147,3 +147,16 @@ it("for: observable list of observables", expect => {
         .map(node => parseInt(node.textContent || "")), list().map(x => x.foo()));
     expect.end();
 });
+
+it("for: binds items after for", expect => {
+    const template = `<ul>
+                        <li x-for-item="src" x-text="item"></li>
+                        <li x-text="'hello'">BAD</li>
+                      </ul>`;
+    const el = <HTMLElement> util.parse(template)[0];
+    let list = [1, 2, 3];
+    expect.doesNotThrow(() => ui.applyBindings({ src: list }, el));
+
+    expect.isEquivalent(el.children[3].textContent, "hello");
+    expect.end();
+});
