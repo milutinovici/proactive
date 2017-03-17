@@ -62,7 +62,7 @@ export class DataContext implements IDataContext {
     }
 
     public extend(name: string, model: IViewModel, indexName?: string, index?: number): IDataContext {
-        let childContext = new DataContext(this.$data);
+        const childContext = Object["assign"](new DataContext(this.$data), this);
         childContext[name] = model;
         if (indexName !== undefined && index !== undefined) {
             childContext[indexName] = new Rx.BehaviorSubject<number>(index);
