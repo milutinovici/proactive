@@ -18,7 +18,7 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
         this.parameter = parameter;
     }
 
-    public evaluate(ctx: IDataContext, element: Element, dataFlow: DataFlow): Observable<T> | Observer<T> {
+    public evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T> {
         let obs: any = this.expression(ctx);
         const isFunc = isFunction(obs);
         const isObs = obs != null && (isRxObservable(obs) || isRxObserver(obs));
@@ -31,8 +31,8 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
                 obs[Symbol.rxSubscriber] = () => obs;
             }
         } else if (isFunc && !isObs) {
-            const fn: (t: T, element: Element, ctx: IDataContext) => void = obs.bind(ctx.$data);
-            obs = new Subscriber<T>(x => fn(x, element, ctx), exception.error);
+            const fn: (t: T) => void = obs.bind(ctx.$data);
+            obs = new Subscriber<T>(fn, exception.error);
         }
         return obs;
     }

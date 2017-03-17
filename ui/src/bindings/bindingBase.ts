@@ -30,7 +30,7 @@ export abstract class SingleBindingBase<T> extends BindingBase {
             exception.next(new Error(`more than 1 ${this.name} binding on element ${el}`));
             return;
         }
-        this.applySingleBinding(el, bindings[0].evaluate(state.context, el, this.dataFlow), state, bindings[0].parameter);
+        this.applySingleBinding(el, bindings[0].evaluate(state.context, this.dataFlow), state, bindings[0].parameter);
     }
     protected abstract applySingleBinding(el: Element, observable: Observable<T> | Observer<T>, state: INodeState, parameter?: string): void;
 }
@@ -44,7 +44,7 @@ export abstract class SimpleBinding<T> extends BindingBase {
     public applyBinding(el: Element, state: INodeState): void {
         const bindings = state.bindings.get(this.name) as IBindingAttribute<any>[];
         for (const binding of bindings) {
-            const observable = binding.evaluate(state.context, el, this.dataFlow) as Observable<T>;
+            const observable = binding.evaluate(state.context, this.dataFlow) as Observable<T>;
             const subscription = this.apply(el, observable, binding.parameter);
             if (subscription !== undefined) {
                 state.cleanup.add(subscription);

@@ -110,7 +110,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
 
     private getViewModel(element: HTMLElement, state: INodeState, descriptor: Observable<IComponentDescriptor>, params: T): Observable<IViewModel|null> {
         return state.bindings.has("as") ?
-               (state.bindings.get("as") as IBindingAttribute<any>[])[0].evaluate(state.context, element, DataFlow.Out) as Observable<IViewModel> :
+               (state.bindings.get("as") as IBindingAttribute<any>[])[0].evaluate(state.context, DataFlow.Out) as Observable<IViewModel> :
                descriptor.map(x => components.initialize(x, params));
     }
 }

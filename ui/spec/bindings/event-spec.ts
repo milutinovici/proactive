@@ -23,7 +23,6 @@ it("event: binds a single event to a handler function", expect => {
 
     let called = false;
     let eventName: string | undefined = undefined;
-    let calledWithValidContext = false;
     let calledWithValidEvent = false;
     let callCount = 0;
 
@@ -33,9 +32,6 @@ it("event: binds a single event to a handler function", expect => {
             called = true;
             eventName = e.type;
 
-            if (ctx.hasOwnProperty("$data")) {
-                calledWithValidContext = true;
-            }
             if (e instanceof window["Event"]) {
                 calledWithValidEvent = true;
             }
@@ -43,12 +39,10 @@ it("event: binds a single event to a handler function", expect => {
     };
 
     expect.doesNotThrow(() => ui.applyBindings(model, el));
-
     util.triggerEvent(el, "click");
 
     expect.true(called, "handler was called");
     expect.equal(eventName, "click", "click event was triggered");
-    expect.true(calledWithValidContext, "valid context was passed as parameter");
     expect.true(calledWithValidEvent, "event passed is instance of window['Event']");
 
     ui.cleanNode(el);
@@ -144,17 +138,11 @@ it("event: binds multiple events to observers", expect => {
 it("event: binds a single key to a handler function", expect => {
     const template = `<input x-key-enter="clickHandler"/>`;
     const el = <HTMLInputElement> util.parse(template)[0];
-
-    let calledWithValidContext = false;
     let callCount = 0;
 
     let model = {
         clickHandler: (on: KeyboardEvent, element: HTMLInputElement, ctx: Object) => {
             callCount++;
-
-            if (ctx.hasOwnProperty("$data")) {
-                calledWithValidContext = true;
-            }
         },
     };
 
@@ -164,7 +152,6 @@ it("event: binds a single key to a handler function", expect => {
     util.triggerEvent(el, "keydown", 13);
 
     expect.true(callCount === 1,  "call count is 1 after pressing enter");
-    expect.true(calledWithValidContext, "called with valid context");
 
     util.triggerEvent(el, "keydown", 14);
     expect.true(callCount === 1, "call count is still 1 after pressing another key");

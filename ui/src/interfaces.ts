@@ -6,7 +6,7 @@ export interface IBindingAttribute<T> {
     readonly text: string;
     readonly parameter?: string;
     readonly expression: (scope: IDataContext) => T | null;
-    evaluate(ctx: IDataContext, element: Element, dataFlow: DataFlow): Observable<T> | Observer<T>;
+    evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T>;
 }
 
 export enum DataFlow { Out = 1, In = 2 }
