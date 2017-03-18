@@ -38,7 +38,8 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
                 obs.next = this.write(ctx);
                 // obs.error = exception.error;
                 obs.complete = () => {};
-                obs[Symbol.rxSubscriber] = () => expression;
+                obs[Symbol.rxSubscriber] = () => obs;
+                return obs;
             } else if (isFunc && !isObs) {
                 const fn: (t: T) => void = expression.bind(ctx.$data);
                 return new Subscriber<T>(fn, exception.error);
