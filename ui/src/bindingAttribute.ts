@@ -19,22 +19,32 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
     }
 
     public evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T> {
-        let obs: any = this.expression(ctx);
-        const isFunc = isFunction(obs);
-        const isObs = obs != null && (isRxObservable(obs) || isRxObserver(obs));
-        if (!isObs && !isFunc) {
-            obs = Observable.of(obs);
-            if (dataFlow & DataFlow.In) {
+        const expression: any = this.expression(ctx);
+        const isFunc = isFunction(expression);
+        const isObs = expression != null && (isRxObservable(expression) || isRxObserver(expression));
+        if (!(dataFlow & DataFlow.In)) { // just out
+            if (isObs) {
+                return expression;
+            } else if (isFunc) {
+                return Observable.of(expression.bind(ctx.$data)());
+            } else {
+                return Observable.of(expression);
+            }
+        // } else if (!(dataFlow & DataFlow.Out)) { // just in
+
+        } else { // twoWay
+            if (!isObs && !isFunc) {
+                const obs: any = Observable.of(expression);
                 obs.next = this.write(ctx);
                 // obs.error = exception.error;
                 obs.complete = () => {};
-                obs[Symbol.rxSubscriber] = () => obs;
+                obs[Symbol.rxSubscriber] = () => expression;
+            } else if (isFunc && !isObs) {
+                const fn: (t: T) => void = expression.bind(ctx.$data);
+                return new Subscriber<T>(fn, exception.error);
             }
-        } else if (isFunc && !isObs) {
-            const fn: (t: T) => void = obs.bind(ctx.$data);
-            obs = new Subscriber<T>(fn, exception.error);
+            return expression;
         }
-        return obs;
     }
 
     public expression(ctx: IDataContext): T | null {
