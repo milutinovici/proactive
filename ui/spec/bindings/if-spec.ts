@@ -1,66 +1,48 @@
 import * as it from "tape";
-import * as Rx from "rxjs";
 import * as px from "../../../core/src/proactive";
 import * as ui from "../../src/app";
 import * as util from "../spec-utils";
 
 it("if: binding to a boolean constant (true) using static template", expect => {
-    const template = `<div x-if="true"><span>foo</span></div>`;
+    const template = `<div><span x-if="true">foo</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
+    const span = el.firstElementChild as HTMLElement;
 
-    let backup = el.innerHTML;
     expect.doesNotThrow(() => ui.applyBindings({}, el));
-    expect.equal(el.innerHTML, backup);
+    expect.equal(span.parentElement, el, "span is div's child");
     expect.end();
 });
 
 it("if: binding to a boolean constant (false) using static template", expect => {
-    const template = `<div x-if="false"><span>foo</span></div>`;
+    const template = `<div><span x-if="false">foo</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
+    const span = el.firstElementChild as HTMLElement;
 
     expect.doesNotThrow(() => ui.applyBindings({}, el));
-    expect.equal(el.innerHTML, "");
+    expect.equal(span.parentElement, null, "span isn't div's child");
     expect.end();
 });
 
 it("if: binding to a boolean observable value using static template", expect => {
-    const template = `<div x-if="$data"><span>foo</span></div>`;
+    const template = `<div><span x-if="$data">foo</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
-    let backup = el.innerHTML;
-    let prop = px.value(true);
+    const span = el.firstElementChild as HTMLElement;
+    const prop = px.value(true);
     expect.doesNotThrow(() => ui.applyBindings(prop, el));
-    expect.equal(el.innerHTML, backup);
-    prop(false);
-    expect.equal(el.innerHTML, "");
 
-    // binding should stop updating after getting disposed
+    expect.equal(span.parentElement, el);
+    prop(false);
+    expect.equal(span.parentElement, null);
+
     ui.cleanNode(el);
     prop(true);
-    expect.equal(el.innerHTML, "");
-    expect.end();
-});
-
-it("if: binding to a boolean observable using static template", expect => {
-    const template = `<div x-if="$data"><span>foo</span></div>`;
-    const el = <HTMLElement> util.parse(template)[0];
-
-    let backup = el.innerHTML;
-    let obs = new Rx.Subject<boolean>();
-    expect.doesNotThrow(() => ui.applyBindings(obs, el));
-    expect.equal(el.innerHTML, "");
-    obs.next(true);
-    expect.equal(el.innerHTML, backup);
-
-    // binding should stop updating after getting disposed
-    ui.cleanNode(el);
-    obs.next(false);
-    expect.equal(el.innerHTML, backup);
+    expect.equal(span.parentElement, null, "binding should stop updating after getting disposed");
     expect.end();
 });
 
 it("if: binding to a boolean observable value using dynamic template", expect => {
-    const template = `<div x-if="$data"><span x-text="'foo'">bar</span></div>`;
+    const template = `<div><span x-if="$data" x-text="'foo'">bar</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     let prop = px.value(true);
@@ -76,7 +58,7 @@ it("if: binding to a boolean observable value using dynamic template", expect =>
 });
 
 it("if: binding to a boolean observable value using dynamic template with event", expect => {
-    const template = `<div x-if="$data"><button x-on-click="cmd">Click me</button></div>`;
+    const template = `<div><button x-if="$data" x-on-click="cmd">Click me</button></div>`;
     const el = <HTMLElement> util.parse(template)[0];
     let count = 0;
     let model = {

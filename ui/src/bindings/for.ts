@@ -18,6 +18,7 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
         const indexName = childContextNames[1];
         const parent = node.parentElement as HTMLElement;
         const placeholder: Comment = document.createComment(`for ${parameter}`);
+        this.domManager.nodeStateManager.set(placeholder, state);
         // backup inner HTML
         parent.insertBefore(placeholder, node);
         let sibling = node.nextSibling;

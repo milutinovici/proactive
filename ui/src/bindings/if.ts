@@ -1,7 +1,7 @@
 import * as Rx from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
-import { IDataContext, INodeState } from "../interfaces";
+import { INodeState } from "../interfaces";
 
 export class IfBinding extends SingleBindingBase<boolean> {
 
@@ -14,41 +14,25 @@ export class IfBinding extends SingleBindingBase<boolean> {
     }
 
     protected applySingleBinding(el: HTMLElement, observable: Rx.Observable<boolean>, state: INodeState) {
-        // backup inner HTML
-        const template = new Array<Node>();
-        // template
-        while (el.firstChild) {
-            template.push(el.removeChild(el.firstChild));
-        }
-        const visibility = observable.map(x => !!x).distinctUntilChanged();
+        const parent = el.parentElement as HTMLElement;
+        const placeholder: Comment = document.createComment(`if`);
+        parent.insertBefore(placeholder, el);
+
+        this.domManager.nodeStateManager.set(placeholder, state);
+        parent.removeChild(el);
+
+        const visibility = observable.map(x => this.inverse ? !x : !!x).distinctUntilChanged();
         // subscribe
         state.cleanup.add(visibility.subscribe((x => {
-            this.applyValue(el, x, template, state.context);
+            if (x) {
+                this.domManager.applyBindingsToDescendants(state.context, el);
+                parent.insertBefore(el, placeholder);
+            } else if (el.parentElement === parent) {
+                parent.removeChild(el);
+                this.domManager.cleanDescendants(el);
+            }
         })));
-    }
-
-    protected applyValue(el: HTMLElement, value: boolean, template: Array<Node>, ctx: IDataContext) {
-        if (value) {
-            const nodes = template.map(x => x.cloneNode(true));
-            this.addChildren(el, nodes);
-            this.domManager.applyBindingsToDescendants(ctx, el);
-        } else {
-            this.removeChildren(el);
-        }
-
-    }
-    private addChildren(el: HTMLElement, nodes: Node[]) {
-        const fragment = document.createDocumentFragment();
-        for (const node of nodes) {
-            fragment.appendChild(node);
-        }
-        el.appendChild(fragment);
-    }
-    private removeChildren(element: HTMLElement) {
-        while (element.firstChild) {
-            this.domManager.cleanNode(<Element> element.firstChild);
-            element.removeChild(element.firstChild);
-        }
+        state.cleanup.add(() => parent.removeChild(placeholder));
     }
 }
 

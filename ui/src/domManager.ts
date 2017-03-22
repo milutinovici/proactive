@@ -81,10 +81,6 @@ export class DomManager {
     private cleanNodeRecursive(node: Node): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
-                // only elements and handlebars
-                if (!isElement(node.childNodes[i]) && !isTextNode(node.childNodes[i])) {
-                    continue;
-                }
                 this.cleanNodeRecursive(node.childNodes[i]);
             }
         }
