@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as px from "../../../core/src/proactive";
-import * as ui from "../../src/app";
+import * as ui from "../../src/proactiveUI";
 import * as util from "../spec-utils";
 
 it("as: bound to a non-observable value", expect => {

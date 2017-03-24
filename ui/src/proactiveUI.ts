@@ -1,15 +1,15 @@
 import * as Rx from "rxjs";
 import { components, ComponentRegistry } from "./components/registry";
 import { DomManager } from "./domManager";
+import { NodeStateManager } from "./nodeState";
 import { IDataContext } from "./interfaces";
 
-export class ProactiveUI {
-
+class ProactiveUI {
     public readonly components: ComponentRegistry;
     private readonly domManager: DomManager;
 
-    constructor(domManager: DomManager) {
-        this.domManager = domManager;
+    constructor() {
+        this.domManager = new DomManager(new NodeStateManager());
         this.components = components;
     }
 
@@ -46,3 +46,6 @@ export class ProactiveUI {
     }
 
 }
+
+const ui = new ProactiveUI();
+export = ui;

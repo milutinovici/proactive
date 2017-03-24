@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
-import * as ui from "../../src/app";
+import * as ui from "../../src/proactiveUI";
 import { IDataContext } from "../../src/interfaces";
 import * as util from "../spec-utils";
 

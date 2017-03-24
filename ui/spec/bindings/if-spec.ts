@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as px from "../../../core/src/proactive";
-import * as ui from "../../src/app";
+import * as ui from "../../src/proactiveUI";
 import * as util from "../spec-utils";
 
 it("if: binding to a boolean constant (true) using static template", expect => {
@@ -75,5 +75,19 @@ it("if: binding to a boolean observable value using dynamic template with event"
     ui.cleanNode(el);
     util.triggerEvent(<HTMLElement> el.children[0], "click");
     expect.equal(count, 1);
+    expect.end();
+});
+
+it("if: binding after removed element", expect => {
+    const template = `<ul><li x-if="false"></li><li x-text="'foo'">bar</li></div>`;
+    const el = <HTMLElement> util.parse(template)[0];
+
+    expect.doesNotThrow(() => ui.applyBindings({}, el));
+    expect.equal(el.children[0].textContent, "foo");
+
+    // try it again
+    ui.cleanNode(el);
+    expect.equal(el.children.length, 1);
+    expect.equal(el.children[1].textContent, "foo");
     expect.end();
 });
