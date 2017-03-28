@@ -3,7 +3,7 @@ import { isElement, isTextNode, isHandlebarExpression, groupBy } from "./utils";
 import { BindingProvider } from "./bindingProvider";
 import { IDataContext, IBindingHandler, IViewModel, INodeState, IBindingAttribute } from "./interfaces";
 import { EventBinding } from "./bindings/event";
-import { IfBinding } from "./bindings/if";
+import { IfBinding, IfNotBinding } from "./bindings/if";
 import { TextBinding } from "./bindings/text";
 import { AttrBinding, CssBinding, StyleBinding, HtmlBinding } from "./bindings/oneWay";
 import { ForBinding } from "./bindings/for";
@@ -164,6 +164,7 @@ export class DomManager {
         this.registerHandler(new EventBinding("on", this));
         this.registerHandler(new KeyPressBinding("key", this));
         this.registerHandler(new IfBinding("if", this));
+        this.registerHandler(new IfNotBinding("ifnot", this));
         this.registerHandler(new AsBinding("as", this));
         this.registerHandler(new TextBinding("text", this));
         this.registerHandler(new HtmlBinding("html", this));
