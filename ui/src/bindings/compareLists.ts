@@ -43,26 +43,24 @@ export const compareLists = (function compareArrays() {
     const statusNotInNew = "deleted";
 
     // Simple calculation based on Levenshtein distance.
-    function compareArrays<T>(oldArray: T[], newArray: T[], options?: any) {
+    function compareArrays<T>(old: T[] | Map<any, T>, nw: T[] | Map<any, T>, options?: any) {
         // For backward compatibility, if the third arg is actually a bool, interpret
         // it as the old parameter 'dontLimitMoves'. Newer code should use { dontLimitMoves: true }.
         options = (typeof options === "boolean") ? { "dontLimitMoves": options } : (options || {});
-        oldArray = oldArray || [];
-        newArray = newArray || [];
+        old = old instanceof Map ? mapToArray(old) : (old || []);
+        nw = nw instanceof Map ? mapToArray(nw) : (nw || []);
 
-        if (oldArray.length < newArray.length) {
-            return compareSmallArrayToBigArray(oldArray, newArray, statusNotInOld, statusNotInNew, options);
+        if (old.length < nw.length) {
+            return compareSmallArrayToBigArray<T>(old, nw, statusNotInOld, statusNotInNew, options);
         } else {
-            return compareSmallArrayToBigArray(newArray, oldArray, statusNotInNew, statusNotInOld, options);
+            return compareSmallArrayToBigArray<T>(nw, old, statusNotInNew, statusNotInOld, options);
         }
     }
 
-    function compareSmallArrayToBigArray<T>(smlArray: T[], bigArray: T[], statusNotInSml: "added"|"deleted", statusNotInBig: "added"|"deleted", options: any): Changes<T> {
-        const myMin = Math.min;
-        const myMax = Math.max;
+    function compareSmallArrayToBigArray<T>(smallArray: T[], bigArray: T[], statusNotInSml: "added"|"deleted", statusNotInBig: "added"|"deleted", options: any): Changes<T> {
         const editDistanceMatrix: number[] = [];
         let smlIndex: number;
-        const smlIndexMax = smlArray.length;
+        const smlIndexMax = smallArray.length;
         let bigIndex: number;
         const bigIndexMax = bigArray.length;
         const compareRange = (bigIndexMax - smlIndexMax) || 1;
@@ -75,19 +73,19 @@ export const compareLists = (function compareArrays() {
         for (smlIndex = 0; smlIndex <= smlIndexMax; smlIndex++) {
             lastRow = thisRow;
             editDistanceMatrix.push(thisRow = <any> []);
-            bigIndexMaxForRow = myMin(bigIndexMax, smlIndex + compareRange);
-            bigIndexMinForRow = myMax(0, smlIndex - 1);
+            bigIndexMaxForRow = Math.min(bigIndexMax, smlIndex + compareRange);
+            bigIndexMinForRow = Math.max(0, smlIndex - 1);
             for (bigIndex = bigIndexMinForRow; bigIndex <= bigIndexMaxForRow; bigIndex++) {
                 if (!bigIndex) {
                     thisRow[bigIndex] = smlIndex + 1;
                 } else if (!smlIndex) { // Top row - transform empty array into new array via additions
                     thisRow[bigIndex] = bigIndex + 1;
-                } else if (smlArray[smlIndex - 1] === bigArray[bigIndex - 1]) {
+                } else if (smallArray[smlIndex - 1] === bigArray[bigIndex - 1]) {
                     thisRow[bigIndex] = lastRow[bigIndex - 1];                  // copy value (no edit)
                 } else {
                     let northDistance = lastRow[bigIndex] || maxDistance;       // not in big (deletion)
                     let westDistance = thisRow[bigIndex - 1] || maxDistance;    // not in small (addition)
-                    thisRow[bigIndex] = myMin(northDistance, westDistance) + 1;
+                    thisRow[bigIndex] = Math.min(northDistance, westDistance) + 1;
                 }
             }
         }
@@ -105,7 +103,7 @@ export const compareLists = (function compareArrays() {
             } else if (smlIndex && meMinusOne === editDistanceMatrix[smlIndex - 1][bigIndex]) {
                 notInBig.push(<Delta<T>> {     // deleted/added
                     "status": statusNotInBig,
-                    "value": smlArray[--smlIndex],
+                    "value": smallArray[--smlIndex],
                     "index": smlIndex });
             } else {
                 --bigIndex;
@@ -125,3 +123,9 @@ export const compareLists = (function compareArrays() {
 
     return compareArrays;
 })();
+
+function mapToArray<T>(map: Map<any, T>): T[] {
+    const array: any[] = [];
+    map.forEach((value, key) => array.push({ key, value }));
+    return array;
+}

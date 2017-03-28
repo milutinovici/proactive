@@ -160,3 +160,19 @@ it("for: binds items after for", expect => {
     expect.isEquivalent(el.children[3].textContent, "hello");
     expect.end();
 });
+
+it("for: works on a map", expect => {
+    const template = `<ul>
+                        <li x-for-item="src" x-text="item.value"></li>
+                      </ul>`;
+    const el = <HTMLElement> util.parse(template)[0];
+    let map = new Map();
+    map.set(1, "hello");
+    map.set(2, "world");
+
+    expect.doesNotThrow(() => ui.applyBindings({ src: map }, el));
+
+    expect.isEquivalent(el.children[0].textContent, "hello");
+    expect.isEquivalent(el.children[1].textContent, "world");
+    expect.end();
+});
