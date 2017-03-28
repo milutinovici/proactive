@@ -7,4 +7,16 @@ if (tapeDom) {
 }
 
 import "./bindingProvider-spec";
-import "./bindings-spec";
+/////////////////////////
+/// bindings specs
+/////////////////////////
+import "./bindings/text-spec";
+import "./bindings/attr-spec";
+import "./bindings/checked-spec";
+import "./bindings/component-spec";
+import "./bindings/css-spec";
+import "./bindings/event-spec";
+import "./bindings/if-spec";
+import "./bindings/value-spec";
+import "./bindings/as-spec";
+import "./bindings/for-spec";
