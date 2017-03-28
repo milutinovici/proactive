@@ -17,6 +17,7 @@ export class IfBinding extends SingleBindingBase<boolean> {
         const parent = el.parentElement as HTMLElement;
         const placeholder: Comment = document.createComment(`if`);
         parent.insertBefore(placeholder, el);
+        let sibling = el.nextSibling;
 
         this.domManager.nodeStateManager.set(placeholder, state);
         parent.removeChild(el);
@@ -32,11 +33,18 @@ export class IfBinding extends SingleBindingBase<boolean> {
                 this.domManager.cleanDescendants(el);
             }
         })));
+        // apply bindings after if element
+        if (el.nextSibling === null && sibling !== null) {
+            while (sibling !== null) {
+                this.domManager.applyBindingsRecursive(state.context, sibling);
+                sibling = sibling.nextSibling;
+            }
+        }
         state.cleanup.add(() => parent.removeChild(placeholder));
     }
 }
 
-export class NotIfBinding extends IfBinding {
+export class IfNotBinding extends IfBinding {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
 

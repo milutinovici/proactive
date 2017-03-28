@@ -88,6 +88,6 @@ it("if: binding after removed element", expect => {
     // try it again
     ui.cleanNode(el);
     expect.equal(el.children.length, 1);
-    expect.equal(el.children[1].textContent, "foo");
+    expect.equal(el.children[0].textContent, "foo");
     expect.end();
 });

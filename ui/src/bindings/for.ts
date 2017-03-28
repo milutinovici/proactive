@@ -31,9 +31,11 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
             oldArray = array;
         }));
         // apply bindings after repeated elements
-        while (sibling !== null) {
-            this.domManager.applyBindingsRecursive(state.context, sibling);
-            sibling = sibling.nextSibling;
+        if (node.nextSibling === null && sibling !== null) {
+            while (sibling !== null) {
+                this.domManager.applyBindingsRecursive(state.context, sibling);
+                sibling = sibling.nextSibling;
+            }
         }
         state.cleanup.add(() => parent.removeChild(placeholder));
     }
@@ -56,7 +58,7 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
         let current = 0;
         while (current <= additions.length) {
             const merger = this.mergeConsecutiveRows(additions, template, current);
-            let before = parent.childNodes[start + current + additions[0].index];
+            let before = parent.childNodes[start + current + additions[current].index];
             parent.insertBefore(merger.fragment, before);
 
             for (let i = current; i < merger.stopped; i++) {
@@ -64,8 +66,8 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
                                  new NodeState(context.extend(itemName, additions[i].value, indexName, additions[i].index)) :
                                  new NodeState(context.extend(itemName, additions[i].value));
                 childState.for = true;
-                this.domManager.nodeStateManager.set(parent.childNodes[i + start + additions[0].index], childState);
-                this.domManager.applyBindingsRecursive(childState.context, parent.childNodes[i + start + additions[0].index]);
+                this.domManager.nodeStateManager.set(parent.childNodes[i + start + additions[current].index], childState);
+                this.domManager.applyBindingsRecursive(childState.context, parent.childNodes[i + start + additions[current].index]);
             }
             if (indexName) {
                 for (let i = merger.stopped + 1; i < newLength; i++) {
