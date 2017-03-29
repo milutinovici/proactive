@@ -1,7 +1,7 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
-import { INodeState, IComponentDescriptor, IComponent, IViewModel, IDataContext, IBindingAttribute, DataFlow } from "../interfaces";
+import { INodeState, IComponent, IDataContext, IBindingAttribute } from "../interfaces";
 import { DataContext } from "../nodeState";
 import { SingleBindingBase } from "./bindingBase";
 import { components } from "../components/registry";
@@ -17,8 +17,6 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
     public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState) {
         const descriptor = observable.mergeMap(name => components.load(name));
         const params = this.getParams(state);
-        const viewModel = this.getViewModel(element, state, descriptor, params);
-        const component = descriptor.combineLatest(viewModel, (desc, vm) => <IComponent> { template: desc.template, viewModel: vm });
 
         // transclusion
         const children = document.createDocumentFragment();
@@ -35,22 +33,24 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         }
 
         // subscribe to any input changes
-        state.cleanup.add(component.subscribe(comp => {
+        state.cleanup.add(descriptor.subscribe(desc => {
             doCleanup();
             internal = new Subscription();
             // isolated nodestate and ctx
             let newContext = state.context;
-            if (comp.viewModel) {
-                newContext = new DataContext(comp.viewModel);
+            const viewModel = components.initialize(desc, params);
+            const template = desc.template as DocumentFragment;
+            if (viewModel) {
+                newContext = new DataContext(viewModel);
 
                 // wire custom events
-                if (comp.viewModel.emitter !== undefined && isRxObservable(comp.viewModel.emitter)) {
-                    const subscription = comp.viewModel.emitter.subscribe(evt => element.dispatchEvent(evt));
+                if (viewModel.emitter !== undefined && isRxObservable(viewModel.emitter)) {
+                    const subscription = viewModel.emitter.subscribe(evt => element.dispatchEvent(evt));
                     internal.add(subscription);
                 }
                 // apply custom component value
-                if (comp.viewModel.value !== undefined && isRxObservable(comp.viewModel.value)) {
-                    const subscription = comp.viewModel.value.subscribe(val => {
+                if (viewModel.value !== undefined && isRxObservable(viewModel.value)) {
+                    const subscription = viewModel.value.subscribe(val => {
                         element["value"] = val;
                         element.dispatchEvent(new Event("change"));
                     });
@@ -58,18 +58,18 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
                 }
 
                 // auto-dispose view-model
-                if (comp.viewModel.cleanup !== undefined) {
-                    internal.add(comp.viewModel.cleanup);
+                if (viewModel.cleanup !== undefined) {
+                    internal.add(viewModel.cleanup);
                 }
             }
 
             // done
-            this.applyTemplate(element, newContext, comp, children);
+            this.applyTemplate(element, newContext, { template: template, viewModel: viewModel }, children);
         }));
         state.cleanup.add(doCleanup);
     }
 
-    protected applyTemplate(element: HTMLElement, newContext: IDataContext, component: IComponent, children: DocumentFragment) {
+    protected applyTemplate(element: HTMLElement, childContext: IDataContext, component: IComponent, children: DocumentFragment) {
         if (component.template) {
             // clear
             while (element.firstChild) {
@@ -81,10 +81,10 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
 
         // invoke preBindingInit
         if (component.viewModel && component.viewModel.hasOwnProperty("preInit")) {
-            (<any> component.viewModel).preInit(element, newContext);
+            (<any> component.viewModel).preInit(element, childContext);
         }
 
-        this.domManager.applyBindingsToDescendants(newContext, element);
+        this.domManager.applyBindingsToDescendants(childContext, element);
         // transclusion
         for (let i = 0; i < element.childNodes.length; i++) {
             const child = element.childNodes[i] as HTMLElement;
@@ -96,7 +96,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
 
         // invoke postBindingInit
         if (component.viewModel && component.viewModel.hasOwnProperty("postInit")) {
-            (<any> component.viewModel).postInit(element, newContext);
+            (<any> component.viewModel).postInit(element, childContext);
         }
     }
 
@@ -106,11 +106,5 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
             (state.bindings.get("attr") as IBindingAttribute<any>[]).forEach(x => params[x.parameter as string] = x.expression(state.context));
         }
         return params as T;
-    }
-
-    private getViewModel(element: HTMLElement, state: INodeState, descriptor: Observable<IComponentDescriptor>, params: T): Observable<IViewModel|null> {
-        return state.bindings.has("as") ?
-               (state.bindings.get("as") as IBindingAttribute<any>[])[0].evaluate(state.context, DataFlow.Out) as Observable<IViewModel> :
-               descriptor.map(x => components.initialize(x, params));
     }
 }

@@ -290,3 +290,46 @@ it("component: Components support value binding", expect => {
     expect.end();
 
 });
+
+it("component: Components support value binding", expect => {
+    const str = `<test-component x-value="obs"></test-component>`;
+    const el = <HTMLElement> util.parse(str)[0];
+
+    const template = `<input type="text" x-value="name"/><input type="text" x-value="surname"/>`;
+    const name = new Rx.BehaviorSubject("Hello");
+    const surname = new Rx.BehaviorSubject("World");
+    const component = { viewModel: { name, surname, value: name.combineLatest(surname, (n, s) => `${n} ${s}`) }, template: template };
+    ui.components.register("test-component", component);
+
+    const vm = { obs: new Rx.BehaviorSubject("") };
+
+    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    expect.equal("Hello World", vm.obs.getValue());
+    expect.end();
+
+});
+
+it("component: Dynamic component", expect => {
+    const str = `<div x-component="name"></div>`;
+    const el = <HTMLElement> util.parse(str)[0];
+
+    const t1 = `<p x-text="id">BAD</p>`;
+    const t2 = `<input type="text" x-value="id"/>`;
+    const c1 = { viewModel: { id: "first" }, template: t1 };
+    const c2 = { viewModel: { id: "second" }, template: t2 };
+    ui.components.register("test-one", c1);
+    ui.components.register("test-two", c2);
+
+    const vm = { name: new Rx.BehaviorSubject("test-one") };
+    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+
+    expect.equal(el.children[0].tagName, "P");
+    expect.equal(el.children[0].textContent, "first");
+    vm.name.next("test-two");
+
+    expect.equal(el.children[0].tagName, "INPUT");
+    expect.equal(el.children[0]["value"], "second");
+
+    expect.end();
+
+});

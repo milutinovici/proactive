@@ -40,14 +40,15 @@ export class ComponentRegistry {
                 return Rx.Observable.of<IComponentDescriptor>(descriptor);
             }
         } else {
-            throw new Error(`No component with name '${name}' is registered`);
+            exception.next(new Error(`No component with name '${name}' is registered`));
+            return Rx.Observable.empty();
         }
     }
 
-    public initialize<T extends Object>(descriptor: IComponentDescriptor, params: T): IViewModel | null {
-        let vm = descriptor.viewModel || null;
+    public initialize<T extends Object>(descriptor: IComponentDescriptor, params: T): IViewModel | undefined {
+        let vm = descriptor.viewModel;
         if (isFunction(vm)) {
-            let model: IViewModel | null = null;
+            let model: IViewModel | undefined;
             try {
                 model = new vm(params);
             } catch (e) {
