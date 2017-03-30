@@ -89,7 +89,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         for (let i = 0; i < element.childNodes.length; i++) {
             const child = element.childNodes[i] as HTMLElement;
             if (child.tagName === "SLOT") {
-                element.insertBefore(children, child);
+                element.insertBefore(children.cloneNode(true), child);
                 this.domManager.cleanNode(element.removeChild(child) as HTMLElement);
             }
         }
