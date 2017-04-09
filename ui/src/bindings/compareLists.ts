@@ -47,8 +47,8 @@ export const compareLists = (function compareArrays() {
         // For backward compatibility, if the third arg is actually a bool, interpret
         // it as the old parameter 'dontLimitMoves'. Newer code should use { dontLimitMoves: true }.
         options = (typeof options === "boolean") ? { "dontLimitMoves": options } : (options || {});
-        old = old instanceof Map ? mapToArray(old) : (old || []);
-        nw = nw instanceof Map ? mapToArray(nw) : (nw || []);
+        old = !Array.isArray(old) ? toArray(old) : old;
+        nw = !Array.isArray(nw) ? toArray(nw) : nw;
 
         if (old.length < nw.length) {
             return compareSmallArrayToBigArray<T>(old, nw, statusNotInOld, statusNotInNew, options);
@@ -124,8 +124,14 @@ export const compareLists = (function compareArrays() {
     return compareArrays;
 })();
 
-function mapToArray<T>(map: Map<any, T>): T[] {
-    const array: any[] = [];
-    map.forEach((value, key) => array.push({ key, value }));
-    return array;
+function toArray<T>(obj: Map<any, T> | object): T[] {
+    if (obj === null || obj === undefined) {
+        return [];
+    } else if (obj instanceof Map) {
+        const array: any[] = [];
+        obj.forEach((value, key) => array.push({ key, value }));
+        return array;
+    } else {
+        return Object.keys(obj).map(key => <any> { key: key, value: obj[key] });
+    }
 }

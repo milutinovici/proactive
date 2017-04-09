@@ -176,3 +176,18 @@ it("for: works on a map", expect => {
     expect.isEquivalent(el.children[1].textContent, "world");
     expect.end();
 });
+
+it("for: works on an object", expect => {
+    const template = `<ul>
+                        <li x-for-item="src" x-text="item.value" x-attr-title="item.key"></li>
+                      </ul>`;
+    const el = <HTMLElement> util.parse(template)[0];
+
+    let obj = { hello: 1, world: 2};
+
+    expect.doesNotThrow(() => ui.applyBindings({ src: obj }, el));
+
+    expect.isEquivalent(el.children[0].textContent, "1");
+    expect.isEquivalent(el.children[1].textContent, "2");
+    expect.end();
+});
