@@ -1,5 +1,5 @@
 import { Observable, Observer, Subscription } from "rxjs";
-import { DataFlow } from "../interfaces";
+import { DataFlow, Parametricity } from "../interfaces";
 import { DomManager } from "../domManager";
 import { SimpleBinding } from "./bindingBase";
 import { isRxObserver } from "../utils";
@@ -24,12 +24,10 @@ const keysByCode = {
 };
 
 export class KeyPressBinding extends SimpleBinding<KeyboardEvent> {
-
-    public priority = 0;
-
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.dataFlow = DataFlow.In;
+        this.parametricity = Parametricity.Required;
     }
 
     public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription {

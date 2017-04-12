@@ -1,55 +1,72 @@
 import { Observable, Observer, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { IBindingHandler, INodeState, IBindingAttribute, DataFlow } from "../interfaces";
+import { IBindingHandler, INodeState, IBindingAttribute, DataFlow, Parametricity } from "../interfaces";
 import { exception } from "../exceptionHandlers";
 
 /**
  * Base class for bindings that takes a single expression and applies the result to one or more target elements
  * @class
  */
-export abstract class BindingBase implements IBindingHandler {
+export abstract class BindingBase<T> implements IBindingHandler {
     public readonly name: string;
+    protected readonly domManager: DomManager;
     public priority = 0;
     public dataFlow = DataFlow.Out;
     public controlsDescendants = false;
-    protected readonly domManager: DomManager;
+    public unique = false;
+    public parametricity = Parametricity.Optional;
 
     constructor(name: string, domManager: DomManager) {
         this.name = name;
         this.domManager = domManager;
     }
 
-    public abstract applyBinding(node: Element, state: INodeState): void;
-
+    public applyBinding(node: Element, state: INodeState): Subscription {
+        const bindings = state.bindings.get(this.name) as IBindingAttribute<T>[];
+        if (this.unique && bindings.length > 1) {
+            exception.next(new Error(`more than 1 ${this.name} binding on element ${node}`));
+            return Subscription.EMPTY;
+        }
+        if (this.parametricity === Parametricity.Forbidden && bindings.some(x => x.parameter !== undefined)) {
+            exception.next(new Error(`binding ${this.name} binding on element ${node} can't have additional parameters`));
+            return Subscription.EMPTY;
+        }
+        if (this.parametricity === Parametricity.Required && bindings.some(x => x.parameter === undefined)) {
+            exception.next(new Error(`binding ${this.name} binding on element ${node} must have a parameter`));
+            return Subscription.EMPTY;
+        }
+        return this.applyInternal(node, state);
+    }
+    protected abstract applyInternal(node: Element, state: INodeState): Subscription;
 }
 
-export abstract class SingleBindingBase<T> extends BindingBase {
-    public applyBinding(el: Element, state: INodeState): void {
-        const bindings = state.bindings.get(this.name) as IBindingAttribute<any>[];
-        if (bindings.length > 1) {
-            exception.next(new Error(`more than 1 ${this.name} binding on element ${el}`));
-            return;
-        }
-        this.applySingleBinding(el, bindings[0].evaluate(state.context, this.dataFlow), state, bindings[0].parameter);
+export abstract class SingleBindingBase<T> extends BindingBase<T> {
+    constructor(name: string, domManager: DomManager) {
+        super(name, domManager);
+        this.unique = true;
     }
-    protected abstract applySingleBinding(el: Element, observable: Observable<T> | Observer<T>, state: INodeState, parameter?: string): void;
+    public applyInternal(el: Element, state: INodeState): Subscription {
+        const binding = (state.bindings.get(this.name) as any)[0] as IBindingAttribute<T>;
+
+        return this.applySingle(el, binding.evaluate(state.context, this.dataFlow), state, binding.parameter);
+    }
+    protected abstract applySingle(el: Element, observable: Observable<T> | Observer<T>, state: INodeState, parameter?: string): Subscription;
 }
 
 /**
 * Base class for one-way bindings that take a single expression and apply the result to one or more target elements
 * @class
 */
-export abstract class SimpleBinding<T> extends BindingBase {
+export abstract class SimpleBinding<T> extends BindingBase<T> {
 
-    public applyBinding(el: Element, state: INodeState): void {
+    public applyInternal(el: Element, state: INodeState): Subscription {
         const bindings = state.bindings.get(this.name) as IBindingAttribute<any>[];
+        const subscription = new Subscription();
         for (const binding of bindings) {
             const observable = binding.evaluate(state.context, this.dataFlow) as Observable<T>;
-            const subscription = this.apply(el, observable, binding.parameter);
-            if (subscription !== undefined) {
-                state.cleanup.add(subscription);
-            }
+            subscription.add(this.apply(el, observable, binding.parameter));
         }
+        return subscription;
     }
 
     public abstract apply(el: Element, observable: Observable<T> | Observer<T>, parameter?: string): Subscription;

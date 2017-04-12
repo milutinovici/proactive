@@ -111,10 +111,10 @@ export class DomManager {
             }
             // apply for before anything else, then imediately return
             if (handler.name === "for" && !state.for) {
-                handler.applyBinding(el, state);
+                state.cleanup.add(handler.applyBinding(el, state));
                 return true;
             }
-            handler.applyBinding(el, state);
+            state.cleanup.add(handler.applyBinding(el, state));
         }
 
         return controlsDescendants !== 0;

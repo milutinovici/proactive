@@ -1,18 +1,15 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
 import { SimpleBinding } from "./bindingBase";
-import { exception } from "../exceptionHandlers";
+import { Parametricity } from "../interfaces";
 
 export class CssBinding extends SimpleBinding<boolean> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
+        this.parametricity = Parametricity.Required;
     }
 
     public apply(el: HTMLElement, observable: Observable<boolean>, className: string): Subscription {
-        if (!className) {
-            exception.next(new Error(`Class name for binding is undefined on ${el.tagName}`));
-            return Subscription.EMPTY;
-        }
         return observable.subscribe(value => {
             if (value) {
                 el.classList.add(className);
@@ -26,15 +23,11 @@ export class CssBinding extends SimpleBinding<boolean> {
 export class AttrBinding extends SimpleBinding<string | number | boolean> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
-
+        this.parametricity = Parametricity.Required;
         this.priority = 5;
     }
 
     public apply(el: HTMLElement, observable: Observable<string|number|boolean>, attributeName: string): Subscription {
-        if (!attributeName) {
-            exception.next(new Error(`Attribute name for binding is undefined on ${el.tagName}`));
-            return Subscription.EMPTY;
-        }
         return observable.subscribe(value => {
             // To cover cases like "attr: { checked:someProp }", we want to remove the attribute entirely
             // when someProp is a "no value"-like value (strictly null, false, or undefined)
@@ -52,13 +45,10 @@ export class AttrBinding extends SimpleBinding<string | number | boolean> {
 export class StyleBinding extends SimpleBinding<string | number | boolean> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
+        this.parametricity = Parametricity.Required;
     }
 
     public apply(el: HTMLElement, observable: Observable<string|number|boolean>, styleName: string): Subscription {
-        if (!styleName) {
-            exception.next(new Error(`Style name for binding is undefined on ${el.tagName}`));
-            return Subscription.EMPTY;
-        }
         return observable.subscribe(value => {
             if (value === null || value === undefined || value === false) {
                 // Empty string removes the value, whereas null/undefined have no effect
@@ -71,9 +61,11 @@ export class StyleBinding extends SimpleBinding<string | number | boolean> {
 }
 
 export class HtmlBinding extends SimpleBinding<string> {
-    public controlsDescendants = true;
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
+        this.controlsDescendants = true;
+        this.parametricity = Parametricity.Forbidden;
+        this.unique = true;
     }
 
     public apply(el: HTMLElement, observable: Observable<string>): Subscription {

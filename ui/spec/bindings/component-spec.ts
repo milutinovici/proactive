@@ -221,7 +221,7 @@ it("component: Unsubscribes a component's viewmodel if has cleanup subscription"
 });
 
 it("component: Components are properly isolated", expect => {
-    const str = `<div x-as="foo"><test-component></test-component></div>`;
+    const str = `<div><test-component></test-component></div>`;
     const el = <HTMLElement> util.parse(str)[0];
     const template = `<span x-text="bar">invalid</span>`;
     const value = "baz";
@@ -333,3 +333,4 @@ it("component: Dynamic component", expect => {
     expect.end();
 
 });
+

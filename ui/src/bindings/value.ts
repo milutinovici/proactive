@@ -5,14 +5,14 @@ import { DomManager } from "../domManager";
 import { isRxObserver, nodeListToArray, tryParse } from "../utils";
 
 export class ValueBinding extends SingleBindingBase<string|number|boolean|string[]> {
-    public priority = 30;
-
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
+        this.priority = 30;
+        this.unique = true;
         this.dataFlow = DataFlow.Out | DataFlow.In;
     }
 
-    public applySingleBinding(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, state: INodeState, event = "change") {
+    public applySingle(el: HTMLElement, observable: Subject<string|number|boolean|string[]>, state: INodeState, event = "change"): Subscription {
         let sub1: Subscription;
         let sub2: Subscription | undefined;
 
@@ -44,10 +44,10 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
                 sub2 = events.map(evt => evt.target["value"] as string).distinctUntilChanged().map(tryParse).subscribe(observable);
             }
         }
-        state.cleanup.add(sub1);
         if (sub2 !== undefined) {
             state.cleanup.add(sub2);
         }
+        return sub1;
     }
 
     private static getEvents(el: Element, event: string, isCheckboxOrRadio: boolean): Observable<Event> {

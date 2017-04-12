@@ -35,6 +35,6 @@ export class BindingProvider {
     private static handleBarsToBinding(node: Node): BindingAttribute<string> {
         const trimmed = (node.nodeValue as string).trim();
         const expression = trimmed.slice(2, trimmed.length - 2);
-        return new BindingAttribute<string>("text", "text", expression);
+        return new BindingAttribute<string>("text", "text", expression, expression);
     }
 }

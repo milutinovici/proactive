@@ -1,18 +1,19 @@
-import { Observable } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
 import { NodeState } from "../nodeState";
-import { IDataContext, INodeState } from "../interfaces";
+import { IDataContext, INodeState, Parametricity } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
 export class ForBinding<T> extends SingleBindingBase<T[]> {
-    public priority = 40;
-
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
+        this.priority = 40;
+        this.unique = true;
+        this.parametricity = Parametricity.Required;
     }
 
-    public applySingleBinding(node: Element, observable: Observable<T[]>, state: INodeState, parameter: string): void {
+    public applySingle(node: Element, observable: Observable<T[]>, state: INodeState, parameter: string): Subscription {
         const childContextNames = parameter.split("-"); // item and index name
         const itemName = childContextNames[0];
         const indexName = childContextNames[1];
@@ -26,10 +27,10 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
 
         let oldArray: T[] = [];
         // subscribe
-        state.cleanup.add(observable.subscribe(array => {
+        const subscription = observable.subscribe(array => {
             this.applyValue(parent, node, state.context, itemName, indexName, array, oldArray, placeholder);
             oldArray = array;
-        }));
+        });
         // apply bindings after repeated elements
         if (node.nextSibling === null && sibling !== null) {
             while (sibling !== null) {
@@ -37,7 +38,8 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
                 sibling = sibling.nextSibling;
             }
         }
-        state.cleanup.add(() => parent.removeChild(placeholder));
+        subscription.add(() => parent.removeChild(placeholder));
+        return subscription;
     }
 
     protected applyValue(parent: Element, template: Element, context: IDataContext, itemName: string, indexName: string, newArray: T[], oldArray: T[], placeholder: Node): void {

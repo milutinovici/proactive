@@ -10,7 +10,7 @@ export interface IBindingAttribute<T> {
 }
 
 export enum DataFlow { Out = 1, In = 2 }
-
+export enum Parametricity { Required, Forbidden, Optional }
 export interface IBindingHandler {
         readonly name: string;
         /**
@@ -18,7 +18,12 @@ export interface IBindingHandler {
         * sometimes it is necessary to specify the order in which the bindings are applied.
         */
         readonly priority: number;
+        // Data flow of the binding, can be In, Out (unidirectional), or both (bidirectional)
         readonly dataFlow: DataFlow;
+        // are aditional parameters of a binding required, optional or forbidden
+        readonly parametricity: Parametricity;
+        // if true, only 1 binding of this type can be on a node
+        readonly unique: boolean;
        /**
         * If set to true then bindings won't be applied to children
         * of the element such binding is encountered on. Instead
@@ -33,7 +38,7 @@ export interface IBindingHandler {
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
-        applyBinding(node: Node, state: INodeState): void;
+        applyBinding(node: Node, state: INodeState): Subscription;
 
 }
 
@@ -45,7 +50,7 @@ export interface INodeState {
     readonly cleanup: Subscription;
     bindings: Map<string, IBindingAttribute<any>[]>;
     context: IDataContext;
-    for?: boolean;
+    for: boolean;
 }
 export interface IViewModel {
     readonly cleanup?: Subscription;

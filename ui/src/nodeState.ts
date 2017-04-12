@@ -5,10 +5,11 @@ export class NodeState implements INodeState {
     public context: IDataContext;        // scope model
     public readonly cleanup: Rx.Subscription;
     public bindings: Map<string, IBindingAttribute<any>[]>;
-    public for?: boolean;
+    public for: boolean;
     constructor(context: IDataContext) {
         this.context = context;
         this.cleanup = new Rx.Subscription();
+        this.for = false;
     }
 }
 

@@ -1,20 +1,21 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
-import { INodeState, IComponent, IDataContext, IBindingAttribute } from "../interfaces";
+import { INodeState, IComponent, IDataContext, IBindingAttribute, Parametricity } from "../interfaces";
 import { DataContext } from "../nodeState";
 import { SingleBindingBase } from "./bindingBase";
 import { components } from "../components/registry";
 
 export class ComponentBinding<T> extends SingleBindingBase<string> {
-    public priority = 20;
-    public controlsDescendants = true;
-
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
+        this.priority = 20;
+        this.unique = true;
+        this.controlsDescendants = true;
+        this.parametricity = Parametricity.Forbidden;
     }
 
-    public applySingleBinding(element: HTMLElement, observable: Observable<string>, state: INodeState) {
+    public applySingle(element: HTMLElement, observable: Observable<string>, state: INodeState): Subscription {
         const descriptor = observable.mergeMap(name => components.load(name));
         const params = this.getParams(state);
 
@@ -33,7 +34,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         }
 
         // subscribe to any input changes
-        state.cleanup.add(descriptor.subscribe(desc => {
+        const sub = descriptor.subscribe(desc => {
             doCleanup();
             internal = new Subscription();
             // isolated nodestate and ctx
@@ -45,16 +46,14 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
 
                 // wire custom events
                 if (viewModel.emitter !== undefined && isRxObservable(viewModel.emitter)) {
-                    const subscription = viewModel.emitter.subscribe(evt => element.dispatchEvent(evt));
-                    internal.add(subscription);
+                    internal.add(viewModel.emitter.subscribe(evt => element.dispatchEvent(evt)));
                 }
                 // apply custom component value
                 if (viewModel.value !== undefined && isRxObservable(viewModel.value)) {
-                    const subscription = viewModel.value.subscribe(val => {
+                    internal.add(viewModel.value.subscribe(val => {
                         element["value"] = val;
                         element.dispatchEvent(new Event("change"));
-                    });
-                    internal.add(subscription);
+                    }));
                 }
 
                 // auto-dispose view-model
@@ -65,8 +64,9 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
 
             // done
             this.applyTemplate(element, newContext, { template: template, viewModel: viewModel }, children);
-        }));
+        });
         state.cleanup.add(doCleanup);
+        return sub;
     }
 
     protected applyTemplate(element: HTMLElement, childContext: IDataContext, component: IComponent, children: DocumentFragment) {

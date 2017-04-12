@@ -1,30 +1,30 @@
-import * as Rx from "rxjs";
+import { Observable, Observer, Subject, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { SingleBindingBase } from "./bindingBase";
-import { INodeState, DataFlow } from "../interfaces";
+import { SimpleBinding } from "./bindingBase";
+import { DataFlow } from "../interfaces";
 import { isRxObserver } from "../utils";
 
-export class FocusBinding extends SingleBindingBase<boolean> {
-
-    public priority = -1;
-
+export class FocusBinding extends SimpleBinding<boolean> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
+        this.unique = true;
         this.dataFlow = DataFlow.Out | DataFlow.In;
+        this.priority = -1;
     }
 
-    public applySingleBinding(el: HTMLInputElement, observable: Rx.Observable<boolean> | Rx.Subject<boolean>, state: INodeState, parameter?: string) {
+    public apply(el: HTMLInputElement, observable: Observable<boolean> | Subject<boolean>, parameter?: string): Subscription {
         const delay = parseInt(parameter || "0");
 
-        state.cleanup.add(observable.subscribe(x => {
+        const subscription = observable.subscribe(x => {
             this.updateElement(el, x, delay);
-        }));
+        });
 
         if (isRxObserver(observable)) {
-            state.cleanup.add(this.getFocusEventObservables(el).subscribe(hasFocus => {
+            subscription.add(this.getFocusEventObservables(el).subscribe(hasFocus => {
                 this.handleElementFocusChange(el, observable, hasFocus);
             }));
         }
+        return subscription;
     }
 
     private updateElement(el: HTMLElement, value: boolean, delay: number) {
@@ -37,7 +37,7 @@ export class FocusBinding extends SingleBindingBase<boolean> {
             if (delay === 0 && el.style.display !== "none") {
                 el.focus();
             } else {
-                Rx.Observable.timer(delay).subscribe(() => {
+                Observable.timer(delay).subscribe(() => {
                     el.focus();
                 });
             }
@@ -46,7 +46,7 @@ export class FocusBinding extends SingleBindingBase<boolean> {
         }
     }
 
-    private handleElementFocusChange(el: HTMLElement, observer: Rx.Observer<boolean>, isFocused: boolean) {
+    private handleElementFocusChange(el: HTMLElement, observer: Observer<boolean>, isFocused: boolean) {
         // If possible, ignore which event was raised and determine focus state using activeElement,
         // as this avoids phantom focus/blur events raised when changing tabs in modern browsers.
         const ownerDoc = el.ownerDocument;
@@ -65,11 +65,11 @@ export class FocusBinding extends SingleBindingBase<boolean> {
         observer.next(isFocused);
     }
 
-    private getFocusEventObservables(el: HTMLInputElement): Rx.Observable<boolean> {
-        return Rx.Observable.merge(Rx.Observable.fromEvent<Event>(el, "focus").mapTo(true),
-                                   Rx.Observable.fromEvent<Event>(el, "focusin").mapTo(true),
-                                   Rx.Observable.fromEvent<Event>(el, "blur").mapTo(false),
-                                   Rx.Observable.fromEvent<Event>(el, "focusout").mapTo(false));
+    private getFocusEventObservables(el: HTMLInputElement): Observable<boolean> {
+        return Observable.merge(Observable.fromEvent<Event>(el, "focus").mapTo(true),
+                                   Observable.fromEvent<Event>(el, "focusin").mapTo(true),
+                                   Observable.fromEvent<Event>(el, "blur").mapTo(false),
+                                   Observable.fromEvent<Event>(el, "focusout").mapTo(false));
 
     }
 }
