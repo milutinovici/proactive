@@ -27,12 +27,14 @@ export abstract class BindingBase<T> implements IBindingHandler {
             exception.next(new Error(`more than 1 ${this.name} binding on element ${node}`));
             return Subscription.EMPTY;
         }
-        if (this.parametricity === Parametricity.Forbidden && bindings.some(x => x.parameter !== undefined)) {
-            exception.next(new Error(`binding ${this.name} binding on element ${node} can't have additional parameters`));
+        let badBindings = bindings.filter(x => x.parameter !== undefined);
+        if (this.parametricity === Parametricity.Forbidden && badBindings.length > 0) {
+            badBindings.forEach(binding => exception.next(new Error(`binding ${this.name} with expression "${binding.text}" on element ${node} can't have parameters`)));
             return Subscription.EMPTY;
         }
-        if (this.parametricity === Parametricity.Required && bindings.some(x => x.parameter === undefined)) {
-            exception.next(new Error(`binding ${this.name} binding on element ${node} must have a parameter`));
+        badBindings = bindings.filter(x => x.parameter === undefined);
+        if (this.parametricity === Parametricity.Required && badBindings.length > 0) {
+            badBindings.forEach(binding => exception.next(new Error(`binding ${this.name} with expression "${binding.text}" on element ${node} must have a parameter`)));
             return Subscription.EMPTY;
         }
         return this.applyInternal(node, state);
