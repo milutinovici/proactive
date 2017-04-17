@@ -1,7 +1,7 @@
-import { Observable, Subscription } from "rxjs";
+import { Observable } from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
-import { INodeState, Parametricity } from "../interfaces";
+import { IBindingAttribute, INodeState, Parametricity } from "../interfaces";
 
 export class IfBinding extends SingleBindingBase<boolean> {
     protected inverse: boolean = false;
@@ -13,36 +13,36 @@ export class IfBinding extends SingleBindingBase<boolean> {
         // this.controlsDescendants = true;
     }
 
-    protected applySingle(el: HTMLElement, observable: Observable<boolean>, state: INodeState): Subscription {
-        const parent = el.parentElement as HTMLElement;
-        const placeholder: Comment = document.createComment(`if`);
-        parent.insertBefore(placeholder, el);
-        let sibling = el.nextSibling;
+    public applySingle(element: HTMLElement, binding: IBindingAttribute<boolean>, state: INodeState): void {
+        const observable = binding.evaluate(state.context, this.dataFlow) as Observable<boolean>;
+        const parent = element.parentElement as HTMLElement;
+        const placeholder: Comment = document.createComment("if");
+        parent.insertBefore(placeholder, element);
+        let sibling = element.nextSibling;
 
         this.domManager.nodeStateManager.set(placeholder, state);
-        parent.removeChild(el);
+        parent.removeChild(element);
 
         const visibility = observable.map(x => this.inverse ? !x : !!x).distinctUntilChanged();
 
         // subscribe
-        const subscription = visibility.subscribe((x => {
+        binding.cleanup.add(visibility.subscribe((x => {
             if (x) {
-                this.domManager.applyBindingsToDescendants(state.context, el);
-                parent.insertBefore(el, placeholder);
-            } else if (el.parentElement === parent) {
-                parent.removeChild(el);
-                this.domManager.cleanDescendants(el);
+                this.domManager.applyBindingsToDescendants(state.context, element);
+                parent.insertBefore(element, placeholder);
+            } else if (element.parentElement === parent) {
+                parent.removeChild(element);
+                this.domManager.cleanDescendants(element);
             }
-        }));
+        })));
         // apply bindings after if element
-        if (el.nextSibling === null && sibling !== null) {
+        if (element.nextSibling === null && sibling !== null) {
             while (sibling !== null) {
                 this.domManager.applyBindingsRecursive(state.context, sibling);
                 sibling = sibling.nextSibling;
             }
         }
-        subscription.add(() => parent.removeChild(placeholder));
-        return subscription;
+        binding.cleanup.add(() => parent.removeChild(placeholder));
     }
 }
 

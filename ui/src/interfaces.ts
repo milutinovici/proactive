@@ -5,6 +5,7 @@ export interface IBindingAttribute<T> {
     readonly name: string;
     readonly text: string;
     readonly parameter?: string;
+    readonly cleanup: Subscription;
     readonly expression: (scope: IDataContext) => T | null;
     evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T>;
 }
@@ -38,7 +39,7 @@ export interface IBindingHandler {
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
-        applyBinding(node: Node, state: INodeState): Subscription;
+        applyBinding(node: Node, state: INodeState): void;
 
 }
 
@@ -47,7 +48,6 @@ export interface IDataContext {
     extend(name: string, model: IViewModel, indexName?: string, index?: number): IDataContext;
 }
 export interface INodeState {
-    readonly cleanup: Subscription;
     bindings: Map<string, IBindingAttribute<any>[]>;
     context: IDataContext;
     for: boolean;
@@ -59,12 +59,12 @@ export interface IViewModel {
 }
 
 export interface IComponentDescriptor {
-    name?: string;
-    template: DocumentFragment | string;
-    viewModel?: IViewModel|(new (params?: Object) => IViewModel);
+    readonly name?: string;
+    readonly template: DocumentFragment | string;
+    readonly viewModel?: IViewModel|(new (params?: Object) => IViewModel);
 }
 
 export interface IComponent {
-    template: DocumentFragment;
-    viewModel?: IViewModel;
+    readonly template: DocumentFragment;
+    readonly viewModel?: IViewModel;
 }

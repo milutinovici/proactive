@@ -15,7 +15,8 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         this.parametricity = Parametricity.Forbidden;
     }
 
-    public applySingle(element: HTMLElement, observable: Observable<string>, state: INodeState): Subscription {
+    public applySingle(element: HTMLElement, binding: IBindingAttribute<string>, state: INodeState): void {
+        const observable = binding.evaluate(state.context, this.dataFlow) as Observable<string>;
         const descriptor = observable.mergeMap(name => components.load(name));
         const params = this.getParams(state);
 
@@ -34,7 +35,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         }
 
         // subscribe to any input changes
-        const sub = descriptor.subscribe(desc => {
+        binding.cleanup.add(descriptor.subscribe(desc => {
             doCleanup();
             internal = new Subscription();
             // isolated nodestate and ctx
@@ -64,9 +65,8 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
 
             // done
             this.applyTemplate(element, newContext, { template: template, viewModel: viewModel }, children);
-        });
-        state.cleanup.add(doCleanup);
-        return sub;
+        }));
+        binding.cleanup.add(doCleanup);
     }
 
     protected applyTemplate(element: HTMLElement, childContext: IDataContext, component: IComponent, children: DocumentFragment) {

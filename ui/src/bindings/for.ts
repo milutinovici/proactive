@@ -1,8 +1,8 @@
-import { Observable, Subscription } from "rxjs";
+import { Observable } from "rxjs";
 import { SingleBindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
 import { NodeState } from "../nodeState";
-import { IDataContext, INodeState, Parametricity } from "../interfaces";
+import { IBindingAttribute, IDataContext, INodeState, Parametricity } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
 export class ForBinding<T> extends SingleBindingBase<T[]> {
@@ -13,12 +13,13 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
         this.parametricity = Parametricity.Required;
     }
 
-    public applySingle(node: Element, observable: Observable<T[]>, state: INodeState, parameter: string): Subscription {
-        const childContextNames = parameter.split("-"); // item and index name
+    public applySingle(node: Element, binding: IBindingAttribute<T[]>, state: INodeState): void {
+        const observable = binding.evaluate(state.context, this.dataFlow) as Observable<T[]>;
+        const childContextNames = (binding.parameter as string).split("-"); // item and index name
         const itemName = childContextNames[0];
         const indexName = childContextNames[1];
         const parent = node.parentElement as HTMLElement;
-        const placeholder: Comment = document.createComment(`for ${parameter}`);
+        const placeholder: Comment = document.createComment(`for ${binding.text}`);
         this.domManager.nodeStateManager.set(placeholder, state);
         // backup inner HTML
         parent.insertBefore(placeholder, node);
@@ -27,10 +28,10 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
 
         let oldArray: T[] = [];
         // subscribe
-        const subscription = observable.subscribe(array => {
+        binding.cleanup.add(observable.subscribe(array => {
             this.applyValue(parent, node, state.context, itemName, indexName, array, oldArray, placeholder);
             oldArray = array;
-        });
+        }));
         // apply bindings after repeated elements
         if (node.nextSibling === null && sibling !== null) {
             while (sibling !== null) {
@@ -38,8 +39,7 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
                 sibling = sibling.nextSibling;
             }
         }
-        subscription.add(() => parent.removeChild(placeholder));
-        return subscription;
+        binding.cleanup.add(() => parent.removeChild(placeholder));
     }
 
     protected applyValue(parent: Element, template: Element, context: IDataContext, itemName: string, indexName: string, newArray: T[], oldArray: T[], placeholder: Node): void {

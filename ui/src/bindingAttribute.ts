@@ -1,5 +1,5 @@
 import { exception } from "./exceptionHandlers";
-import { Observable, Observer, Subscriber, Symbol } from "rxjs";
+import { Observable, Observer, Subscriber, Subscription, Symbol } from "rxjs";
 import { IDataContext, IBindingAttribute, DataFlow } from "./interfaces";
 import { isRxObservable, isRxObserver, isFunction } from "./utils";
 
@@ -10,12 +10,14 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
     public readonly name: string;
     public readonly text: string;
     public readonly parameter?: string;
+    public readonly cleanup: Subscription;
 
     constructor(tag: string, name: string, text: string, parameter?: string) {
         this.tag = tag;
         this.name = name;
         this.text = text;
         this.parameter = parameter;
+        this.cleanup = new Subscription();
     }
 
     public evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T> {

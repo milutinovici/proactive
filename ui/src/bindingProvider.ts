@@ -1,8 +1,42 @@
+import { IBindingHandler, IBindingAttribute } from "./interfaces";
 import { BindingAttribute } from "./bindingAttribute";
 import { isElement } from "./utils";
 import { components } from "./components/registry";
-
+import { exception } from "./exceptionHandlers";
 export class BindingProvider {
+    private static readonly bindingHandlers = new Map<string, IBindingHandler>();
+
+    public static registerHandler(handler: IBindingHandler) {
+        this.bindingHandlers.set(handler.name, handler);
+    }
+    public static getBindingHandler(name: string) {
+        const handler = this.bindingHandlers.get(name);
+        if (!handler) {
+            throw new Error(`Binding handler "${name}" has not been registered.`);
+        }
+        return handler;
+    }
+    public static getHandlers(bindings: Map<string, IBindingAttribute<any>[]>, handlers: IBindingHandler[]) {
+        let controlsDescendants = 0;
+        bindings.forEach((val, name) => {
+            const handler = this.bindingHandlers.get(name);
+            if (!handler) {
+                exception.next(new Error(`Binding handler "${name}" has not been registered.`));
+            } else {
+                if (handler.controlsDescendants) {
+                    controlsDescendants += 1;
+                }
+                handlers.push(handler);
+            }
+        });
+        // sort by priority
+        handlers.sort((a, b) => b.priority - a.priority);
+
+        if (controlsDescendants > 1) {
+            throw Error(`bindings are competing for descendants of target element!`);
+        }
+        return controlsDescendants;
+    }
 
     public static getBindings(element: Node): BindingAttribute<any>[] {
         if (!isElement(element)) {

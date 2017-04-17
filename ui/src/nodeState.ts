@@ -3,12 +3,10 @@ import { IDataContext, INodeState, IViewModel, IBindingAttribute } from "./inter
 
 export class NodeState implements INodeState {
     public context: IDataContext;        // scope model
-    public readonly cleanup: Rx.Subscription;
-    public bindings: Map<string, IBindingAttribute<any>[]>;
+    public readonly bindings: Map<string, IBindingAttribute<any>[]>;
     public for: boolean;
     constructor(context: IDataContext) {
         this.context = context;
-        this.cleanup = new Rx.Subscription();
         this.for = false;
     }
 }
@@ -32,8 +30,8 @@ export class NodeStateManager {
         const state = this.weakMap.get(node);
 
         if (state != null) {
-            if (state.cleanup != null) {
-                state.cleanup.unsubscribe();
+            if (state.bindings != null) {
+                state.bindings.forEach(group => group.forEach(x => x.cleanup.unsubscribe()));
             }
             delete state.context;
             // delete state itself
