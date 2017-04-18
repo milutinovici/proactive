@@ -1,9 +1,9 @@
 import { Observable } from "rxjs";
-import { SingleBindingBase } from "./bindingBase";
+import { BindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
-import { IBindingAttribute, INodeState, Parametricity } from "../interfaces";
+import { IBinding, INodeState, Parametricity } from "../interfaces";
 
-export class IfBinding extends SingleBindingBase<boolean> {
+export class IfBinding extends BindingBase<boolean> {
     protected inverse: boolean = false;
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
@@ -13,7 +13,7 @@ export class IfBinding extends SingleBindingBase<boolean> {
         // this.controlsDescendants = true;
     }
 
-    public applySingle(element: HTMLElement, binding: IBindingAttribute<boolean>, state: INodeState): void {
+    public applyInternal(element: HTMLElement, binding: IBinding<boolean>, state: INodeState): void {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<boolean>;
         const parent = element.parentElement as HTMLElement;
         const placeholder: Comment = document.createComment("if");

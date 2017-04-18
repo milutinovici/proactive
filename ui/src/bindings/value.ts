@@ -1,10 +1,10 @@
 import { Observable } from "rxjs";
-import { SingleBindingBase } from "./bindingBase";
-import { IBindingAttribute, INodeState, DataFlow } from "../interfaces";
+import { BindingBase } from "./bindingBase";
+import { IBinding, INodeState, DataFlow } from "../interfaces";
 import { DomManager } from "../domManager";
 import { isRxObserver, nodeListToArray, tryParse } from "../utils";
 
-export class ValueBinding extends SingleBindingBase<string|number|boolean|string[]> {
+export class ValueBinding extends BindingBase<string|number|boolean|string[]> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.priority = 30;
@@ -12,7 +12,7 @@ export class ValueBinding extends SingleBindingBase<string|number|boolean|string
         this.dataFlow = DataFlow.Out | DataFlow.In;
     }
 
-    public applySingle(el: HTMLElement, binding: IBindingAttribute<string | number | boolean | string[]>, state: INodeState): void {
+    public applyInternal(el: HTMLElement, binding: IBinding<string | number | boolean | string[]>, state: INodeState): void {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<string | number | boolean | string[]>;
         const event = binding.parameter || "change";
         if (ValueBinding.isCheckbox(el)) {

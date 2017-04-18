@@ -1,13 +1,13 @@
 import { Observable, Subscription, Observer } from "rxjs";
 
-export interface IBindingAttribute<T> {
-    readonly tag: string;
-    readonly name: string;
+export interface IBinding<T> {
+    readonly handler: IBindingHandler;
     readonly text: string;
     readonly parameter?: string;
     readonly cleanup: Subscription;
     readonly expression: (scope: IDataContext) => T | null;
     evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T>;
+    activate(node: Node, state: INodeState): void;
 }
 
 export enum DataFlow { Out = 1, In = 2 }
@@ -39,7 +39,7 @@ export interface IBindingHandler {
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
-        applyBinding(node: Node, state: INodeState): void;
+        applyBinding(node: Node, binding: IBinding<any>, state: INodeState): void;
 
 }
 
@@ -48,9 +48,10 @@ export interface IDataContext {
     extend(name: string, model: IViewModel, indexName?: string, index?: number): IDataContext;
 }
 export interface INodeState {
-    bindings: Map<string, IBindingAttribute<any>[]>;
+    bindings: IBinding<any>[];
     context: IDataContext;
     for: boolean;
+    getBindings<T>(name: string): IBinding<T>[];
 }
 export interface IViewModel {
     readonly cleanup?: Subscription;

@@ -1,12 +1,12 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
-import { INodeState, IComponent, IDataContext, IBindingAttribute, Parametricity } from "../interfaces";
+import { INodeState, IComponent, IDataContext, IBinding, Parametricity } from "../interfaces";
 import { DataContext } from "../nodeState";
-import { SingleBindingBase } from "./bindingBase";
+import { BindingBase } from "./bindingBase";
 import { components } from "../components/registry";
 
-export class ComponentBinding<T> extends SingleBindingBase<string> {
+export class ComponentBinding<T> extends BindingBase<string> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.priority = 20;
@@ -15,7 +15,7 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
         this.parametricity = Parametricity.Forbidden;
     }
 
-    public applySingle(element: HTMLElement, binding: IBindingAttribute<string>, state: INodeState): void {
+    public applyInternal(element: HTMLElement, binding: IBinding<string>, state: INodeState): void {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<string>;
         const descriptor = observable.mergeMap(name => components.load(name));
         const params = this.getParams(state);
@@ -101,10 +101,11 @@ export class ComponentBinding<T> extends SingleBindingBase<string> {
     }
 
     private getParams(state: INodeState): T {
-        const params = {};
-        if (state.bindings.has("attr")) {
-            (state.bindings.get("attr") as IBindingAttribute<any>[]).forEach(x => params[x.parameter as string] = x.expression(state.context));
+        const params = {} as T;
+        const attributes = state.getBindings<any>("attr");
+        if (attributes.length > 0) {
+            attributes.forEach(x => params[x.parameter as string] = x.expression(state.context));
         }
-        return params as T;
+        return params;
     }
 }

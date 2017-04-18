@@ -1,11 +1,11 @@
 import { Observable } from "rxjs";
-import { SingleBindingBase } from "./bindingBase";
+import { BindingBase } from "./bindingBase";
 import { DomManager } from "../domManager";
 import { NodeState } from "../nodeState";
-import { IBindingAttribute, IDataContext, INodeState, Parametricity } from "../interfaces";
+import { IBinding, IDataContext, INodeState, Parametricity } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
-export class ForBinding<T> extends SingleBindingBase<T[]> {
+export class ForBinding<T> extends BindingBase<T[]> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.priority = 40;
@@ -13,7 +13,7 @@ export class ForBinding<T> extends SingleBindingBase<T[]> {
         this.parametricity = Parametricity.Required;
     }
 
-    public applySingle(node: Element, binding: IBindingAttribute<T[]>, state: INodeState): void {
+    public applyInternal(node: Element, binding: IBinding<T[]>, state: INodeState): void {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<T[]>;
         const childContextNames = (binding.parameter as string).split("-"); // item and index name
         const itemName = childContextNames[0];

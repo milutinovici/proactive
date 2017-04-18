@@ -1,25 +1,25 @@
 import { exception } from "./exceptionHandlers";
 import { Observable, Observer, Subscriber, Subscription, Symbol } from "rxjs";
-import { IDataContext, IBindingAttribute, DataFlow } from "./interfaces";
+import { IDataContext, IBinding, IBindingHandler, DataFlow, INodeState } from "./interfaces";
 import { isRxObservable, isRxObserver, isFunction } from "./utils";
 
-export class BindingAttribute<T> implements IBindingAttribute<T> {
+export class Binding<T> implements IBinding<T> {
     private static expressionCache = new Map<string, Function>();
     private static writeCache = new Map<string, Function>();
-    public readonly tag: string;
-    public readonly name: string;
+    public readonly handler: IBindingHandler;
     public readonly text: string;
     public readonly parameter?: string;
     public readonly cleanup: Subscription;
 
-    constructor(tag: string, name: string, text: string, parameter?: string) {
-        this.tag = tag;
-        this.name = name;
+    constructor(handler: IBindingHandler, text: string, parameter?: string) {
+        this.handler = handler;
         this.text = text;
         this.parameter = parameter;
         this.cleanup = new Subscription();
     }
-
+    public activate(node: Node, state: INodeState) {
+        this.handler.applyBinding(node, this, state);
+    }
     public evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T> {
         const expression: any = this.expression(ctx);
         const isFunc = isFunction(expression);
@@ -52,36 +52,36 @@ export class BindingAttribute<T> implements IBindingAttribute<T> {
 
     public expression(ctx: IDataContext): T | null {
         try {
-            const fn = BindingAttribute.expressionCache.get(this.text);
+            const fn = Binding.expressionCache.get(this.text);
             if (fn !== undefined) {
                 return fn(ctx);
             } else {
                 const readBody = this.text ? `with($context){with($data||{}){return ${this.text};}}` : "return null;";
                 let read = new Function("$context", readBody) as (ctx: IDataContext) => T | null;
-                BindingAttribute.expressionCache.set(this.text, read);
+                Binding.expressionCache.set(this.text, read);
                 return read(ctx);
             }
         } catch (e) {
-            exception.next(new Error(`Binding expression "${this.text}" on element ${this.tag} failed. ${e.message}`));
+            exception.next(new Error(`Binding ${this.handler}="${this.text}" failed. ${e.message}`));
             return null;
         }
     };
 
     private write(ctx: IDataContext): (value: T) => void {
         try {
-            const fn = BindingAttribute.writeCache.get(this.text);
+            const fn = Binding.writeCache.get(this.text);
             if (fn !== undefined) {
                 return fn(ctx);
             } else if (this.canWrite(this.text)) {
                 const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
                 const write = new Function("$context", writeBody);
-                BindingAttribute.writeCache.set(this.text, write);
+                Binding.writeCache.set(this.text, write);
                 return write(ctx) as (value: T) => void;
             } else {
             return (value: T) => {};
           }
         } catch (e) {
-            exception.next(new Error(`Binding expression "${this.text}" on element ${this.tag} failed. ${e.message}`));
+            exception.next(new Error(`Binding ${this.handler}="${this.text}" failed. ${e.message}`));
             return (value: T) => {};
         }
     }

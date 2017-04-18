@@ -1,9 +1,9 @@
 import { Observable } from "rxjs";
-import { SingleBindingBase } from "./bindingBase";
-import { INodeState, Parametricity, IBindingAttribute } from "../interfaces";
+import { BindingBase } from "./bindingBase";
+import { INodeState, Parametricity, IBinding } from "../interfaces";
 import { DomManager } from "../domManager";
 
-export class AsBinding<T> extends SingleBindingBase<T> {
+export class AsBinding<T> extends BindingBase<T> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.priority = 50;
@@ -11,7 +11,7 @@ export class AsBinding<T> extends SingleBindingBase<T> {
         // this.controlsDescendants = true;
     }
 
-    public applySingle(element: HTMLElement, binding: IBindingAttribute<T>, state: INodeState) {
+    public applyInternal(element: HTMLElement, binding: IBinding<T>, state: INodeState) {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<T>;
         const name = binding.parameter as string;
         // subscribe
@@ -20,7 +20,6 @@ export class AsBinding<T> extends SingleBindingBase<T> {
 
             this.domManager.cleanDescendants(element);
             this.domManager.applyBindingsToDescendants(state.context, element);
-
         }));
     }
 

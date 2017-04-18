@@ -1,13 +1,16 @@
 import * as Rx from "rxjs";
-import { IDataContext, INodeState, IViewModel, IBindingAttribute } from "./interfaces";
+import { IDataContext, INodeState, IViewModel, IBinding } from "./interfaces";
 
 export class NodeState implements INodeState {
     public context: IDataContext;        // scope model
-    public readonly bindings: Map<string, IBindingAttribute<any>[]>;
+    public readonly bindings: IBinding<any>[];
     public for: boolean;
     constructor(context: IDataContext) {
         this.context = context;
         this.for = false;
+    }
+    public getBindings<T>(name: string): IBinding<T>[] {
+        return this.bindings.filter(x => x.handler.name === name);
     }
 }
 
@@ -31,7 +34,7 @@ export class NodeStateManager {
 
         if (state != null) {
             if (state.bindings != null) {
-                state.bindings.forEach(group => group.forEach(x => x.cleanup.unsubscribe()));
+                state.bindings.forEach(x => x.cleanup.unsubscribe());
             }
             delete state.context;
             // delete state itself

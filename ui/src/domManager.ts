@@ -1,7 +1,7 @@
 import { NodeStateManager, DataContext, NodeState } from "./nodeState";
-import { isElement, isTextNode, isHandlebarExpression, groupBy } from "./utils";
+import { isElement, isTextNode, isHandlebarExpression } from "./utils";
 import { BindingProvider } from "./bindingProvider";
-import { IDataContext, IBindingHandler, IViewModel, INodeState } from "./interfaces";
+import { IDataContext, IViewModel, INodeState } from "./interfaces";
 
 export class DomManager {
     public readonly nodeStateManager: NodeStateManager;
@@ -86,24 +86,23 @@ export class DomManager {
             state = new NodeState(ctx);
             this.nodeStateManager.set(el, state);
         }
-        state.bindings = groupBy(bindings, x => x.name);
-        const handlers: IBindingHandler[] = [];
-        const controlsDescendants = BindingProvider.getHandlers(state.bindings, handlers);
+        state.bindings = bindings;
+
         // apply all bindings
-        for (const handler of handlers) {
+        for (const binding of state.bindings) {
             // prevent recursive applying of for
-            if (handler.name === "for" && state.for) {
+            if (binding.handler.name === "for" && state.for) {
                 continue;
             }
             // apply for before anything else, then imediately return
-            if (handler.name === "for" && !state.for) {
-                handler.applyBinding(el, state);
+            if (binding.handler.name === "for" && !state.for) {
+                binding.activate(el, state);
                 return true;
             }
-            handler.applyBinding(el, state);
+            binding.activate(el, state);
         }
 
-        return controlsDescendants !== 0;
+        return bindings.some(x => x.handler.controlsDescendants);
     }
 
     private shouldBind(el: Node): boolean {
