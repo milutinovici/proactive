@@ -1,10 +1,10 @@
 import { Observable } from "rxjs";
-import { BindingBase } from "./bindingBase";
+import { BaseHandler } from "./baseHandler";
 import { IBinding, INodeState, DataFlow } from "../interfaces";
 import { DomManager } from "../domManager";
 import { isRxObserver, nodeListToArray, tryParse } from "../utils";
 
-export class ValueBinding extends BindingBase<string|number|boolean|string[]> {
+export class ValueBinding extends BaseHandler<string|number|boolean|string[]> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.priority = 30;

@@ -45,8 +45,8 @@ export class ComponentRegistry {
         }
     }
 
-    public initialize<T extends Object>(descriptor: IComponentDescriptor, params: T): IViewModel | undefined {
-        let vm = descriptor.viewModel;
+    public initialize<T extends Object>(descriptor: IComponentDescriptor, params: T, viewModel?: T): IViewModel | undefined {
+        let vm = viewModel || descriptor.viewModel;
         if (isFunction(vm)) {
             let model: IViewModel | undefined;
             try {

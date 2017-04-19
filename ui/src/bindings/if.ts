@@ -1,9 +1,9 @@
 import { Observable } from "rxjs";
-import { BindingBase } from "./bindingBase";
+import { BaseHandler } from "./baseHandler";
 import { DomManager } from "../domManager";
 import { IBinding, INodeState, Parametricity } from "../interfaces";
 
-export class IfBinding extends BindingBase<boolean> {
+export class IfBinding extends BaseHandler<boolean> {
     protected inverse: boolean = false;
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);

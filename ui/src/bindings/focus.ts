@@ -1,10 +1,10 @@
 import { Observable, Observer, Subject, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { SimpleBinding } from "./bindingBase";
+import { SimpleHandler } from "./baseHandler";
 import { DataFlow } from "../interfaces";
 import { isRxObserver } from "../utils";
 
-export class FocusBinding extends SimpleBinding<boolean> {
+export class FocusBinding extends SimpleHandler<boolean> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.unique = true;

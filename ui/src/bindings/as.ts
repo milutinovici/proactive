@@ -1,9 +1,9 @@
 import { Observable } from "rxjs";
-import { BindingBase } from "./bindingBase";
+import { BaseHandler } from "./baseHandler";
 import { INodeState, Parametricity, IBinding } from "../interfaces";
 import { DomManager } from "../domManager";
 
-export class AsBinding<T> extends BindingBase<T> {
+export class AsBinding<T> extends BaseHandler<T> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.priority = 50;

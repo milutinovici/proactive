@@ -1,11 +1,11 @@
 import { Observable } from "rxjs";
-import { BindingBase } from "./bindingBase";
+import { BaseHandler } from "./baseHandler";
 import { DomManager } from "../domManager";
 import { NodeState } from "../nodeState";
 import { IBinding, IDataContext, INodeState, Parametricity } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
-export class ForBinding<T> extends BindingBase<T[]> {
+export class ForBinding<T> extends BaseHandler<T[]> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.priority = 40;

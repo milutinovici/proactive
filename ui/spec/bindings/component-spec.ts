@@ -334,3 +334,24 @@ it("component: Dynamic component", expect => {
 
 });
 
+it("component: Recursive component", expect => {
+    const str = `<tree-comp x-as-well="$data"></tree-comp>`;
+    const el = util.parse(str)[0] as HTMLElement;
+
+    const t1 = `<ul>
+                    <li x-for-item="$data">
+                        <span x-text="item.key"></span>&nbsp<span x-if="typeof item.value !=='object'" x-text="item.value"></span>
+                        <tree-comp x-if="typeof item.value ==='object'" x-as-well="item.value"></tree-comp>
+                    </li>
+                </ul>`;
+
+    const c1 = { template: t1 };
+
+    ui.components.register("tree-comp", c1);
+    expect.doesNotThrow(() => ui.applyBindings({ hello: "my", baby: { hello: "my", honey: "!!!" } }, el));
+
+    expect.equal(el.children[0].children[1].children[1].children[0].children[1].children[1].textContent, "!!!");
+
+    expect.end();
+
+});

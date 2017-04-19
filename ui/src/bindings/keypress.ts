@@ -1,7 +1,7 @@
 import { Observable, Observer, Subscription } from "rxjs";
 import { DataFlow, Parametricity } from "../interfaces";
 import { DomManager } from "../domManager";
-import { SimpleBinding } from "./bindingBase";
+import { SimpleHandler } from "./baseHandler";
 import { isRxObserver } from "../utils";
 import { exception } from "../exceptionHandlers";
 
@@ -23,7 +23,7 @@ const keysByCode = {
     46: "deconste",
 };
 
-export class KeyPressBinding extends SimpleBinding<KeyboardEvent> {
+export class KeyPressBinding extends SimpleHandler<KeyboardEvent> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.dataFlow = DataFlow.In;

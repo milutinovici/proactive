@@ -3,10 +3,10 @@ import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
 import { INodeState, IComponent, IDataContext, IBinding, Parametricity } from "../interfaces";
 import { DataContext } from "../nodeState";
-import { BindingBase } from "./bindingBase";
+import { BaseHandler } from "./baseHandler";
 import { components } from "../components/registry";
 
-export class ComponentBinding<T> extends BindingBase<string> {
+export class ComponentBinding<T> extends BaseHandler<string> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.priority = 20;
@@ -19,7 +19,7 @@ export class ComponentBinding<T> extends BindingBase<string> {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<string>;
         const descriptor = observable.mergeMap(name => components.load(name));
         const params = this.getParams(state);
-
+        const vm = this.getVm(state);
         // transclusion
         const children = document.createDocumentFragment();
         this.domManager.applyBindingsToDescendants(state.context, element);
@@ -40,7 +40,7 @@ export class ComponentBinding<T> extends BindingBase<string> {
             internal = new Subscription();
             // isolated nodestate and ctx
             let newContext = state.context;
-            const viewModel = components.initialize(desc, params);
+            const viewModel = components.initialize(desc, params, vm);
             const template = desc.template as DocumentFragment;
             if (viewModel) {
                 newContext = new DataContext(viewModel);
@@ -107,5 +107,12 @@ export class ComponentBinding<T> extends BindingBase<string> {
             attributes.forEach(x => params[x.parameter as string] = x.expression(state.context));
         }
         return params;
+    }
+    private getVm(state: INodeState): T | undefined {
+        const vm = state.getBindings<T>("as")[0];
+        if (vm !== undefined) {
+            return vm.expression(state.context) as T;
+        }
+        return undefined;
     }
 }

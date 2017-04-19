@@ -1,9 +1,9 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { SimpleBinding } from "./bindingBase";
+import { SimpleHandler } from "./baseHandler";
 import { Parametricity } from "../interfaces";
 
-export class CssBinding extends SimpleBinding<boolean> {
+export class CssBinding extends SimpleHandler<boolean> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.parametricity = Parametricity.Required;
@@ -20,7 +20,7 @@ export class CssBinding extends SimpleBinding<boolean> {
     }
 }
 
-export class AttrBinding extends SimpleBinding<string | number | boolean> {
+export class AttrBinding extends SimpleHandler<string | number | boolean> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.parametricity = Parametricity.Required;
@@ -42,7 +42,7 @@ export class AttrBinding extends SimpleBinding<string | number | boolean> {
     }
 }
 
-export class StyleBinding extends SimpleBinding<string | number | boolean> {
+export class StyleBinding extends SimpleHandler<string | number | boolean> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.parametricity = Parametricity.Required;
@@ -60,7 +60,7 @@ export class StyleBinding extends SimpleBinding<string | number | boolean> {
     }
 }
 
-export class HtmlBinding extends SimpleBinding<string> {
+export class HtmlBinding extends SimpleHandler<string> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.controlsDescendants = true;

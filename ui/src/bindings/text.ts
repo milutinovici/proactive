@@ -1,9 +1,9 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
-import { SimpleBinding } from "./bindingBase";
+import { SimpleHandler } from "./baseHandler";
 import { isTextNode } from "../utils";
 
-export class TextBinding extends SimpleBinding<string> {
+export class TextBinding extends SimpleHandler<string> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
         this.unique = true;

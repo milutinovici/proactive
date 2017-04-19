@@ -7,7 +7,7 @@ import { exception } from "../exceptionHandlers";
  * Base class for bindings that takes a single expression and applies the result to one or more target elements
  * @class
  */
-export abstract class BindingBase<T> implements IBindingHandler {
+export abstract class BaseHandler<T> implements IBindingHandler {
     public readonly name: string;
     protected readonly domManager: DomManager;
     public priority = 0;
@@ -28,9 +28,9 @@ export abstract class BindingBase<T> implements IBindingHandler {
         // }
 
         if (this.parametricity === Parametricity.Forbidden && binding.parameter !== undefined) {
-            exception.next(new Error(`binding ${this.name} with expression "${binding.text}" on element ${node} can't have parameters`));
+            exception.next(new Error(`binding "${this.name}" with expression "${binding.text}" on element ${node} can't have parameters`));
         } else if (this.parametricity === Parametricity.Required && binding.parameter === undefined) {
-            exception.next(new Error(`binding ${this.name} with expression "${binding.text}" on element ${node} must have a parameter`));
+            exception.next(new Error(`binding "${this.name}" with expression "${binding.text}" on element ${node} must have a parameter`));
         }
         this.applyInternal(node, binding, state);
     }
@@ -41,7 +41,7 @@ export abstract class BindingBase<T> implements IBindingHandler {
 * Base class for one-way bindings that take a single expression and apply the result to one or more target elements
 * @class
 */
-export abstract class SimpleBinding<T> extends BindingBase<T> {
+export abstract class SimpleHandler<T> extends BaseHandler<T> {
     public applyInternal(el: Element, binding: IBinding<T>, state: INodeState) {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<T>;
         binding.cleanup.add(this.apply(el, observable, binding.parameter));
