@@ -90,6 +90,9 @@ export class DomManager {
 
         // apply all bindings
         for (const binding of state.bindings) {
+            if (state.disabled === true) {
+                return true;
+            }
             // prevent recursive applying of for
             if (binding.handler.name === "for" && state.for) {
                 continue;

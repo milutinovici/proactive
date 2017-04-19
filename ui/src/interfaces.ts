@@ -8,6 +8,7 @@ export interface IBinding<T> {
     readonly expression: (scope: IDataContext) => T | null;
     evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T>;
     activate(node: Node, state: INodeState): void;
+    deactivate(): void;
 }
 
 export enum DataFlow { Out = 1, In = 2 }
@@ -51,6 +52,7 @@ export interface INodeState {
     bindings: IBinding<any>[];
     context: IDataContext;
     for: boolean;
+    disabled: boolean;
     getBindings<T>(name: string): IBinding<T>[];
 }
 export interface IViewModel {

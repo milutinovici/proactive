@@ -79,7 +79,7 @@ it("if: binding to a boolean observable value using dynamic template with event"
 });
 
 it("if: binding after removed element", expect => {
-    const template = `<ul><li x-if="false"></li><li x-text="'foo'">bar</li></div>`;
+    const template = `<ul><li x-if="false"></li><li x-text="'foo'">bar</li></ul>`;
     const el = <HTMLElement> util.parse(template)[0];
 
     expect.doesNotThrow(() => ui.applyBindings({}, el));
@@ -89,5 +89,18 @@ it("if: binding after removed element", expect => {
     ui.cleanNode(el);
     expect.equal(el.children.length, 1);
     expect.equal(el.children[0].textContent, "foo");
+    expect.end();
+});
+
+it("if: binding toggles other bindings on an element", expect => {
+    const template = `<div><div x-if="active" x-text="active"></div></div>`;
+    const el = <HTMLElement> util.parse(template)[0];
+    const active = px.value(false);
+    const child = el.firstChild as Node;
+    expect.doesNotThrow(() => ui.applyBindings({ active }, el));
+    expect.equal(child.textContent, "");
+    active(true);
+    expect.equal(child.textContent, "true");
+
     expect.end();
 });

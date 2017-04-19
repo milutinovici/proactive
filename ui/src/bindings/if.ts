@@ -27,11 +27,14 @@ export class IfBinding extends BindingBase<boolean> {
 
         // subscribe
         binding.cleanup.add(visibility.subscribe((x => {
+            state.disabled = !x;
             if (x) {
+                this.enableOtherBindings(element, state);
                 this.domManager.applyBindingsToDescendants(state.context, element);
                 parent.insertBefore(element, placeholder);
             } else if (element.parentElement === parent) {
                 parent.removeChild(element);
+                this.disableOtherBindings(state);
                 this.domManager.cleanDescendants(element);
             }
         })));
@@ -43,6 +46,14 @@ export class IfBinding extends BindingBase<boolean> {
             }
         }
         binding.cleanup.add(() => parent.removeChild(placeholder));
+    }
+    private disableOtherBindings(state: INodeState) {
+        const others = state.bindings.filter(x => x.handler.name !== "if");
+        others.forEach(x => x.cleanup.unsubscribe());
+    }
+    private enableOtherBindings(element: HTMLElement, state: INodeState) {
+        const others = state.bindings.filter(x => x.handler.name !== "if");
+        others.forEach(x => x.activate(element, state));
     }
 }
 

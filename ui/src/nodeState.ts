@@ -5,9 +5,11 @@ export class NodeState implements INodeState {
     public context: IDataContext;        // scope model
     public readonly bindings: IBinding<any>[];
     public for: boolean;
+    public disabled: boolean;
     constructor(context: IDataContext) {
         this.context = context;
         this.for = false;
+        this.disabled = false;
     }
     public getBindings<T>(name: string): IBinding<T>[] {
         return this.bindings.filter(x => x.handler.name === name);
@@ -34,7 +36,7 @@ export class NodeStateManager {
 
         if (state != null) {
             if (state.bindings != null) {
-                state.bindings.forEach(x => x.cleanup.unsubscribe());
+                state.bindings.forEach(x => x.deactivate());
             }
             delete state.context;
             // delete state itself

@@ -10,15 +10,24 @@ export class Binding<T> implements IBinding<T> {
     public readonly text: string;
     public readonly parameter?: string;
     public readonly cleanup: Subscription;
+    private active: boolean;
 
     constructor(handler: IBindingHandler, text: string, parameter?: string) {
         this.handler = handler;
         this.text = text;
         this.parameter = parameter;
         this.cleanup = new Subscription();
+        this.active = false;
     }
     public activate(node: Node, state: INodeState) {
-        this.handler.applyBinding(node, this, state);
+        if (!this.active) {
+            this.handler.applyBinding(node, this, state);
+            this.active = true;
+        }
+    }
+    public deactivate() {
+        this.cleanup.unsubscribe();
+        this.active = false;
     }
     public evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T> {
         const expression: any = this.expression(ctx);
