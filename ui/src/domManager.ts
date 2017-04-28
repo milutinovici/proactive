@@ -90,6 +90,7 @@ export class DomManager {
 
         // apply all bindings
         for (const binding of state.bindings) {
+            // if binding disables other bindings when false 
             if (state.disabled === true) {
                 return true;
             }

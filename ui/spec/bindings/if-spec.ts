@@ -104,3 +104,15 @@ it("if: binding toggles other bindings on an element", expect => {
 
     expect.end();
 });
+
+it("if: cleans up after itself", expect => {
+    const template = `<div><div x-if="active" x-text="active"></div></div>`;
+    const el = <HTMLElement> util.parse(template)[0];
+    const active = false;
+    const child = el.firstChild as Node;
+    expect.doesNotThrow(() => ui.applyBindings({ active }, el));
+    expect.equal(el.children.length, 0);
+    ui.cleanNode(el);
+    expect.equal(el.children[0], child);
+    expect.end();
+});

@@ -7,7 +7,7 @@ export class IfBinding extends BaseHandler<boolean> {
     protected inverse: boolean = false;
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
-        this.priority = 50;
+        this.priority = 40;
         this.parametricity = Parametricity.Forbidden;
         this.unique = true;
         // this.controlsDescendants = true;
@@ -45,7 +45,11 @@ export class IfBinding extends BaseHandler<boolean> {
                 sibling = sibling.nextSibling;
             }
         }
-        binding.cleanup.add(() => parent.removeChild(placeholder));
+        binding.cleanup.add(() => {
+            this.domManager.cleanNode(element);
+            parent.insertBefore(element, placeholder);
+            parent.removeChild(placeholder);
+        });
     }
     private disableOtherBindings(state: INodeState) {
         const others = state.bindings.filter(x => x.handler.name !== "if");
