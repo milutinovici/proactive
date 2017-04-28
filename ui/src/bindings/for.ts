@@ -8,16 +8,16 @@ import { compareLists, Delta } from "./compareLists";
 export class ForBinding<T> extends BaseHandler<T[]> {
     constructor(name: string, domManager: DomManager) {
         super(name, domManager);
-        this.priority = 40;
+        this.priority = 50;
         this.unique = true;
         this.parametricity = Parametricity.Required;
     }
 
     public applyInternal(node: Element, binding: IBinding<T[]>, state: INodeState): void {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<T[]>;
-        const childContextNames = (binding.parameter as string).split("-"); // item and index name
-        const itemName = childContextNames[0];
-        const indexName = childContextNames[1];
+        const parameters = (binding.parameter as string).split("-"); // item and index name
+        const itemName = parameters[0];
+        const indexName = parameters[1];
         const parent = node.parentElement as HTMLElement;
         const placeholder: Comment = document.createComment(`for ${binding.text}`);
         this.domManager.nodeStateManager.set(placeholder, state);
@@ -39,7 +39,12 @@ export class ForBinding<T> extends BaseHandler<T[]> {
                 sibling = sibling.nextSibling;
             }
         }
-        binding.cleanup.add(() => parent.removeChild(placeholder));
+        // cleanup after itself
+        binding.cleanup.add(() => {
+            this.applyValue(parent, node, state.context, itemName, indexName, [], oldArray, placeholder);
+            parent.removeChild(placeholder);
+            parent.appendChild(node);
+        });
     }
 
     protected applyValue(parent: Element, template: Element, context: IDataContext, itemName: string, indexName: string, newArray: T[], oldArray: T[], placeholder: Node): void {

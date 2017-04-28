@@ -191,3 +191,17 @@ it("for: works on an object", expect => {
     expect.isEquivalent(el.children[1].textContent, "2");
     expect.end();
 });
+
+it("for: cleans up after iteself", expect => {
+    const template = `<ul><li x-for-item="src" x-text="item"></li></ul>`;
+    const el = <HTMLElement> util.parse(template)[0];
+    const array = [1, 5, 7];
+
+    expect.doesNotThrow(() => ui.applyBindings({ src: array }, el));
+    expect.equal(el.children.length, 3);
+    ui.cleanNode(el);
+    expect.equal(el.children.length, 1);
+    expect.doesNotThrow(() => ui.applyBindings({ src: array }, el));
+    expect.equal(el.children.length, 3);
+    expect.end();
+});
