@@ -71,7 +71,7 @@ export class Binding<T> implements IBinding<T> {
                 return read(ctx);
             }
         } catch (e) {
-            exception.next(new Error(`Binding ${this.handler}="${this.text}" failed. ${e.message}`));
+            exception.next(new Error(`Binding ${this.handler.name}="${this.text}" failed. ${e.message}`));
             return null;
         }
     };
@@ -90,7 +90,7 @@ export class Binding<T> implements IBinding<T> {
             return (value: T) => {};
           }
         } catch (e) {
-            exception.next(new Error(`Binding ${this.handler}="${this.text}" failed. ${e.message}`));
+            exception.next(new Error(`Binding ${this.handler.name}="${this.text}" failed. ${e.message}`));
             return (value: T) => {};
         }
     }
