@@ -43,6 +43,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
         binding.cleanup.add(() => {
             this.applyValue(parent, node, state.context, itemName, indexName, [], oldArray, placeholder);
             parent.removeChild(placeholder);
+            this.domManager.cleanNode(node);
             parent.appendChild(node);
         });
     }
