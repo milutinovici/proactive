@@ -34,10 +34,10 @@ it("if: binding to a boolean observable value using static template", expect => 
     expect.equal(span.parentElement, el);
     prop(false);
     expect.equal(span.parentElement, null);
-
-    ui.cleanNode(el);
     prop(true);
-    expect.equal(span.parentElement, null, "binding should stop updating after getting disposed");
+    ui.cleanNode(el);
+    prop(false);
+    expect.equal(span.parentElement, el, "binding should stop updating after getting disposed");
     expect.end();
 });
 
@@ -87,8 +87,7 @@ it("if: binding after removed element", expect => {
 
     // try it again
     ui.cleanNode(el);
-    expect.equal(el.children.length, 1);
-    expect.equal(el.children[0].textContent, "foo");
+    expect.equal(el.children[1].textContent, "foo");
     expect.end();
 });
 
