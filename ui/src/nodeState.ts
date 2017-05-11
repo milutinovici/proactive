@@ -4,11 +4,10 @@ import { IDataContext, INodeState, IViewModel, IBinding } from "./interfaces";
 export class NodeState implements INodeState {
     public context: IDataContext;        // scope model
     public readonly bindings: IBinding<any>[];
-    public for: boolean;
     public disabled: boolean;
-    constructor(context: IDataContext) {
+    constructor(context: IDataContext, bindings: IBinding<any>[]) {
         this.context = context;
-        this.for = false;
+        this.bindings = bindings;
         this.disabled = false;
     }
     public getBindings<T>(name: string): IBinding<T>[] {

@@ -7,24 +7,20 @@ it("as: bound to a non-observable value", expect => {
     const template = `<div x-as-child="childModel"><span x-text="child.foo">invalid</span></div>`;
     const el = <HTMLElement> util.parse(template)[0];
 
-    let childModel = {
-        foo: px.value("bar"),
+    const viewModel = {
+        childModel: { foo: px.value("bar") },
     };
-
-    let viewModel = {
-        childModel: childModel,
-    };
-
+    const obs = viewModel.childModel.foo;
     expect.doesNotThrow(() => ui.applyBindings(viewModel, el));
 
-    expect.equal(el.children[0].textContent, viewModel.childModel.foo());
-    viewModel.childModel.foo("foo");
-    expect.equal(el.children[0].textContent, viewModel.childModel.foo());
+    expect.equal(el.children[0].textContent, obs());
+    obs("foo");
+    expect.equal(el.children[0].textContent, obs());
 
     // try it again
     ui.cleanNode(el);
-    viewModel.childModel.foo("baz");
-    expect.notEqual(el.children[0].textContent, viewModel.childModel.foo());
+    obs("baz");
+    expect.notEqual(el.children[0].textContent, obs());
     expect.end();
 });
 

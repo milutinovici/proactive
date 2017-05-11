@@ -1,7 +1,7 @@
 import { NodeStateManager, DataContext, NodeState } from "./nodeState";
 import { isElement, isTextNode, isHandlebarExpression } from "./utils";
 import { BindingProvider } from "./bindingProvider";
-import { IDataContext, IViewModel, INodeState } from "./interfaces";
+import { IDataContext, IViewModel } from "./interfaces";
 
 export class DomManager {
     public readonly nodeStateManager: NodeStateManager;
@@ -17,16 +17,9 @@ export class DomManager {
         }
         // create or update node state for root node
         const context = new DataContext(model);
-        let state = this.nodeStateManager.get(rootNode) as INodeState;
-        if (state === undefined) {
-            state = new NodeState(context);
-            this.nodeStateManager.set(rootNode, state);
-        } else {
-            state.context = context;
-        }
 
         // calculate resulting data-context and apply bindings
-        this.applyBindingsRecursive(state.context, rootNode);
+        this.applyBindingsRecursive(context, rootNode);
     }
 
     public applyBindingsToDescendants(ctx: IDataContext, node: Element): void {
@@ -75,18 +68,17 @@ export class DomManager {
     }
 
     private applyBindingsInternal(ctx: IDataContext, el: Node): boolean {
-        const bindings = BindingProvider.getBindings(el);
-        if (bindings.length === 0) {
-            return false;
-        }
         // get or create elment-state
         let state = this.nodeStateManager.get(el);
         // create and set if necessary
         if (!state) {
-            state = new NodeState(ctx);
+            const bindings = BindingProvider.getBindings(el);
+            if (bindings.length === 0) {
+                return false;
+            }
+            state = new NodeState(ctx, bindings);
             this.nodeStateManager.set(el, state);
         }
-        state.bindings = bindings;
 
         // apply all bindings
         for (const binding of state.bindings) {
@@ -94,19 +86,15 @@ export class DomManager {
             if (state.disabled === true) {
                 return true;
             }
-            // prevent recursive applying of for
-            if (binding.handler.name === "for" && state.for) {
-                continue;
-            }
             // apply for before anything else, then imediately return
-            if (binding.handler.name === "for" && !state.for) {
+            if (binding.handler.name === "for") {
                 binding.activate(el, state);
                 return true;
             }
             binding.activate(el, state);
         }
 
-        return bindings.some(x => x.handler.controlsDescendants);
+        return state.bindings.some(x => x.handler.controlsDescendants);
     }
 
     private shouldBind(el: Node): boolean {

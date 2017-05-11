@@ -10,24 +10,27 @@ export class Binding<T> implements IBinding<T> {
     public readonly text: string;
     public readonly parameter?: string;
     public readonly cleanup: Subscription;
-    private active: boolean;
+    private activated: number;
 
     constructor(handler: IBindingHandler, text: string, parameter?: string) {
         this.handler = handler;
         this.text = text;
         this.parameter = parameter;
         this.cleanup = new Subscription();
-        this.active = false;
+        this.activated = 0;
     }
     public activate(node: Node, state: INodeState) {
-        if (!this.active) {
+        if (this.activated === 0) {
             this.handler.applyBinding(node, this, state);
-            this.active = true;
+            this.activated += 1;
         }
     }
     public deactivate() {
         this.cleanup.unsubscribe();
-        this.active = false;
+        this.activated -= 1;
+    }
+    public clone(): Binding<T> {
+        return new Binding<T>(this.handler, this.text, this.parameter);
     }
     public evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T> {
         const expression: any = this.expression(ctx);
