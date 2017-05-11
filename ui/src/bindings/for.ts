@@ -2,7 +2,7 @@ import { Observable } from "rxjs";
 import { BaseHandler } from "./baseHandler";
 import { DomManager } from "../domManager";
 import { NodeState } from "../nodeState";
-import { IBinding, IDataContext, INodeState, Parametricity } from "../interfaces";
+import { IBinding, INodeState, Parametricity } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
 export class ForBinding<T> extends BaseHandler<T[]> {
@@ -18,7 +18,6 @@ export class ForBinding<T> extends BaseHandler<T[]> {
         const parameters = (binding.parameter as string).split("-"); // item and index name
         const itemName = parameters[0];
         const indexName = parameters[1];
-        const otherBindings = state.bindings.filter(x => x.handler.name !== "for");
         const parent = node.parentElement as HTMLElement;
         const placeholder: Comment = document.createComment(`for ${binding.text}`);
         this.domManager.nodeStateManager.set(placeholder, state);
@@ -30,7 +29,16 @@ export class ForBinding<T> extends BaseHandler<T[]> {
         let oldArray: T[] = [];
         // subscribe
         binding.cleanup.add(observable.subscribe(array => {
-            this.applyValue(parent, node, state.context, itemName, indexName, array, oldArray, placeholder, otherBindings);
+            let changes = compareLists(oldArray, array);
+            if (changes.deleted.length > 0) {
+                this.removeRows(parent, indexName, changes.deleted, placeholder, array.length);
+            }
+            if (changes.added.length > 0) {
+                this.addRows(parent, node, state, itemName, indexName, changes.added, placeholder, array.length);
+            }
+            if (changes.moved.length > 0) {
+                this.moveRows(parent, indexName, changes.moved, placeholder, array.length);
+            }
             oldArray = array;
         }));
         // apply bindings after repeated elements
@@ -42,29 +50,19 @@ export class ForBinding<T> extends BaseHandler<T[]> {
         }
         // cleanup after itself
         binding.cleanup.add(() => {
-            this.applyValue(parent, node, state.context, itemName, indexName, [], oldArray, placeholder, otherBindings);
+            let changes = compareLists(oldArray, []);
+            this.removeRows(parent, indexName, changes.deleted, placeholder, 0);
             parent.removeChild(placeholder);
             this.domManager.cleanNode(node);
             parent.appendChild(node);
         });
     }
 
-    protected applyValue(parent: Element, template: Element, context: IDataContext, itemName: string, indexName: string, newArray: T[], oldArray: T[], placeholder: Node, otherBindings: IBinding<any>[]): void {
-        let changes = compareLists(oldArray, newArray);
-        if (changes.deleted.length > 0) {
-            this.removeRows(parent, indexName, changes.deleted, placeholder, newArray.length);
-        }
-        if (changes.added.length > 0) {
-            this.addRows(parent, template, context, itemName, indexName, changes.added, placeholder, newArray.length, otherBindings);
-        }
-        if (changes.moved.length > 0) {
-            this.moveRows(parent, indexName, changes.moved, placeholder, newArray.length);
-        }
-    }
-
-    private addRows(parent: Element, template: Element, context: IDataContext, itemName: string, indexName: string, additions: Delta<T>[], placeholder: Node, newLength: number, otherBindings: IBinding<any>[]) {
+    private addRows(parent: Element, template: Element, state: INodeState, itemName: string, indexName: string, additions: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
         let current = 0;
+        const otherBindings = state.bindings.filter(x => x.handler.name !== "for");
+
         while (current <= additions.length) {
             const merger = this.mergeConsecutiveRows(additions, template, current);
             let before = parent.childNodes[start + current + additions[current].index];
@@ -72,8 +70,8 @@ export class ForBinding<T> extends BaseHandler<T[]> {
 
             for (let i = current; i < merger.stopped; i++) {
                 let childState = indexName ?
-                                 new NodeState(context.extend(itemName, additions[i].value, indexName, additions[i].index), otherBindings.map(x => x.clone())) :
-                                 new NodeState(context.extend(itemName, additions[i].value), otherBindings.map(x => x.clone()));
+                                 new NodeState(state.context.extend(itemName, additions[i].value, indexName, additions[i].index), otherBindings.map(x => x.clone())) :
+                                 new NodeState(state.context.extend(itemName, additions[i].value), otherBindings.map(x => x.clone()));
 
                 this.domManager.nodeStateManager.set(parent.childNodes[i + start + additions[current].index], childState);
                 this.domManager.applyBindingsRecursive(childState.context, parent.childNodes[i + start + additions[current].index]);
