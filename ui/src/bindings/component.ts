@@ -16,10 +16,7 @@ export class ComponentBinding<T> extends BaseHandler<string> {
     }
 
     public applyInternal(element: HTMLElement, binding: IBinding<string>, state: INodeState): void {
-        const observable = binding.evaluate(state.context, this.dataFlow) as Observable<string>;
-        const descriptor = observable.mergeMap(name => components.load(name));
-        const params = this.getParams(state);
-        const vm = this.getVm(state);
+        const component = this.getComponent(element, binding, state);
         // transclusion
         const children = document.createDocumentFragment();
         this.domManager.applyBindingsToDescendants(state.context, element);
@@ -35,40 +32,43 @@ export class ComponentBinding<T> extends BaseHandler<string> {
         }
 
         // subscribe to any input changes
-        binding.cleanup.add(descriptor.subscribe(desc => {
+        binding.cleanup.add(component.subscribe(comp => {
             doCleanup();
             internal = new Subscription();
             // isolated nodestate and ctx
             let newContext = state.context;
-            const viewModel = components.initialize(desc, params, vm);
-            const template = desc.template as DocumentFragment;
-            if (viewModel) {
-                newContext = new DataContext(viewModel);
+
+            if (comp.viewModel) {
+                newContext = new DataContext(comp.viewModel);
 
                 // wire custom events
-                if (viewModel.emitter !== undefined && isRxObservable(viewModel.emitter)) {
-                    internal.add(viewModel.emitter.subscribe(evt => element.dispatchEvent(evt)));
+                if (comp.viewModel.emitter !== undefined && isRxObservable(comp.viewModel.emitter)) {
+                    internal.add(comp.viewModel.emitter.subscribe(evt => element.dispatchEvent(evt)));
                 }
                 // apply custom component value
-                if (viewModel.value !== undefined && isRxObservable(viewModel.value)) {
-                    internal.add(viewModel.value.subscribe(val => {
+                if (comp.viewModel.value !== undefined && isRxObservable(comp.viewModel.value)) {
+                    internal.add(comp.viewModel.value.subscribe(val => {
                         element["value"] = val;
                         element.dispatchEvent(new Event("change"));
                     }));
                 }
-
                 // auto-dispose view-model
-                if (viewModel.cleanup !== undefined) {
-                    internal.add(viewModel.cleanup);
+                if (comp.viewModel.cleanup !== undefined) {
+                    internal.add(comp.viewModel.cleanup);
                 }
             }
-
             // done
-            this.applyTemplate(element, newContext, { template: template, viewModel: viewModel }, children);
+            this.applyTemplate(element, newContext, comp, children);
         }));
         binding.cleanup.add(doCleanup);
     }
-
+    protected getComponent(element: HTMLElement, binding: IBinding<string>, state: INodeState): Observable<IComponent> {
+        const name = binding.evaluate(state.context, this.dataFlow) as Observable<string>;
+        const descriptor = name.mergeMap(n => components.load(n));
+        const params = this.getParams(state);
+        const vm = this.getVm(state);
+        return descriptor.map(desc => <IComponent> { viewModel: components.initialize(desc, params, vm), template: desc.template });
+    }
     protected applyTemplate(element: HTMLElement, childContext: IDataContext, component: IComponent, children: DocumentFragment) {
         if (component.template) {
             // clear
