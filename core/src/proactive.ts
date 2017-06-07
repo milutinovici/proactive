@@ -1,17 +1,42 @@
-import * as Rx from "rxjs";
+import { Observable, BehaviorSubject } from "rxjs";
 import "./observableExtensions";
 import { ObservableValue, ComputedValue } from "./interfaces";
-import { ObservableValueImpl } from "./value";
+import { StatefulObservable } from "./computed";
 import { ArrayImpl, ObservableArray } from "./array";
-import { ComputedArrayImpl, ComputedArray } from "./computedArray";
+import { ComputedArray } from "./computedArray";
 
-export function value<T>(initial?: T): ObservableValue<T> {
-    return ObservableValueImpl.createValue(initial);
+export function computed<T>(source: Observable<T>, initial: T): ComputedValue<T> {
+    if ("call" in source && "source" in source) {
+        return <ComputedValue<T>> source;
+    }
+    const stateful = new StatefulObservable<T>(source, initial);
+    return createFunction(stateful) as ComputedValue<T>;
+}
+
+export function value<T>(initial: T): ObservableValue<T> {
+    return createFunction(new BehaviorSubject(initial)) as ObservableValue<T>;
 }
 export function array<T>(initial: T[] = []): ObservableArray<T> {
-    return ArrayImpl.createArray(initial);
+    return createFunction(new ArrayImpl(initial)) as ObservableArray<T>;
 }
-export function whenAny<T>(observables: Rx.Observable<Rx.Observable<T>[]>): ComputedArray<T> {
-    return ComputedArrayImpl.whenAny(observables);
+export function whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
+    return ComputedArray._whenAny(observables);
 }
+
+function createFunction<T>(observable: Observable<T>): Observable<T> {
+    const accessor = function(value: T) {
+        if (arguments.length > 0) {
+            return accessor.next(value);
+        } else {
+            return accessor.getValue();
+        }
+    } as any;
+    const call = accessor["call"];
+    const apply = accessor["apply"];
+    Object["setPrototypeOf"](accessor, observable);
+    accessor["call"] = call;
+    accessor["apply"] = apply;
+    return accessor;
+}
+
 export { ComputedValue, ObservableValue, ObservableArray, ComputedArray };

@@ -1,55 +1,40 @@
 import { Observable } from "rxjs";
-import { ComputedValueImpl } from "./computed";
-import { Func, Disposable, ComputedValue } from "./interfaces";
 import "./observableExtensions";
 
-export class ComputedArrayImpl<T> extends ComputedValueImpl<T[]> {
+export class ComputedArray<T> extends Observable<T[]> {
 
-    constructor(source: Observable<T[]>, initial: T[] = []) {
-        super(source, initial);
-    }
-
-    public static createComputedArray<T>(source: Observable<T[]>): ComputedArray<T> {
-        const accessor: ComputedArray<T> = (() => accessor.getValue()) as any;
-        const call = accessor["call"];
-        const apply = accessor["apply"];
-        Object["setPrototypeOf"](accessor, new ComputedArrayImpl(source));
-        accessor["call"] = call;
-        accessor["apply"] = apply;
-        accessor.subscription = accessor.subscribe(val => accessor.value = val, console.error);
-        return accessor;
+    constructor(source: Observable<T[]>) {
+        super();
+        this.source = source;
     }
 
-    public mapArray<R>(fn: (x: T, ix?: number) => R): ComputedArray<R> {
-        const obs: any = this.map(array => array.map(fn));
-        return obs.toComputedArray();
+    public _map<R>(fn: (x: T, ix?: number) => R): ComputedArray<R> {
+        const obs = this.map(array => array.map(fn));
+        return new ComputedArray(obs);
     }
-    public filterArray(fn: (x: T, ix?: number) => boolean): ComputedArray<T> {
-        const obs: any = this.map(array => array.filter(fn));
-        return obs.toComputedArray();
+    public _filter(fn: (x: T, ix?: number) => boolean): ComputedArray<T> {
+        const obs = this.map(array => array.filter(fn));
+        return new ComputedArray(obs);
     }
-    public sortArray(fn: (x: T, y: T) => number): ComputedArray<T> {
-        const obs: any = this.map(array => array.slice().sort(fn));
-        return obs.toComputedArray();
+    public _sort(fn: (x: T, y: T) => number): ComputedArray<T> {
+        const obs = this.map(array => array.slice().sort(fn));
+        return new ComputedArray(obs);
     }
-    public everyArray(fn: (x: T, ix?: number) => boolean): ComputedValue<boolean> {
-        return this.map(array => array.every(fn)).toComputed();
+    public _every(fn: (x: T, ix?: number) => boolean): Observable<boolean> {
+        return this.map(array => array.every(fn));
     }
-    public someArray(fn: (x: T, ix?: number) => boolean): ComputedValue<boolean> {
-        return this.map(array => array.some(fn)).toComputed();
+    public _some(fn: (x: T, ix?: number) => boolean): Observable<boolean> {
+        return this.map(array => array.some(fn));
     }
-    public reduceArray<R>(fn: (x: R, y: T) => R, initial: R): ComputedValue<R> {
-        return this.map(array => array.reduce(fn, initial)).toComputed();
+    public _reduce<R>(fn: (x: R, y: T) => R, initial: R): Observable<R> {
+        return this.map(array => array.reduce(fn, initial));
     }
-    public flatMapArray<R>(fn: (x: T) => R[]): ComputedArray<R> {
-        const obs: any = this.map(array => array.reduce((cumulus: R[], next: T) => [...cumulus, ...fn(next)], <R[]> []));
-        return obs.toComputedArray();
+    public _flatMap<R>(fn: (x: T) => R[]): ComputedArray<R> {
+        const obs = this.map(array => array.reduce((cumulus: R[], next: T) => [...cumulus, ...fn(next)], <R[]> []));
+        return new ComputedArray(obs);
     }
-    public static whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
-        const obs: any = observables.mergeMap(array => Observable.combineLatest<T[]>(array));
-        return obs.toComputedArray();
+    public static _whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
+        const obs = observables.mergeMap(array => Observable.combineLatest<T>(array));
+        return new ComputedArray(obs);
     }
-}
-
-export interface ComputedArray<T> extends ComputedArrayImpl<T>, Func<T[]>, Disposable {
 }

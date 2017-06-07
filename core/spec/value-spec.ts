@@ -2,12 +2,6 @@
 import * as px from "../src/proactive";
 import * as it from "tape";
 
-it("can be created using factory method", expect => {
-    const val = px.value<number>();
-    expect.true(val !== undefined);
-    expect.end();
-});
-
 it("can be created using factory method with initial value", expect => {
     const val = px.value<number>(10);
     expect.equal(val(), 10);
@@ -26,21 +20,15 @@ it("falsy initial values are not coerced to undefined", expect => {
     expect.end();
 });
 
-it("observables are set up during creation", expect => {
-    const val = px.value<number>();
-    expect.true(val["source"] !== undefined);
-    expect.end();
-});
-
-it("invoking it as a function with a parameter changes the valerty's value", expect => {
-    const val = px.value<number>();
+it("invoking it as a function with a parameter changes the value", expect => {
+    const val = px.value(0);
     val(10);
     expect.equal(val(), 10);
     expect.end();
 });
 
 it("setting value to undefined works", expect => {
-    const val = px.value<number | undefined>();
+    const val = px.value<number | undefined>(undefined);
 
     val(3);
     expect.equal(val(), 3);
@@ -50,7 +38,7 @@ it("setting value to undefined works", expect => {
 });
 
 it("type transition", expect => {
-    const val = px.value<any>();
+    const val = px.value<string | number | object>(0);
 
     val(3);
     expect.equal(val(), 3);
@@ -64,7 +52,7 @@ it("type transition", expect => {
 });
 
 it("setting a value fires change notifications", expect => {
-    const val = px.value<number>();
+    const val = px.value(0);
     let changedFired = false;
 
     val.subscribe(() => changedFired = true);
@@ -83,7 +71,7 @@ it("subscribers are notified of initial value", expect => {
 });
 
 it("all value changes before subscription are ignored, except the last", expect => {
-    const val = px.value<number>();
+    const val = px.value(0);
     let changed = 0;
     val(10);
     val(8);
@@ -94,7 +82,7 @@ it("all value changes before subscription are ignored, except the last", expect 
 });
 
 it("multiple subscribers receive notifications, initial value, then subsequent", expect => {
-    const val = px.value<number>();
+    const val = px.value(0);
     let changingFiredCount = 0;
 
     // subscribe
@@ -109,22 +97,9 @@ it("multiple subscribers receive notifications, initial value, then subsequent",
     expect.end();
 });
 
-it("consecutively assigning the same value does not result in duplicate change notifications", expect => {
-    const val = px.value<number>(1);
-    let changedFiredCount = 0;
-
-    val.subscribe(() => changedFiredCount++);
-    val(1);
-    val(2);
-    val(2);
-
-    expect.equal(changedFiredCount, 2);
-    expect.end();
-});
-
 it("to Computed works", expect => {
     const val = px.value<number>(3);
-    const max = val.scan((x, y) => x > y ? x : y, val()).toComputed();
+    const max = val.scan((x, y) => x > y ? x : y, val()).toComputed(0);
     expect.equal(max(), 3);
     val(1);
     expect.equal(max(), 3);
@@ -136,11 +111,11 @@ it("to Computed works", expect => {
 });
 
 it("computed chaining works", expect => {
-    const val = px.value<number>();
-    const max = val.scan((x, y) => x > y ? x : y, val()).toComputed();
-    const evenMax = max.filter(x => x % 2 === 0).toComputed();
+    const val = px.value(0);
+    const max = val.scan((x, y) => x > y ? x : y, val()).toComputed(0);
+    const evenMax = max.filter(x => x % 2 === 0).toComputed(0);
     val(1);
-    expect.equal(evenMax(), undefined);
+    expect.equal(evenMax(), 0);
     val(6);
     expect.equal(evenMax(), 6);
     val(9);
@@ -150,13 +125,13 @@ it("computed chaining works", expect => {
 it("combine 2 values", expect => {
     const val1 = px.value<number>(4);
     const val2 = px.value<number>(2);
-    const ratio = val1.combineLatest(val2, (p1: number, p2: number) => p1 / p2).toComputed();
+    const ratio = val1.combineLatest(val2, (p1: number, p2: number) => p1 / p2).toComputed(0);
     expect.equal(ratio(), 2);
     expect.end();
 });
 it("value is also an observer", expect => {
     const val1 = px.value<number>(4);
-    const val2 = px.value<number>();
+    const val2 = px.value<number>(0);
     val1.subscribe(val2);
     expect.equal(val2(), 4);
     expect.end();
