@@ -7,7 +7,11 @@ export class BindingProvider {
     private static readonly handlers = new Map<string, IBindingHandler>();
 
     public static registerHandler(handler: IBindingHandler) {
-        this.handlers.set(handler.name, handler);
+        if (!this.handlers.has(handler.name)) {
+            this.handlers.set(handler.name, handler);
+        } else {
+            throw new Error(`Binding handler with "${handler.name}" name is already registered`);
+        }
     }
 
     public static getBindings(element: Node): IBinding<any>[] {
