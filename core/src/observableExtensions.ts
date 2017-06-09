@@ -1,14 +1,13 @@
 import { Observable } from "rxjs";
-import { ComputedValue } from "./interfaces";
-import { computed } from "./proactive";
+import { StatefulObservable } from "./interfaces";
+import { stateful } from "./proactive";
 
 declare module "rxjs/Observable" {
     export interface Observable<T> {
-        toComputed(initial: T): ComputedValue<T>;
+        toStateful(initial: T): StatefulObservable<T>;
     }
 }
 
-Observable.prototype.toComputed = function<T>(this: Observable<T>, initial: T): ComputedValue<T> {
-    return computed<T>(this, initial);
+Observable.prototype.toStateful = function<T>(this: Observable<T>, initial: T): StatefulObservable<T> {
+    return stateful<T>(this, initial);
 };
-

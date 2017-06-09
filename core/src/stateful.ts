@@ -1,6 +1,6 @@
 import { Observable, Subscription } from "rxjs";
 
-export class StatefulObservable<T> extends Observable<T> {
+export class StatefulObservableImpl<T> extends Observable<T> {
     private subscription: Subscription;
     constructor(source: Observable<T>, protected value: T) {
         super();

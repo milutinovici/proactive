@@ -3,7 +3,7 @@ import * as px from "../src/proactive";
 import * as it from "tape";
 
 it("can be created using factory method with initial value", expect => {
-    const val = px.value<number>(10);
+    const val = px.value(10);
     expect.equal(val(), 10);
     expect.end();
 });
@@ -99,7 +99,7 @@ it("multiple subscribers receive notifications, initial value, then subsequent",
 
 it("to Computed works", expect => {
     const val = px.value<number>(3);
-    const max = val.scan((x, y) => x > y ? x : y, val()).toComputed(0);
+    const max = val.scan((x, y) => x > y ? x : y, val()).toStateful(0);
     expect.equal(max(), 3);
     val(1);
     expect.equal(max(), 3);
@@ -112,8 +112,8 @@ it("to Computed works", expect => {
 
 it("computed chaining works", expect => {
     const val = px.value(0);
-    const max = val.scan((x, y) => x > y ? x : y, val()).toComputed(0);
-    const evenMax = max.filter(x => x % 2 === 0).toComputed(0);
+    const max = val.scan((x, y) => x > y ? x : y, val()).toStateful(0);
+    const evenMax = max.filter(x => x % 2 === 0).toStateful(0);
     val(1);
     expect.equal(evenMax(), 0);
     val(6);
@@ -125,7 +125,7 @@ it("computed chaining works", expect => {
 it("combine 2 values", expect => {
     const val1 = px.value<number>(4);
     const val2 = px.value<number>(2);
-    const ratio = val1.combineLatest(val2, (p1: number, p2: number) => p1 / p2).toComputed(0);
+    const ratio = val1.combineLatest(val2, (p1: number, p2: number) => p1 / p2).toStateful(0);
     expect.equal(ratio(), 2);
     expect.end();
 });

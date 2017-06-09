@@ -1,16 +1,16 @@
 import { Observable, BehaviorSubject } from "rxjs";
 import "./observableExtensions";
-import { ObservableValue, ComputedValue } from "./interfaces";
-import { StatefulObservable } from "./computed";
+import { ObservableValue, StatefulObservable } from "./interfaces";
+import { StatefulObservableImpl } from "./stateful";
 import { ArrayImpl, ObservableArray } from "./array";
 import { ComputedArray } from "./computedArray";
 
-export function computed<T>(source: Observable<T>, initial: T): ComputedValue<T> {
+export function stateful<T>(source: Observable<T>, initial: T): StatefulObservable<T> {
     if ("call" in source && "source" in source) {
-        return <ComputedValue<T>> source;
+        return <StatefulObservable<T>> source;
     }
-    const stateful = new StatefulObservable<T>(source, initial);
-    return createFunction(stateful) as ComputedValue<T>;
+    const observable = new StatefulObservableImpl<T>(source, initial);
+    return createFunction(observable) as StatefulObservable<T>;
 }
 
 export function value<T>(initial: T): ObservableValue<T> {
@@ -39,4 +39,4 @@ function createFunction<T>(observable: Observable<T>): Observable<T> {
     return accessor;
 }
 
-export { ComputedValue, ObservableValue, ObservableArray, ComputedArray };
+export { StatefulObservable, ObservableValue, ObservableArray, ComputedArray };
