@@ -145,7 +145,7 @@ it("value: multiple radios bound to a single value", expect => {
                           <input type="radio" name="grp" x-value="someProp" value="1st" />
                           <input type="radio" name="grp" x-value="someProp" value="2nd" />
                       </div>`;
-    const obs = px.value();
+    const obs = px.value(false);
     const el = <HTMLElement> util.parse(template)[0];
     const viewModel = { someProp: obs };
     ui.applyBindings(viewModel, el);

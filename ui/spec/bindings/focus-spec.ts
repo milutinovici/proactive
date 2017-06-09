@@ -13,7 +13,7 @@ it("focus: Should respond to changes on an observable value by blurring or focus
     document.body.appendChild(el);
 
     let currentState = false;
-    let model = { myVal: px.value() };
+    let model = { myVal: px.value(false) };
 
     ui.applyBindings(model, el);
 
@@ -39,7 +39,7 @@ it("focus: Should set an observable value to be true on focus and false on blur"
     const template = `<div><input x-focus="myVal" /><input /><p x-text="myVal"></p></div>`;
     const el = <Element> util.parse(template)[0];
     document.body.appendChild(el);
-    let model = { myVal: px.value() };
+    let model = { myVal: px.value(false) };
 
     ui.applyBindings(model, el);
 
