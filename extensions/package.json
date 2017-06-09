@@ -1,6 +1,6 @@
 {
   "name": "@proactive/extensions",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Proactive Extensions",
   "repository": {
     "url": "https://github.com/milutinovici/proactive"
@@ -29,5 +29,6 @@
     "vinyl-buffer": "^1.0.0",
     "@types/tape": "^4.2.30",
     "@types/benchmark": "^1.0.30"
-  }
+  },
+  "main": "src/extensions"
 }
