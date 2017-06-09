@@ -1,5 +1,5 @@
 import * as Rx from "rxjs";
-import { ComputedArray } from "./computedArray";
+import { ComputedArray } from "./computed-array";
 import { Func, Action } from "./interfaces";
 
 export class ArrayImpl<T> extends ComputedArray<T> implements Rx.Observer<T[]> {

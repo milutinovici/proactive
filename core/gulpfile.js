@@ -13,9 +13,9 @@ const vendors = ["rxjs"];
 gulp.task("build",  () => 
     browserify({ debug: true })
     .external(vendors)
-    .add("src/proactive.ts")
+    .add("src/extensions.ts")
     .plugin(tsify).bundle()
-    .pipe(source("core.js"))
+    .pipe(source("extensions.js"))
     .pipe(buffer())
     .pipe(uglify())
     .pipe(gulp.dest("./dist/"))

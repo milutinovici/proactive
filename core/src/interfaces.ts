@@ -10,7 +10,7 @@ export interface Disposable {
     subscription: Subscription;
 }
 
-export interface StatefulObservable<T> extends Observable<T>, Func<T>, Disposable {
+export interface ObservableState<T> extends Observable<T>, Func<T>, Disposable {
 }
 
 export interface ObservableValue<T> extends Observable<T>, Func<T>, Action<T>, Observer<T> {

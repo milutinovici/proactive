@@ -1,5 +1,5 @@
 import "./array-spec";
-import "./stateful-spec";
-import "./computedArray-spec";
+import "./state-spec";
+import "./computed-array-spec";
 import "./value-spec";
-import "./whenAny-spec";
+import "./when-any-spec";

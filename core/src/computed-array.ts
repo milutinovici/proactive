@@ -1,5 +1,4 @@
 import { Observable } from "rxjs";
-import "./observableExtensions";
 
 export class ComputedArray<T> extends Observable<T[]> {
 

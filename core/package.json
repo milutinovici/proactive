@@ -1,9 +1,9 @@
 {
-  "name": "proactive-core",
+  "name": "@auspex/extensions",
   "version": "0.1.0",
-  "description": "Proactive Extensions",
+  "description": "Auspex Extensions",
   "repository": {
-    "url": "https://github.com/milutinovici/proactive"
+    "url": "https://github.com/milutinovici/auspex"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
