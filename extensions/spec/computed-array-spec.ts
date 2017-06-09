@@ -1,9 +1,9 @@
-import * as ax from "../src/extensions";
+import * as px from "../src/extensions";
 import * as it from "tape";
 
 it("should follow base collection", expect => {
     const input = ["Foo", "Bar", "Baz", "Bamf"];
-    const origin = ax.array(input);
+    const origin = px.array(input);
     const computed = origin._map(x => x.toUpperCase());
 
     let output: string[] = [];
@@ -29,7 +29,7 @@ it("should follow base collection", expect => {
 
 it("should be filtered", expect => {
     const input = ["Foo", "Bar", "Baz", "Bamf"];
-    const origin = ax.array(input);
+    const origin = px.array(input);
     const computed = origin._filter(x => x.toUpperCase().indexOf("F") !== -1);
 
     let output: string[] = [];
@@ -54,7 +54,7 @@ it("should be filtered", expect => {
 
 it("should be sorted", expect => {
     const input = ["Foo", "Bar", "Baz"];
-    const origin = ax.array<string>(input);
+    const origin = px.array<string>(input);
 
     const stringOrderer = (a: any, b: any) => {
         if (a.toString() < b.toString()) { return -1; }
@@ -78,7 +78,7 @@ it("should be sorted", expect => {
 
 it("chaining works", expect => {
     const input = ["Foo", "Bar", "Baz", "Bamf"];
-    const origin = ax.array(input);
+    const origin = px.array(input);
     const computed = origin._map(x => x.toUpperCase())._filter(x => x.indexOf("F") !== -1);
     let output: string[] = [];
     computed.subscribe(x => output = x);
@@ -101,7 +101,7 @@ it("chaining works", expect => {
 
 it("should check if every element satisfies selector", expect => {
     const input = [1, 2, 4, 6];
-    const origin = ax.array(input);
+    const origin = px.array(input);
     const computed = origin._every(x => x % 2 === 0);
     let output: boolean = false;
     computed.subscribe(x => output = x);
@@ -121,7 +121,7 @@ it("should check if every element satisfies selector", expect => {
 });
 it("should check if any element satisfies selector", expect => {
     const input = [2, 3, 5, 7];
-    const origin = ax.array(input);
+    const origin = px.array(input);
     const computed = origin._some(x => x % 2 === 0);
     let output: boolean = false;
     computed.subscribe(x => output = x);
@@ -141,7 +141,7 @@ it("should check if any element satisfies selector", expect => {
 });
 it("should get max element of Array using reduce", expect => {
     const input = [2, 3, 5, 7, 1, 4];
-    const origin = ax.array(input);
+    const origin = px.array(input);
     const computed = origin._reduce((x, y) => x > y ? x : y, 0);
     let output: number = 0;
     computed.subscribe(x => output = x);
@@ -161,7 +161,7 @@ it("should get max element of Array using reduce", expect => {
 });
 it("should flatten elements using flatMap", expect => {
     const input = [[2, 3], [5, 7]];
-    const origin = ax.array(input);
+    const origin = px.array(input);
     const computed = origin._flatMap(x => x);
     let output: number[] = [];
     computed.subscribe(x => output = x);
