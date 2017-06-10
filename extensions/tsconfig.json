@@ -6,14 +6,15 @@
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es5",
-    "module": "umd",
+    "module": "commonjs",
+    "declaration": true,
     "moduleResolution": "node",
     "strictNullChecks": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
     "noUnusedParameters": false,
     "noUnusedLocals": true,
-    "outDir": "./dist",
+    "outDir": "./lib",
     "lib": ["es5", "dom", "es2015.promise", "es2015.collection"]
   },
   "formatCodeOptions": {
@@ -22,6 +23,6 @@
   },
    "exclude": [
        "node_modules",
-       "dist"
+       "lib"
    ]
 }

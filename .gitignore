@@ -10,6 +10,7 @@ node_modules/
 typings/
 
 # Generated
+lib/
 dist/
 tmp/
 coverage/
