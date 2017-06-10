@@ -1,7 +1,7 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
-import * as px from "../../../core/src/proactive";
-import * as ui from "../../src/proactiveUI";
+import * as px from "@proactive/extensions";
+import * as ui from "../../src/ui";
 import * as util from "../spec-utils";
 
 it("value: Should treat null values as empty strings", expect => {

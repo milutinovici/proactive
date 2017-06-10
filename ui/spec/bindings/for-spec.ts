@@ -1,6 +1,6 @@
 import * as it from "tape";
-import * as px from "../../../core/src/proactive";
-import * as ui from "../../src/proactiveUI";
+import * as px from "@proactive/extensions";
+import * as ui from "../../src/ui";
 import * as util from "../spec-utils";
 
 it("for: binding to a standard array", expect => {

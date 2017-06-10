@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
-import * as ui from "../../src/proactiveUI";
+import * as ui from "../../src/ui";
 import * as util from "../spec-utils";
 
 it("event: this is bound to $data", expect => {

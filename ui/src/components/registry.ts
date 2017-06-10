@@ -41,7 +41,7 @@ export class ComponentRegistry {
             }
         } else {
             exception.next(new Error(`No component with name '${name}' is registered`));
-            return Rx.Observable.empty();
+            return Rx.Observable.empty<IComponentDescriptor>();
         }
     }
 

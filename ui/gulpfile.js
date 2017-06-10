@@ -7,12 +7,12 @@ const buffer = require("vinyl-buffer");
 const tsify = require("tsify");
 const stringify = require("stringify");
 
-const vendors = ["rxjs"];
+const vendors = ["rxjs", "route-parser"];
 
 gulp.task("build", () => browserify({ debug: true })
                         .transform(stringify, { appliesTo: { includeExtensions: [".html"] }, minify: true })
                         .external(vendors)
-                        .add("src/proactiveUI.ts")
+                        .add("src/ui.ts")
                         .plugin(tsify).bundle()
                         .pipe(source("ui.js"))
                         .pipe(buffer())
