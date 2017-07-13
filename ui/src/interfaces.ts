@@ -59,6 +59,7 @@ export interface IViewModel {
     readonly cleanup?: Subscription;
     readonly value?: Observable<string>;
     readonly emitter?: Observable<CustomEvent>;
+    [others: string]: any;
 }
 
 export interface IComponentDescriptor {

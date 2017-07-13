@@ -1,14 +1,34 @@
 import { NodeStateManager, DataContext, NodeState } from "./nodeState";
+import { HtmlEngine } from "./templateEngines";
 import { isElement, isTextNode, isHandlebarExpression } from "./utils";
 import { BindingProvider } from "./bindingProvider";
+import { components, ComponentRegistry } from "./components/registry";
 import { IDataContext, IViewModel } from "./interfaces";
 
+import { EventBinding } from "./bindings/event";
+import { IfBinding, IfNotBinding } from "./bindings/if";
+import { TextBinding } from "./bindings/text";
+import { AttrBinding, CssBinding, StyleBinding, HtmlBinding } from "./bindings/oneWay";
+import { ForBinding } from "./bindings/for";
+import { AsBinding } from "./bindings/as";
+import { ValueBinding } from "./bindings/value";
+import { ComponentBinding } from "./bindings/component";
+import { KeyPressBinding } from "./bindings/keypress";
+import { FocusBinding } from "./bindings/focus";
+
 export class DomManager {
+    public readonly engine: HtmlEngine;
     public readonly nodeStateManager: NodeStateManager;
+    public readonly bindingProvider: BindingProvider;
+    public readonly components: ComponentRegistry;
     private readonly ignore = ["SCRIPT", "TEXTAREA", "TEMPLATE"];
 
-    constructor(nodeState: NodeStateManager) {
+    constructor(nodeState: NodeStateManager, engine: HtmlEngine) {
+        this.bindingProvider = new BindingProvider();
         this.nodeStateManager = nodeState;
+        this.engine = engine;
+        this.components = components;
+        this.registerCoreBindings();
     }
 
     public applyBindings(model: IViewModel, rootNode: Element): void {
@@ -56,7 +76,6 @@ export class DomManager {
             }
         }
     }
-
     private cleanNodeRecursive(node: Node): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
@@ -72,7 +91,7 @@ export class DomManager {
         let state = this.nodeStateManager.get(el);
         // create and set if necessary
         if (!state) {
-            const bindings = BindingProvider.getBindings(el);
+            const bindings = this.bindingProvider.getBindings(el);
             if (bindings.length === 0) {
                 return false;
             }
@@ -101,5 +120,22 @@ export class DomManager {
         return (isElement(el) && this.ignore.indexOf(el.tagName) === -1) ||
                (isTextNode(el) && isHandlebarExpression(el.nodeValue));
     }
+    private registerCoreBindings() {
+        this.bindingProvider.registerHandler(new CssBinding("css", this));
+        this.bindingProvider.registerHandler(new AttrBinding("attr", this));
+        this.bindingProvider.registerHandler(new StyleBinding("style", this));
+        this.bindingProvider.registerHandler(new EventBinding("on", this));
+        this.bindingProvider.registerHandler(new KeyPressBinding("key", this));
+        this.bindingProvider.registerHandler(new IfBinding("if", this));
+        this.bindingProvider.registerHandler(new IfNotBinding("ifnot", this));
+        this.bindingProvider.registerHandler(new AsBinding("as", this));
+        this.bindingProvider.registerHandler(new TextBinding("text", this));
+        this.bindingProvider.registerHandler(new HtmlBinding("html", this));
+        this.bindingProvider.registerHandler(new ForBinding("for", this));
 
+        this.bindingProvider.registerHandler(new ComponentBinding("component", this));
+        this.bindingProvider.registerHandler(new ValueBinding("value", this));
+        this.bindingProvider.registerHandler(new FocusBinding("focus", this));
+
+    }
 }

@@ -1,14 +1,15 @@
 import * as it from "tape";
 import * as px from "@proactive/extensions";
-import * as ui from "../../src/ui";
-import * as util from "../spec-utils";
+import { document, parse, triggerEvent } from "../spec-utils";
+import { ProactiveUI } from "../../src/ui";
+const ui = new ProactiveUI(document);
 
 let focusInEvent = "focusin";
 let focusOutEvent = "focusout";
 
 it("focus: Should respond to changes on an observable value by blurring or focusing the element", expect => {
     const template = `<div><input x-focus="myVal" /><input /></div>`;
-    const el = <Element> util.parse(template)[0];
+    const el = <Element> parse(template)[0];
     let input = <HTMLInputElement> el.childNodes[0];
     document.body.appendChild(el);
 
@@ -37,7 +38,7 @@ it("focus: Should respond to changes on an observable value by blurring or focus
 
 it("focus: Should set an observable value to be true on focus and false on blur", expect => {
     const template = `<div><input x-focus="myVal" /><input /><p x-text="myVal"></p></div>`;
-    const el = <Element> util.parse(template)[0];
+    const el = <Element> parse(template)[0];
     document.body.appendChild(el);
     let model = { myVal: px.value(false) };
 
@@ -49,12 +50,12 @@ it("focus: Should set an observable value to be true on focus and false on blur"
     let input2 = <HTMLInputElement> el.childNodes[0];
 
     input1.focus();
-    util.triggerEvent(input1, focusInEvent);
+    triggerEvent(input1, focusInEvent);
     expect.equal(model.myVal(), true);
 
     // Move the focus elsewhere
     input2.focus();
-    util.triggerEvent(input1, focusOutEvent);
+    triggerEvent(input1, focusOutEvent);
     expect.equal(model.myVal(), false);
 
     // If the model value becomes true after a blur, we re-focus the element
@@ -68,7 +69,7 @@ it("focus: Should set an observable value to be true on focus and false on blur"
 
 it("focus: Should not unnecessarily focus or blur an element that is already focused/blurred", expect => {
     const template = `<input x-focus="isFocused" />`;
-    const el = <HTMLInputElement> util.parse(template)[0];
+    const el = <HTMLInputElement> parse(template)[0];
     // This is the closest we can get to representing issue #698 as a spec
     let model = { isFocused: px.value<Object | null>({}) };
 

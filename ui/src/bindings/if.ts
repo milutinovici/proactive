@@ -16,7 +16,7 @@ export class IfBinding extends BaseHandler<boolean> {
     public applyInternal(element: HTMLElement, binding: IBinding<boolean>, state: INodeState): void {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<boolean>;
         const parent = element.parentElement as HTMLElement;
-        const placeholder: Comment = document.createComment("if");
+        const placeholder: Comment = this.domManager.engine.createComment("if");
         parent.insertBefore(placeholder, element);
         let sibling = element.nextSibling;
 

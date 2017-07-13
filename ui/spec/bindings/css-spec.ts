@@ -1,11 +1,12 @@
 import * as it from "tape";
 import * as px from "@proactive/extensions";
-import * as ui from "../../src/ui";
-import * as util from "../spec-utils";
+import { document, parse } from "../spec-utils";
+import { ProactiveUI } from "../../src/ui";
+const ui = new ProactiveUI(document);
 
 it("css: binding to a string constant", expect => {
     const template = `<div x-css-foo="true">empty</div>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
 
     let model = {};
     expect.false(hasClass(el, "foo"));
@@ -16,7 +17,7 @@ it("css: binding to a string constant", expect => {
 
 it("css: binding to a non-observable model value", expect => {
     const template = `<div x-css-foo="constantBool">empty</div>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
 
     let model = createCssModel();
     model.constantString = "foo";
@@ -29,7 +30,7 @@ it("css: binding to a non-observable model value", expect => {
 
 it("css: binding to a observable model value", expect => {
     const template = `<div x-css-foo="observableBool">empty</div>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
 
     let model = createCssModel();
 
@@ -50,7 +51,7 @@ it("css: binding to a observable model value", expect => {
 
 it("css: binding multiple css classes to multiple observable model properties", expect => {
     const template = `<div x-css-foo="observableBool" x-css-bar="observableBool2">empty</div>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
 
     let model = createCssModel();
 

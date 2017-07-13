@@ -96,18 +96,6 @@ export function nodeListToArray(nodes: NodeList): Node[] {
     return Array.prototype.slice.call(nodes);
 }
 
-/**
- * Converts a NodeList into a document fragment
- * @param {NodeList} nodes
- */
-export function nodeListToFragment(nodes: NodeList): DocumentFragment {
-    const fragment = document.createDocumentFragment();
-    for (let i = 0; i < nodes.length; i++) {
-        fragment.appendChild(nodes[i]);
-    }
-    return fragment;
-}
-
 declare function require(modules: string[], successCB: (s: any) => any, errCB: (err: Error) => any): void;
 
 /**

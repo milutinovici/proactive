@@ -1,11 +1,13 @@
-import { html } from "../src/templateEngines";
 import { nodeListToArray } from "../src/utils";
+import { JSDOM } from "jsdom";
+const dom = new JSDOM(`<!DOCTYPE html></html>`);
+export const document = dom.window.document;
 
 export function parse(template: string): Node[] {
-    return nodeListToArray(html.parse(template).childNodes);
+    return nodeListToArray(fragment(template).childNodes);
 }
-export function parseFrag(template: string): DocumentFragment {
-    return html.parse(template);
+export function fragment(template: string): DocumentFragment {
+    return JSDOM.fragment(template);
 }
 
 let knownEvents = {};
@@ -24,41 +26,35 @@ Object.keys(knownEvents).forEach(x => {
         }
     }
 });
-
+function createEvent(category: any): Event {
+    return dom.window.document.createEvent(category);
+}
 export function triggerEvent(element: Element, eventType: string, keyCode?: any) {
-    if (typeof document.createEvent === "function") {
-        if (typeof element.dispatchEvent === "function") {
-            let eventCategory = knownEventTypesByEventName[eventType] || "HTMLEvents";
-            let event: any;
+    if (typeof element.dispatchEvent === "function") {
+        let eventCategory = knownEventTypesByEventName[eventType] || "HTMLEvents";
+        let event: any;
 
-            if (eventCategory !== "KeyboardEvent") {
-                event = document.createEvent(eventCategory);
-                (<any> event.initEvent)(eventType, true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, element);
-            } else {
-                let keyEvent = <KeyboardEvent> <any> document.createEvent(eventCategory);
-                keyEvent.initKeyboardEvent(eventType, true, true, window, "", 0, "", false, "");
+        if (eventCategory !== "KeyboardEvent") {
+            event = createEvent(eventCategory);
+            (<any> event.initEvent)(eventType, true, true, dom.window, 0, 0, 0, 0, 0, false, false, false, false, 0, element);
+        } else {
+            let keyEvent = <KeyboardEvent> <any> createEvent(eventCategory);
+            keyEvent.initKeyboardEvent(eventType, true, true, dom.window, "", 0, "", false, "");
 
-                if (keyCode) {
-                    Object.defineProperty(keyEvent, "keyCode", {
-                        get() {
-                            return keyCode;
-                        },
-                    });
-                }
-
-                event = keyEvent;
+            if (keyCode) {
+                Object.defineProperty(keyEvent, "keyCode", {
+                    get() {
+                        return keyCode;
+                    },
+                });
             }
 
-            element.dispatchEvent(event);
-        } else {
-            throw new Error("The supplied element doesn't support dispatchEvent");
+            event = keyEvent;
         }
-    } else if (element["click"]) {
-        element["click"]();
-    } else if (typeof element["fireEvent"] !== "undefined") {
-        element["fireEvent"]("on" + eventType);
+
+        element.dispatchEvent(event);
     } else {
-        throw new Error("Browser doesn't support triggering events");
+        throw new Error("The supplied element doesn't support dispatchEvent");
     }
 }
 

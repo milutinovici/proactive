@@ -1,32 +1,25 @@
 const gulp = require("gulp");
 const tape = require("gulp-tape");
-const uglify = require("gulp-uglify");
-const browserify = require("browserify");
-const source = require("vinyl-source-stream");
-const buffer = require("vinyl-buffer");
-const tsify = require("tsify");
-const stringify = require("stringify");
+const ts = require("gulp-typescript");
+const sourcemaps = require("gulp-sourcemaps");
+const merge = require("merge2");
+const spec = require("tap-spec");
 
-const vendors = ["rxjs", "route-parser"];
+gulp.task("build",  () => {
+    const project = ts.createProject("tsconfig.json");
+    const result = project.src()
+        .pipe(sourcemaps.init())  
+        .pipe(project());
 
-gulp.task("build", () => browserify({ debug: true })
-                        .transform(stringify, { appliesTo: { includeExtensions: [".html"] }, minify: true })
-                        .external(vendors)
-                        .add("src/ui.ts")
-                        .plugin(tsify).bundle()
-                        .pipe(source("ui.js"))
-                        .pipe(buffer())
-                        .pipe(uglify())
-                        .pipe(gulp.dest("./dist"))
-                        );
+    return merge([
+        result.dts.pipe(gulp.dest("./lib")),
+        result.js.pipe(sourcemaps.write()).pipe(gulp.dest("./lib"))
+    ]);
+});
 
-gulp.task("spec", () => browserify({ debug: true })
-                        .transform(stringify, { appliesTo: { includeExtensions: [".html"] }, minify: true })
-                        // .external(vendors)
-                        .add("spec/spec.ts")
-                        .plugin(tsify).bundle()
-                        .pipe(source("ui-spec.js"))
-                        .pipe(buffer())
-                        // .pipe(uglify())
-                        .pipe(gulp.dest("./dist/"))
-                        );
+gulp.task("spec", () => {
+    const result = gulp.src("./lib/spec/*.js")
+                       .pipe(tape({ reporter: spec() }));
+    }
+);
+

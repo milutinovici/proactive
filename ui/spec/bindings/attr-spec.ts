@@ -1,11 +1,13 @@
 import * as it from "tape";
 import * as px from "@proactive/extensions";
-import * as ui from "../../src/ui";
-import * as util from "../spec-utils";
+import { document, parse } from "../spec-utils";
+import { ProactiveUI } from "../../src/ui";
+
+const ui = new ProactiveUI(document);
 
 it("attr: binding to a string constant", expect => {
     const template = `<div x-attr-data-foo="true">empty</div>`;
-    const el = <HTMLInputElement> util.parse(template)[0];
+    const el = <HTMLInputElement> parse(template)[0];
 
     let model = {};
     expect.false(hasAttr(el, "data-foo"));
@@ -16,7 +18,7 @@ it("attr: binding to a string constant", expect => {
 
 it("attr: binding to a non-observable model value", expect => {
     const template = `<div x-attr-data-foo="constantString">empty</div>`;
-    const el = <HTMLInputElement> util.parse(template)[0];
+    const el = <HTMLInputElement> parse(template)[0];
 
     let model = createCssModel();
     model.constantString = "data-foo";
@@ -29,7 +31,7 @@ it("attr: binding to a non-observable model value", expect => {
 
 it("attr: binding to a observable model value", expect => {
     const template = `<div x-attr-data-foo="observableString">empty</div>`;
-    const el = <HTMLInputElement> util.parse(template)[0];
+    const el = <HTMLInputElement> parse(template)[0];
 
     let model = createCssModel();
 
@@ -50,7 +52,7 @@ it("attr: binding to a observable model value", expect => {
 
 it("attr: binding multiple attr classes to multiple observable model properties", expect => {
     const template = `<div x-attr-data-foo="observableString" x-attr-data-bar="observableString2">empty</div>`;
-    const el = <HTMLInputElement> util.parse(template)[0];
+    const el = <HTMLInputElement> parse(template)[0];
 
     let model = createCssModel();
 

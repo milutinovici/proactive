@@ -1,7 +1,7 @@
 import * as Rx from "rxjs";
 import { IComponentDescriptor, IViewModel } from "../interfaces";
-import { observableRequire, isFunction, nodeListToFragment } from "../utils";
-import { html } from "../templateEngines";
+import { observableRequire, isFunction, isElement } from "../utils";
+import { HtmlEngine } from "../templateEngines";
 import { exception } from "../exceptionHandlers";
 export class ComponentRegistry {
 
@@ -23,10 +23,10 @@ export class ComponentRegistry {
         return this.components.has(name);
     }
 
-    public load(name: string): Rx.Observable<IComponentDescriptor> {
+    public load(name: string, html: HtmlEngine): Rx.Observable<IComponentDescriptor> {
         name = name.toUpperCase();
         let result = this.getDescriptor(name);
-        result = result.map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel });
+        result = result.map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template, html), viewModel: x.viewModel });
         result.do(x => this.components.set(name, x)); // cache descriptor
         return result;
     }
@@ -59,14 +59,14 @@ export class ComponentRegistry {
         return vm;
     }
 
-    private compileTemplate(template: DocumentFragment | string): DocumentFragment {
+    private compileTemplate(template: DocumentFragment | string, html: HtmlEngine): DocumentFragment {
         if (typeof template === "string") {
             if (template[0] === "#") {
-                const tmp = document.getElementById(template.slice(1, template.length));
-                if (tmp instanceof HTMLTemplateElement) {
-                    return nodeListToFragment(tmp.content.childNodes);
+                const tmp = html.getElementById(template.slice(1, template.length));
+                if (tmp !== null && isElement(tmp) && tmp["content"] !== undefined) { // template
+                    return tmp["content"];
                 } else if (tmp !== null) {
-                    return nodeListToFragment(tmp.childNodes);
+                    return html.nodeListToFragment(tmp.childNodes);
                 } else {
                     throw Error(`No template with id: "${template}" found`);
                 }
@@ -74,8 +74,8 @@ export class ComponentRegistry {
                 return html.parse(template);
             }
         } else if (Array.isArray(template)) {
-            return nodeListToFragment(template as any);
-        } else if (template instanceof DocumentFragment) {
+            return html.nodeListToFragment(template as any);
+        } else if (html.isFragment(template)) {
             return template;
         } else {
             throw Error("invalid template descriptor");

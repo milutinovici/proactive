@@ -1,11 +1,13 @@
 import * as it from "tape";
 import * as px from "@proactive/extensions";
-import * as ui from "../../src/ui";
-import * as util from "../spec-utils";
+import { document, parse } from "../spec-utils";
+import { ProactiveUI } from "../../src/ui";
+
+const ui = new ProactiveUI(document);
 
 it("as: bound to a non-observable value", expect => {
     const template = `<div x-as-child="childModel"><span x-text="child.foo">invalid</span></div>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
 
     const viewModel = {
         childModel: { foo: px.value("bar") },
@@ -26,7 +28,7 @@ it("as: bound to a non-observable value", expect => {
 
 it("as: bound to an observable value", expect => {
     const template = `<div x-as-child="childModel"><span x-text="child.foo">invalid</span></div>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
 
     let childModel1 = {
         foo: px.value("bar"),

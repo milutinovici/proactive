@@ -1,11 +1,12 @@
 import * as it from "tape";
 import * as px from "@proactive/extensions";
-import * as ui from "../../src/ui";
-import * as util from "../spec-utils";
+import { document, parse } from "../spec-utils";
+import { ProactiveUI } from "../../src/ui";
+const ui = new ProactiveUI(document);
 
 it("text: binding to a string constant", expect => {
     const template = `<span x-text="'foo'">invalid</span>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
     let model = {};
 
     expect.equal(el.textContent, "invalid");
@@ -16,7 +17,7 @@ it("text: binding to a string constant", expect => {
 
 it("text: binding to a numeric constant", expect => {
     const template = `<span x-text="42">invalid</span>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
     let model = {};
 
     expect.equal(el.textContent, "invalid");
@@ -27,7 +28,7 @@ it("text: binding to a numeric constant", expect => {
 
 it("text: binding to a falsy numeric model value", expect => {
     const template = `<span x-text="$data">invalid</span>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
     let model = 0;
 
     expect.equal(el.textContent, "invalid");
@@ -38,7 +39,7 @@ it("text: binding to a falsy numeric model value", expect => {
 
 it("text: binding to a boolean constant", expect => {
     const template = `<span x-text="true">invalid</span>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
     let model = {};
 
     expect.equal(el.textContent, "invalid");
@@ -49,7 +50,7 @@ it("text: binding to a boolean constant", expect => {
 
 it("text: binding to a non-observable model value", expect => {
     const template = `<span x-text="constantString">invalid</span>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
     let model = { constantString: "foo" };
 
     expect.equal(el.textContent, "invalid");
@@ -60,7 +61,7 @@ it("text: binding to a non-observable model value", expect => {
 
 it("text: binding to a observable model value", expect => {
     const template = `<span x-text="observableString">invalid</span>`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
 
     let model = { observableString: px.value("foo") };
 
@@ -82,7 +83,7 @@ it("text: binding to a observable model value", expect => {
 
 // it("text: binding to a view computed observable", expect => {
 //     const template = `<span x-text="'hello ' + observableString">invalid</span>`;
-//     const el = <HTMLElement> util.parse(template)[0];
+//     const el = <HTMLElement> parse(template)[0];
 
 //     let model = { observableString: px.value("foo") };
 
@@ -96,7 +97,7 @@ it("text: binding to a observable model value", expect => {
 
 it("text: handlebar binding works", expect => {
     const template = `<div>{{observableString}}</div>"`;
-    const el = <HTMLElement> util.parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
 
     let model = { observableString: px.value("foo") };
 
