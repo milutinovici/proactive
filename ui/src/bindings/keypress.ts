@@ -31,10 +31,6 @@ export class KeyPressBinding extends SimpleHandler<KeyboardEvent> {
     }
 
     public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription {
-            if (parameter === undefined) {
-                exception.next(new Error(`key must be defined for ${this.name} binding on ${el.tagName}`));
-                return Subscription.EMPTY;
-            }
             if (!isRxObserver(observer)) {
                 exception.next(new Error(`must supply function or observer for ${this.name} binding on ${el.tagName}`));
                 return Subscription.EMPTY;

@@ -33,32 +33,12 @@ export class Binding<T> implements IBinding<T> {
         return new Binding<T>(this.handler, this.text, this.parameter);
     }
     public evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T> {
-        const expression: any = this.expression(ctx);
-        const isFunc = isFunction(expression);
-        const isObs = expression != null && (isRxObservable(expression) || isRxObserver(expression));
-        if (!(dataFlow & DataFlow.In)) { // just out
-            if (isObs) {
-                return expression;
-            } else if (isFunc) {
-                return Observable.of(expression.bind(ctx.$data)());
-            } else {
-                return Observable.of(expression);
-            }
-        // } else if (!(dataFlow & DataFlow.Out)) { // just in
-
+        if (dataFlow === DataFlow.Out) {
+            return this.createObservable(ctx);
+        } else if (dataFlow === DataFlow.In) {
+            return this.createObserver(ctx);
         } else { // twoWay
-            if (!isObs && !isFunc) {
-                const obs: any = Observable.of(expression);
-                obs.next = this.write(ctx);
-                // obs.error = exception.error;
-                obs.complete = () => {};
-                obs[Symbol.rxSubscriber] = () => obs;
-                return obs;
-            } else if (isFunc && !isObs) {
-                const fn: (t: T) => void = expression.bind(ctx.$data);
-                return new Subscriber<T>(fn, exception.error);
-            }
-            return expression;
+            return this.createBoth(ctx);
         }
     }
 
@@ -78,7 +58,45 @@ export class Binding<T> implements IBinding<T> {
             return null;
         }
     };
-
+    private createObserver(ctx: IDataContext): Observer<T> {
+        const subscriber = new Subscriber<T>(x => {
+            const result: any = this.expression(ctx);
+            if (isFunction(result)) {
+                return result.bind(ctx.$data)(x);
+            } else if (result != null && isRxObserver(result)) {
+                return result.next(x);
+            }
+            return result;
+        }, exception.error);
+        return subscriber;
+    }
+    private createObservable(ctx: IDataContext): Observable<T> {
+        const expression: any = this.expression(ctx);
+        if (expression != null && isRxObservable(expression)) {
+            return expression;
+        } else if (isFunction(expression)) {
+            return Observable.of(expression.bind(ctx.$data)());
+        } else {
+            return Observable.of(expression);
+        }
+    }
+    private createBoth(ctx: IDataContext): Observable<T> | Observer<T> {
+        const expression: any = this.expression(ctx);
+        const isFunc = isFunction(expression);
+        const isObs = expression != null && (isRxObservable(expression) || isRxObserver(expression));
+        if (!isObs && !isFunc) {
+            const obs: any = Observable.of(expression);
+            obs.next = this.write(ctx);
+            // obs.error = exception.error;
+            obs.complete = () => {};
+            obs[Symbol.rxSubscriber] = () => obs;
+            return obs;
+        } else if (isFunc && !isObs) {
+            const fn: (t: T) => void = expression.bind(ctx.$data);
+            return new Subscriber<T>(fn, exception.error);
+        }
+        return expression;
+    }
     private write(ctx: IDataContext): (value: T) => void {
         try {
             const fn = Binding.writeCache.get(this.text);

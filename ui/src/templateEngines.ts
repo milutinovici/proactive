@@ -21,7 +21,7 @@ export class HtmlEngine {
     }
     public createEvent(event: string): Event {
         const evt = this.document.createEvent("HTMLEvents");
-        evt.initEvent(event, false, true);
+        evt.initEvent(event, true, true);
         return evt;
     }
     public createFragment(): DocumentFragment {

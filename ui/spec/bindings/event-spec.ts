@@ -5,38 +5,19 @@ import { ProactiveUI } from "../../src/ui";
 
 const ui = new ProactiveUI(document);
 
-it("event: this is bound to $data", expect => {
-    const template = `<button x-on-click="clickHandler">Click me</button>`;
-    const el = <HTMLInputElement> parse(template)[0];
-
-    let model = new TestVM();
-
-    expect.doesNotThrow(() => ui.applyBindings(model, el));
-    expect.true(model.constant = "hello");
-    triggerEvent(el, "click");
-    expect.true(model.constant = "world");
-    ui.cleanNode(el);
-    expect.end();
-});
-
 it("event: binds a single event to a handler function", expect => {
     const template = `<button x-on-click="clickHandler">Click me</button>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let called = false;
     let eventName: string | undefined = undefined;
-    let calledWithValidEvent = false;
     let callCount = 0;
 
     let model = {
-        clickHandler: (e: Event, element: HTMLElement, ctx: Object) => {
+        clickHandler: (e: Event) => {
             callCount++;
             called = true;
             eventName = e.type;
-
-            // if (e instanceof Event) {
-                calledWithValidEvent = true;
-            // }
         },
     };
 
@@ -45,7 +26,7 @@ it("event: binds a single event to a handler function", expect => {
 
     expect.true(called, "handler was called");
     expect.equal(eventName, "click", "click event was triggered");
-    expect.true(calledWithValidEvent, "event passed is instance of Event");
+    expect.equal(callCount, 1, "event was triggered once");
 
     ui.cleanNode(el);
     called = false;
@@ -65,10 +46,10 @@ it("event: binds multiple events to handler functions", expect => {
     let inputCallCount = 0;
 
     let model = {
-        clickHandler: (e: Event, element: Element) => {
+        clickHandler: (e: Event) => {
             clickCallCount++;
         },
-        inputHandler: (e: Event, element: Element) => {
+        inputHandler: (e: Event) => {
             inputCallCount++;
         },
     };
@@ -137,13 +118,32 @@ it("event: binds multiple events to observers", expect => {
     expect.end();
 });
 
+it("event: pass parameters to function", expect => {
+    const template = `<input type="text" x-on-click="custom(5, 2)" />`;
+    const el = <HTMLInputElement> parse(template)[0];
+
+    let first = 0;
+    let second = 0;
+    let model = {
+        custom: function (f: number, s: number) { first = f; second = s; },
+    };
+
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
+
+    triggerEvent(el, "click");
+    expect.equal(first, 5, "1st parameter is good");
+    expect.equal(second, 2, "2nd parameter is good");
+
+    expect.end();
+});
+
 it("event: binds a single key to a handler function", expect => {
     const template = `<input x-key-enter="clickHandler"/>`;
     const el = <HTMLInputElement> parse(template)[0];
     let callCount = 0;
 
     let model = {
-        clickHandler: (on: KeyboardEvent, element: HTMLInputElement, ctx: Object) => {
+        clickHandler: (on: KeyboardEvent) => {
             callCount++;
         },
     };
@@ -211,24 +211,26 @@ it("event: binds multiple keys to handler functions", expect => {
 });
 
 it("event: event delegation works", expect => {
-    const template = `<ul x-on-click-item="selected">
-                        <li><a item="1">Click to select</a></li>
-                        <li><a item="2">Click to select</a></li>
+    const template = `<ul x-on-click-id="console.log">
+                        <li><a id="1">Click to select</a></li>
+                        <li><a id="2">Click to select</a></li>
                       </ul>`;
-    const el = <HTMLInputElement> parse(template)[0];
+    const el = <HTMLElement> parse(template)[0];
 
     const viewModel = {
         selected: new Rx.BehaviorSubject(0),
     };
 
     expect.doesNotThrow(() => ui.applyBindings(viewModel, el));
-
+    triggerEvent(el.children[0].children[0], "click");
+    triggerEvent(el.children[1].children[0], "click");
+    expect.fail("it doesn't actually work");
     expect.end();
 });
 
 class TestVM {
     public constant = "hello";
-    public clickHandler(e: Event, el: HTMLElement, ctx: any) {
+    public clickHandler(e: Event) {
         this.constant = "world";
     }
 }

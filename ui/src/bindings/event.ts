@@ -13,10 +13,6 @@ export class EventBinding extends SimpleHandler<Event> {
     }
 
     public apply(el: Element, observer: Observer<Event>, parameter: string): Subscription {
-        if (parameter === undefined) {
-            exception.next(new Error(`Event name must be supplied for ${this.name} binding, on ${el.tagName} element`));
-            return Subscription.EMPTY;
-        }
         if (!isRxObserver(observer)) {
             exception.next(new Error(`Observer or function must be supplied for ${this.name} binding on ${el}`));
             return Subscription.EMPTY;

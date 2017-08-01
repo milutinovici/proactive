@@ -21,7 +21,7 @@ export class BindingProvider {
              return [this.handleBarsToBinding(element)];
         }
         const tag = element.tagName;
-        const bindings = element.hasAttributes() ? this.getBindingAttributes(element, tag) : [];
+        const bindings = element.hasAttributes() ? this.getBindingAttributes(element) : [];
         // check if element is custom element (component)
         if (components.registered(tag)) {
             // when a component is referenced as custom-element, apply a virtual 'component' binding
@@ -30,7 +30,7 @@ export class BindingProvider {
         return bindings;
     }
 
-    private getBindingAttributes(element: Element, tag: string): IBinding<any>[] {
+    private getBindingAttributes(element: Element): IBinding<any>[] {
         let controlsDescendants = 0;
         const bindings: Binding<any>[] = [];
         for (let i = 0; i < element.attributes.length; i++) {
