@@ -1,16 +1,34 @@
 import { Observable } from "rxjs";
-import { components, ComponentRegistry } from "./components/registry";
+import { ComponentRegistry } from "./components/registry";
 import { DomManager } from "./domManager";
-import { NodeStateManager } from "./nodeState";
 import { HtmlEngine } from "./templateEngines";
-import { IDataContext } from "./interfaces";
+import { BindingProvider } from "./bindingProvider";
+import { IDataContext, IConfiguration } from "./interfaces";
+
+import { EventBinding } from "./bindings/event";
+import { IfBinding, IfNotBinding } from "./bindings/if";
+import { TextBinding } from "./bindings/text";
+import { AttrBinding, CssBinding, StyleBinding, HtmlBinding } from "./bindings/oneWay";
+import { ForBinding } from "./bindings/for";
+import { AsBinding } from "./bindings/as";
+import { ValueBinding } from "./bindings/value";
+import { ComponentBinding } from "./bindings/component";
+import { KeyPressBinding } from "./bindings/keypress";
+import { FocusBinding } from "./bindings/focus";
 
 export class ProactiveUI {
+    private readonly bindingProvider: BindingProvider;
     public readonly components: ComponentRegistry;
     public readonly domManager: DomManager;
-    constructor(document: Document = window.document) {
-        this.domManager = new DomManager(new NodeStateManager(), new HtmlEngine(document));
-        this.components = components;
+    public readonly engine: HtmlEngine;
+
+    constructor(config: IConfiguration = {}) {
+        this.engine = new HtmlEngine(config.document || document);
+        this.components = new ComponentRegistry();
+        this.bindingProvider = new BindingProvider(this.components);
+        this.domManager = new DomManager(this.bindingProvider);
+        this.registerCoreBindings(this.domManager, this.engine, this.components);
+
     }
 
     /**
@@ -45,6 +63,26 @@ export class ProactiveUI {
 
     public dataFor(node: Element): any {
         return this.domManager.nodeStateManager.getDataContext(node);
+    }
+
+    private registerCoreBindings(domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {
+        this.bindingProvider.registerHandler(new CssBinding("css"));
+        this.bindingProvider.registerHandler(new AttrBinding("attr"));
+        this.bindingProvider.registerHandler(new StyleBinding("style"));
+        this.bindingProvider.registerHandler(new EventBinding("on"));
+        this.bindingProvider.registerHandler(new KeyPressBinding("key"));
+        this.bindingProvider.registerHandler(new TextBinding("text"));
+        this.bindingProvider.registerHandler(new HtmlBinding("html"));
+        // two way
+        this.bindingProvider.registerHandler(new ValueBinding("value"));
+        this.bindingProvider.registerHandler(new FocusBinding("focus"));
+
+        this.bindingProvider.registerHandler(new AsBinding("as", domManager));
+        this.bindingProvider.registerHandler(new IfBinding("if", domManager, engine));
+        this.bindingProvider.registerHandler(new IfNotBinding("ifnot", domManager, engine));
+        this.bindingProvider.registerHandler(new ForBinding("for", domManager, engine));
+        this.bindingProvider.registerHandler(new ComponentBinding("component", domManager, engine, registry));
+
     }
 
 }

@@ -3,7 +3,7 @@ import * as px from "@proactive/extensions";
 import { document, parse } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 it("attr: binding to a string constant", expect => {
     const template = `<div x-attr-data-foo="true">empty</div>`;

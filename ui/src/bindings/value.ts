@@ -1,12 +1,11 @@
 import { Observable } from "rxjs";
 import { BaseHandler } from "./baseHandler";
 import { IBinding, INodeState, DataFlow } from "../interfaces";
-import { DomManager } from "../domManager";
 import { isRxObserver, nodeListToArray, tryParse } from "../utils";
 
 export class ValueBinding extends BaseHandler<string|number|boolean|string[]> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string) {
+        super(name);
         this.priority = 30;
         this.unique = true;
         this.dataFlow = DataFlow.Out | DataFlow.In;

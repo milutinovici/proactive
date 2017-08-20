@@ -2,7 +2,7 @@ import * as it from "tape";
 import * as px from "@proactive/extensions";
 import { document, parse } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 it("text: binding to a string constant", expect => {
     const template = `<span x-text="'foo'">invalid</span>`;

@@ -2,7 +2,7 @@ import * as it from "tape";
 import * as px from "@proactive/extensions";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 let focusInEvent = "focusin";
 let focusOutEvent = "focusout";

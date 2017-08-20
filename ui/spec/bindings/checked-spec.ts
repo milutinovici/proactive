@@ -4,7 +4,7 @@ import * as px from "@proactive/extensions";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 it("value: Triggering a click should toggle a checkbox's checked state before the event handler fires", expect => {
     // This isn't strictly to do with the checked binding, but if this doesn't work, the rest of the specs aren't meaningful

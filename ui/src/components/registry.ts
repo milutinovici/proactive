@@ -83,5 +83,3 @@ export class ComponentRegistry {
     }
 
 }
-
-export const components: ComponentRegistry = new ComponentRegistry();

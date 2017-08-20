@@ -1,22 +1,27 @@
 import { Observable } from "rxjs";
 import { BaseHandler } from "./baseHandler";
 import { DomManager } from "../domManager";
+import { HtmlEngine } from "../templateEngines";
 import { IBinding, INodeState, Parametricity } from "../interfaces";
 
 export class IfBinding extends BaseHandler<boolean> {
+    private readonly domManager: DomManager;
+    private readonly engine: HtmlEngine;
     protected inverse: boolean = false;
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string, domManager: DomManager, engine: HtmlEngine) {
+        super(name);
         this.priority = 40;
         this.parametricity = Parametricity.Forbidden;
         this.unique = true;
         // this.controlsDescendants = true;
+        this.domManager = domManager;
+        this.engine = engine;
     }
 
     public applyInternal(element: HTMLElement, binding: IBinding<boolean>, state: INodeState): void {
         const observable = binding.evaluate(state.context, this.dataFlow) as Observable<boolean>;
         const parent = element.parentElement as HTMLElement;
-        const placeholder: Comment = this.domManager.engine.createComment("if");
+        const placeholder: Comment = this.engine.createComment("if");
         parent.insertBefore(placeholder, element);
         let sibling = element.nextSibling;
 
@@ -62,8 +67,8 @@ export class IfBinding extends BaseHandler<boolean> {
 }
 
 export class IfNotBinding extends IfBinding {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string, domManager: DomManager, engine: HtmlEngine) {
+        super(name, domManager, engine);
 
         this.inverse = true;
     }

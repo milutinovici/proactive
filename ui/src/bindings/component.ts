@@ -4,20 +4,28 @@ import { isRxObservable } from "../utils";
 import { INodeState, IComponent, IDataContext, IBinding, Parametricity } from "../interfaces";
 import { DataContext } from "../nodeState";
 import { BaseHandler } from "./baseHandler";
+import { ComponentRegistry } from "../components/registry";
+import { HtmlEngine } from "../templateEngines";
 
 export class ComponentBinding<T> extends BaseHandler<string> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    private readonly domManager: DomManager;
+    private readonly registry: ComponentRegistry;
+    private readonly engine: HtmlEngine;
+    constructor(name: string, domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {
+        super(name);
         this.priority = 20;
         this.unique = true;
         this.controlsDescendants = true;
         this.parametricity = Parametricity.Forbidden;
+        this.domManager = domManager;
+        this.registry = registry;
+        this.engine = engine;
     }
 
     public applyInternal(element: HTMLElement, binding: IBinding<string>, state: INodeState): void {
         const component = this.getComponent(element, binding, state);
         // transclusion
-        const children = this.domManager.engine.createFragment();
+        const children = this.engine.createFragment();
         this.domManager.applyBindingsToDescendants(state.context, element);
         while (element.firstChild) {
             children.appendChild(element.removeChild(element.firstChild));
@@ -48,7 +56,7 @@ export class ComponentBinding<T> extends BaseHandler<string> {
                 if (comp.viewModel.value !== undefined && isRxObservable(comp.viewModel.value)) {
                     internal.add(comp.viewModel.value.subscribe(val => {
                         element["value"] = val;
-                        const evt = this.domManager.engine.createEvent("change");
+                        const evt = this.engine.createEvent("change");
                         element.dispatchEvent(evt);
                     }));
                 }
@@ -64,10 +72,10 @@ export class ComponentBinding<T> extends BaseHandler<string> {
     }
     protected getComponent(element: HTMLElement, binding: IBinding<string>, state: INodeState): Observable<IComponent> {
         const name = binding.evaluate(state.context, this.dataFlow) as Observable<string>;
-        const descriptor = name.mergeMap(n => this.domManager.components.load(n, this.domManager.engine));
+        const descriptor = name.mergeMap(n => this.registry.load(n, this.engine));
         const params = this.getParams(state);
         const vm = this.getVm(state);
-        return descriptor.map(desc => <IComponent> { viewModel: this.domManager.components.initialize(desc, params, vm), template: desc.template });
+        return descriptor.map(desc => <IComponent> { viewModel: this.registry.initialize(desc, params, vm), template: desc.template });
     }
     protected applyTemplate(element: HTMLElement, childContext: IDataContext, component: IComponent, children: DocumentFragment) {
         if (component.template) {

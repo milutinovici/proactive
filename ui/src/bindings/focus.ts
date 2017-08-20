@@ -1,12 +1,11 @@
 import { Observable, Observer, Subject, Subscription } from "rxjs";
-import { DomManager } from "../domManager";
 import { SimpleHandler } from "./baseHandler";
 import { DataFlow } from "../interfaces";
 import { isRxObserver } from "../utils";
 
 export class FocusBinding extends SimpleHandler<boolean> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string) {
+        super(name);
         this.unique = true;
         this.dataFlow = DataFlow.Out | DataFlow.In;
         this.priority = -1;

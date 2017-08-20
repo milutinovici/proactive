@@ -3,7 +3,7 @@ import * as px from "@proactive/extensions";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 it("if: binding to a boolean constant (true) using static template", expect => {
     const template = `<div><span x-if="true">foo</span></div>`;

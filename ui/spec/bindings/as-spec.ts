@@ -3,7 +3,7 @@ import * as px from "@proactive/extensions";
 import { document, parse } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 it("as: bound to a non-observable value", expect => {
     const template = `<div x-as-child="childModel"><span x-text="child.foo">invalid</span></div>`;

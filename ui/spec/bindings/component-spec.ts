@@ -4,7 +4,7 @@ import { IDataContext } from "../../src/interfaces";
 import { document, parse, fragment } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 it("component: Loads a component using simple string options", expect => {
     const str = `<div x-component="'test-component'"></div>`;

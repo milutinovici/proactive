@@ -1,11 +1,14 @@
 import { IBindingHandler, IBinding } from "./interfaces";
 import { Binding } from "./binding";
 import { isElement } from "./utils";
-import { components } from "./components/registry";
+import { ComponentRegistry } from "./components/registry";
 import { exception } from "./exceptionHandlers";
 export class BindingProvider {
+    public static readonly PREFIX = "x";
     private readonly handlers: Map<string, IBindingHandler>;
-    constructor() {
+    private readonly components: ComponentRegistry;
+    constructor(components: ComponentRegistry) {
+        this.components = components;
         this.handlers = new Map<string, IBindingHandler>();
     }
     public registerHandler(handler: IBindingHandler) {
@@ -23,7 +26,7 @@ export class BindingProvider {
         const tag = element.tagName;
         const bindings = element.hasAttributes() ? this.getBindingAttributes(element) : [];
         // check if element is custom element (component)
-        if (components.registered(tag)) {
+        if (this.components.registered(tag)) {
             // when a component is referenced as custom-element, apply a virtual 'component' binding
             bindings.push(new Binding<string>(this.handlers.get("component") as IBindingHandler, `'${tag}'`));
         }
@@ -36,7 +39,7 @@ export class BindingProvider {
         for (let i = 0; i < element.attributes.length; i++) {
             const attribute = element.attributes[i];
             const array = attribute.name.split("-");
-            if (array[0] === "x") {
+            if (array[0] === BindingProvider.PREFIX) {
                 array.shift();
                 const name = array.shift() as string;
                 const handler = this.handlers.get(name);

@@ -24,8 +24,8 @@ const keysByCode = {
 };
 
 export class KeyPressBinding extends SimpleHandler<KeyboardEvent> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string) {
+        super(name);
         this.dataFlow = DataFlow.In;
         this.parametricity = Parametricity.Required;
     }

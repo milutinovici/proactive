@@ -2,7 +2,7 @@ import * as it from "tape";
 import * as px from "@proactive/extensions";
 import { document, parse, toArray, range } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 it("for: binding to a standard array", expect => {
     const template = `<ul><li x-for-number="array" x-text="number"></li></ul>`;

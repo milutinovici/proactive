@@ -3,7 +3,7 @@ import * as Rx from "rxjs";
 import * as px from "@proactive/extensions";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 it("value: Should treat null values as empty strings", expect => {
     const template = `<input type="text" x-value="myProp" />`;

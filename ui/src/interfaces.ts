@@ -72,3 +72,6 @@ export interface IComponent {
     readonly template: DocumentFragment;
     readonly viewModel?: IViewModel;
 }
+export interface IConfiguration {
+    document?: Document;
+}

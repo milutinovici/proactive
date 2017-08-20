@@ -1,5 +1,4 @@
 import { Observable, Observer, Subscription } from "rxjs";
-import { DomManager } from "../domManager";
 import { IBindingHandler, INodeState, IBinding, DataFlow, Parametricity } from "../interfaces";
 import { exception } from "../exceptionHandlers";
 
@@ -9,16 +8,14 @@ import { exception } from "../exceptionHandlers";
  */
 export abstract class BaseHandler<T> implements IBindingHandler {
     public readonly name: string;
-    protected readonly domManager: DomManager;
     public priority = 0;
     public dataFlow = DataFlow.Out;
     public controlsDescendants = false;
     public unique = false;
     public parametricity = Parametricity.Optional;
 
-    constructor(name: string, domManager: DomManager) {
+    constructor(name: string) {
         this.name = name;
-        this.domManager = domManager;
     }
 
     public applyBinding(node: Element, binding: IBinding<T>, state: INodeState) {

@@ -1,13 +1,12 @@
 import { Observable, Observer, Subscription } from "rxjs";
 import { DataFlow, Parametricity } from "../interfaces";
-import { DomManager } from "../domManager";
 import { SimpleHandler } from "./baseHandler";
 import { isRxObserver } from "../utils";
 import { exception } from "../exceptionHandlers";
 
 export class EventBinding extends SimpleHandler<Event> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string) {
+        super(name);
         this.dataFlow = DataFlow.In;
         this.parametricity = Parametricity.Required;
     }

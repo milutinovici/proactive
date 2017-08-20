@@ -1,11 +1,10 @@
 import { Observable, Subscription } from "rxjs";
-import { DomManager } from "../domManager";
 import { SimpleHandler } from "./baseHandler";
 import { Parametricity } from "../interfaces";
 
 export class CssBinding extends SimpleHandler<boolean> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string) {
+        super(name);
         this.parametricity = Parametricity.Required;
     }
 
@@ -21,8 +20,8 @@ export class CssBinding extends SimpleHandler<boolean> {
 }
 
 export class AttrBinding extends SimpleHandler<string | number | boolean> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string) {
+        super(name);
         this.parametricity = Parametricity.Required;
         this.priority = 5;
     }
@@ -43,8 +42,8 @@ export class AttrBinding extends SimpleHandler<string | number | boolean> {
 }
 
 export class StyleBinding extends SimpleHandler<string | number | boolean> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string) {
+        super(name);
         this.parametricity = Parametricity.Required;
     }
 
@@ -61,8 +60,8 @@ export class StyleBinding extends SimpleHandler<string | number | boolean> {
 }
 
 export class HtmlBinding extends SimpleHandler<string> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    constructor(name: string) {
+        super(name);
         this.controlsDescendants = true;
         this.parametricity = Parametricity.Forbidden;
         this.unique = true;

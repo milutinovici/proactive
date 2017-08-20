@@ -4,11 +4,13 @@ import { INodeState, IBinding } from "../interfaces";
 import { DomManager } from "../domManager";
 
 export class AsBinding<T> extends BaseHandler<T> {
+    private readonly domManager: DomManager;
     constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+        super(name);
         this.priority = 50;
         // this.parametricity = Parametricity.Required;
         // this.controlsDescendants = true;
+        this.domManager = domManager;
     }
 
     public applyInternal(element: HTMLElement, binding: IBinding<T>, state: INodeState) {

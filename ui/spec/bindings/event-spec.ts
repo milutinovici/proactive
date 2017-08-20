@@ -3,7 +3,7 @@ import * as Rx from "rxjs";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
-const ui = new ProactiveUI(document);
+const ui = new ProactiveUI({ document });
 
 it("event: binds a single event to a handler function", expect => {
     const template = `<button x-on-click="clickHandler">Click me</button>`;

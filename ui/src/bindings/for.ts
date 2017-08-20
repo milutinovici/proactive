@@ -2,15 +2,20 @@ import { Observable } from "rxjs";
 import { BaseHandler } from "./baseHandler";
 import { DomManager } from "../domManager";
 import { NodeState } from "../nodeState";
+import { HtmlEngine } from "../templateEngines";
 import { IBinding, INodeState, Parametricity } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
 export class ForBinding<T> extends BaseHandler<T[]> {
-    constructor(name: string, domManager: DomManager) {
-        super(name, domManager);
+    private readonly domManager: DomManager;
+    private readonly engine: HtmlEngine;
+    constructor(name: string, domManager: DomManager, engine: HtmlEngine) {
+        super(name);
         this.priority = 50;
         this.unique = true;
         this.parametricity = Parametricity.Required;
+        this.domManager = domManager;
+        this.engine = engine;
     }
 
     public applyInternal(node: Element, binding: IBinding<T[]>, state: INodeState): void {
@@ -19,7 +24,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
         const itemName = parameters[0];
         const indexName = parameters[1];
         const parent = node.parentElement as HTMLElement;
-        const placeholder: Comment = this.domManager.engine.createComment(`for ${binding.text}`);
+        const placeholder: Comment = this.engine.createComment(`for ${binding.text}`);
         this.domManager.nodeStateManager.set(placeholder, state);
         // backup inner HTML
         parent.insertBefore(placeholder, node);
@@ -128,7 +133,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
     }
 
     private mergeConsecutiveRows(additions: Delta<T>[], template: Element, start: number): Merger {
-        let fragment = this.domManager.engine.createFragment();
+        let fragment = this.engine.createFragment();
         for (let i = start; i < additions.length; i++) {
             fragment.appendChild(template.cloneNode(true));
             if (additions[i - 1] !== undefined && additions[i].index - additions[i - 1].index !== 1) {
