@@ -19,15 +19,16 @@ export abstract class BaseHandler<T> implements IBindingHandler {
     }
 
     public applyBinding(node: Element, binding: IBinding<T>, state: INodeState) {
-        // const bindings = state.getBindings(this.name) as IBinding<T>[];
-        // if (this.unique && bindings.length > 1) {
-        //     exception.next(new Error(`more than 1 ${this.name} binding on element ${node}`));
-        // }
-
+        if (this.unique && state.getBindings(this.name).length > 1) {
+            exception.next(new Error(`more than 1 ${this.name} binding on element ${node}`));
+            return;
+        }
         if (this.parametricity === Parametricity.Forbidden && binding.parameter !== undefined) {
             exception.next(new Error(`binding "${this.name}" with expression "${binding.text}" on element ${node} can't have parameters`));
+            return;
         } else if (this.parametricity === Parametricity.Required && binding.parameter === undefined) {
             exception.next(new Error(`binding "${this.name}" with expression "${binding.text}" on element ${node} must have a parameter`));
+            return;
         }
         this.applyInternal(node, binding, state);
     }
