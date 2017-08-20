@@ -25,7 +25,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
         const indexName = parameters[1];
         const parent = node.parentElement as HTMLElement;
         const placeholder: Comment = this.engine.createComment(`for ${binding.text}`);
-        this.domManager.nodeStateManager.set(placeholder, state);
+        this.domManager.setState(placeholder, state);
         // backup inner HTML
         parent.insertBefore(placeholder, node);
         let sibling = node.nextSibling;
@@ -78,12 +78,12 @@ export class ForBinding<T> extends BaseHandler<T[]> {
                                  new NodeState(state.context.extend(itemName, additions[i].value, indexName, additions[i].index), otherBindings.map(x => x.clone())) :
                                  new NodeState(state.context.extend(itemName, additions[i].value), otherBindings.map(x => x.clone()));
 
-                this.domManager.nodeStateManager.set(parent.childNodes[i + start + additions[current].index], childState);
+                this.domManager.setState(parent.childNodes[i + start + additions[current].index], childState);
                 this.domManager.applyBindingsRecursive(childState.context, parent.childNodes[i + start + additions[current].index]);
             }
             if (indexName) {
                 for (let i = merger.stopped + 1; i < newLength; i++) {
-                    let siblingState = this.domManager.nodeStateManager.get(parent.childNodes[start + i]);
+                    let siblingState = this.domManager.getState(parent.childNodes[start + i]);
                     if (siblingState !== undefined) {
                         siblingState.context[indexName].next(siblingState.context[indexName].getValue() + 1);
                     }
@@ -103,7 +103,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
 
             if (indexName) {
                 for (let i = deletion.index; i < newLength; i++) {
-                    let siblingState  = this.domManager.nodeStateManager.get(parent.childNodes[start + i]);
+                    let siblingState  = this.domManager.getState(parent.childNodes[start + i]);
                     if (siblingState !== undefined) {
                         siblingState.context[indexName].next(siblingState.context[indexName].getValue() - 1);
                     }
@@ -119,11 +119,11 @@ export class ForBinding<T> extends BaseHandler<T[]> {
             let before = parent.childNodes[start + move.moved];
             parent.insertBefore(node, before);
             if (indexName) {
-                let state = this.domManager.nodeStateManager.get(node) as INodeState;
+                let state = this.domManager.getState(node) as INodeState;
                 state.context[indexName].next(move.moved as number);
 
                 for (let i = Math.min(move.index, move.moved as number); i < Math.max(move.index, move.moved as number); i++) {
-                    let siblingState  = this.domManager.nodeStateManager.get(parent.childNodes[start + i]);
+                    let siblingState  = this.domManager.getState(parent.childNodes[start + i]);
                     if (siblingState !== undefined) {
                         siblingState.context[indexName].next(siblingState.context[indexName].getValue() + 1);
                     }

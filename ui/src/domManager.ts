@@ -1,18 +1,17 @@
-import { NodeStateManager, DataContext, NodeState } from "./nodeState";
+import { DataContext, NodeState } from "./nodeState";
 import { BindingProvider } from "./bindingProvider";
 import { isElement, isTextNode, isHandlebarExpression } from "./utils";
-import { IDataContext, IViewModel } from "./interfaces";
+import { INodeState, IDataContext, IViewModel } from "./interfaces";
 
 export class DomManager {
-    public readonly nodeStateManager: NodeStateManager;
+    private readonly nodeStateManager: WeakMap<Node, INodeState>;
     private readonly bindingProvider: BindingProvider;
 
     private readonly ignore = ["SCRIPT", "TEXTAREA", "TEMPLATE"];
 
     constructor(bindingProvider: BindingProvider) {
+        this.nodeStateManager = new WeakMap<Node, INodeState>();
         this.bindingProvider = bindingProvider;
-
-        this.nodeStateManager = new NodeStateManager();
     }
 
     public applyBindings(model: IViewModel, rootNode: Element): void {
@@ -45,7 +44,7 @@ export class DomManager {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
                 this.cleanNodeRecursive(node.childNodes[i]);
-                this.nodeStateManager.clear(node.childNodes[i]);
+                this.clear(node.childNodes[i]);
             }
         }
     }
@@ -60,6 +59,24 @@ export class DomManager {
             }
         }
     }
+    public setState(node: Node, state: INodeState): void {
+        this.nodeStateManager.set(node, state);
+    }
+
+    public getState(node: Node): INodeState | undefined {
+        return this.nodeStateManager.get(node);
+    }
+    public getDataContext(node: Node): IDataContext | undefined {
+        let currentNode: Node | null = node;
+        while (currentNode) {
+            let state = this.nodeStateManager.get(currentNode);
+            if (state !== undefined) {
+                return state.context;
+            }
+            currentNode = currentNode.parentNode;
+        }
+        return undefined;
+    }
     private cleanNodeRecursive(node: Node): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
@@ -67,9 +84,22 @@ export class DomManager {
             }
         }
         // clear parent after childs
-        this.nodeStateManager.clear(node);
+        this.clear(node);
     }
+    private clear(node: Node) {
+        const state = this.nodeStateManager.get(node);
 
+        if (state != null) {
+            if (state.bindings != null) {
+                state.bindings.forEach(x => x.deactivate());
+            }
+            delete state.context;
+            // delete state itself
+            this.nodeStateManager.delete(node);
+        }
+        // support external per-node cleanup
+        // env.cleanExternalData(node);
+    }
     private applyBindingsInternal(ctx: IDataContext, el: Node): boolean {
         // get or create elment-state
         let state = this.nodeStateManager.get(el);

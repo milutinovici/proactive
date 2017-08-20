@@ -54,7 +54,7 @@ export class ProactiveUI {
     }
 
     public contextFor(node: Element): IDataContext | undefined {
-        const nodeState = this.domManager.nodeStateManager.get(node);
+        const nodeState = this.domManager.getState(node);
         if (nodeState !== undefined) {
             return nodeState.context;
         }
@@ -62,7 +62,7 @@ export class ProactiveUI {
     }
 
     public dataFor(node: Element): any {
-        return this.domManager.nodeStateManager.getDataContext(node);
+        return this.domManager.getDataContext(node);
     }
 
     private registerCoreBindings(domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {

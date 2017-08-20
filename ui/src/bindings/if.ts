@@ -25,7 +25,7 @@ export class IfBinding extends BaseHandler<boolean> {
         parent.insertBefore(placeholder, element);
         let sibling = element.nextSibling;
 
-        this.domManager.nodeStateManager.set(placeholder, state);
+        this.domManager.setState(placeholder, state);
         parent.removeChild(element);
 
         const visibility = observable.map(x => this.inverse ? !x : !!x).distinctUntilChanged();
