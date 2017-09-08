@@ -6,6 +6,12 @@ import { exception } from "../exceptionHandlers";
 export class ComponentRegistry {
 
     private readonly components = new Map<string, IComponentDescriptor | string>();
+    private readonly engine: HtmlEngine;
+    private readonly router?: object;
+    constructor(engine: HtmlEngine, router?: object) {
+        this.engine = engine;
+        this.router = router;
+    }
 
     // component is either a descriptor or a require string
     public register(name: string, component: IComponentDescriptor | string) {
@@ -23,10 +29,10 @@ export class ComponentRegistry {
         return this.components.has(name);
     }
 
-    public load(name: string, html: HtmlEngine): Rx.Observable<IComponentDescriptor> {
+    public load(name: string): Rx.Observable<IComponentDescriptor> {
         name = name.toUpperCase();
         let result = this.getDescriptor(name);
-        result = result.map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template, html), viewModel: x.viewModel });
+        result = result.map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel });
         result.do(x => this.components.set(name, x)); // cache descriptor
         return result;
     }
@@ -50,6 +56,7 @@ export class ComponentRegistry {
         if (isFunction(vm)) {
             let model: IViewModel | undefined;
             try {
+                params["$router"] = this.router;
                 model = new vm(params);
             } catch (e) {
                 exception.next(new Error(`Failed in constructor of component "${descriptor.name}". ${e.message}`));
@@ -59,23 +66,23 @@ export class ComponentRegistry {
         return vm;
     }
 
-    private compileTemplate(template: DocumentFragment | string, html: HtmlEngine): DocumentFragment {
+    private compileTemplate(template: DocumentFragment | string): DocumentFragment {
         if (typeof template === "string") {
             if (template[0] === "#") {
-                const tmp = html.getElementById(template.slice(1, template.length));
+                const tmp = this.engine.getElementById(template.slice(1, template.length));
                 if (tmp !== null && isElement(tmp) && tmp["content"] !== undefined) { // template
                     return tmp["content"];
                 } else if (tmp !== null) {
-                    return html.nodeListToFragment(tmp.childNodes);
+                    return this.engine.nodeListToFragment(tmp.childNodes);
                 } else {
                     throw Error(`No template with id: "${template}" found`);
                 }
             } else {
-                return html.parse(template);
+                return this.engine.parse(template);
             }
         } else if (Array.isArray(template)) {
-            return html.nodeListToFragment(template as any);
-        } else if (html.isFragment(template)) {
+            return this.engine.nodeListToFragment(template as any);
+        } else if (this.engine.isFragment(template)) {
             return template;
         } else {
             throw Error("invalid template descriptor");

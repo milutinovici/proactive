@@ -17,14 +17,14 @@ import { KeyPressBinding } from "./bindings/keypress";
 import { FocusBinding } from "./bindings/focus";
 
 export class ProactiveUI {
-    private readonly bindingProvider: BindingProvider;
+    public readonly bindingProvider: BindingProvider;
     public readonly components: ComponentRegistry;
     public readonly domManager: DomManager;
     public readonly engine: HtmlEngine;
 
     constructor(config: IConfiguration = {}) {
         this.engine = new HtmlEngine(config.document || document);
-        this.components = new ComponentRegistry();
+        this.components = new ComponentRegistry(this.engine, config.router);
         this.bindingProvider = new BindingProvider(this.components);
         this.domManager = new DomManager(this.bindingProvider);
         this.registerCoreBindings(this.domManager, this.engine, this.components);

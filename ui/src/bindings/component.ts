@@ -9,21 +9,25 @@ import { HtmlEngine } from "../templateEngines";
 
 export class ComponentBinding<T> extends BaseHandler<string> {
     private readonly domManager: DomManager;
-    private readonly registry: ComponentRegistry;
+    protected readonly registry: ComponentRegistry;
     private readonly engine: HtmlEngine;
     constructor(name: string, domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {
         super(name);
         this.priority = 20;
         this.unique = true;
         this.controlsDescendants = true;
-        this.parametricity = Parametricity.Forbidden;
         this.domManager = domManager;
         this.registry = registry;
         this.engine = engine;
     }
 
-    public applyInternal(element: HTMLElement, binding: IBinding<string>, state: INodeState): void {
-        const component = this.getComponent(element, binding, state);
+    public applyInternal(element: HTMLElement, binding: IBinding<string>, state: INodeState, shadowDom = true): void {
+        const host = element;
+        if (element.attachShadow !== undefined && shadowDom) {
+            element.attachShadow({ mode: "open" });
+            element = element.shadowRoot as any;
+        }
+        const component = this.getComponent(binding, state);
         // transclusion
         const children = this.engine.createFragment();
         this.domManager.applyBindingsToDescendants(state.context, element);
@@ -50,14 +54,14 @@ export class ComponentBinding<T> extends BaseHandler<string> {
 
                 // wire custom events
                 if (comp.viewModel.emitter !== undefined && isRxObservable(comp.viewModel.emitter)) {
-                    internal.add(comp.viewModel.emitter.subscribe(evt => element.dispatchEvent(evt)));
+                    internal.add(comp.viewModel.emitter.subscribe(evt => host.dispatchEvent(evt)));
                 }
                 // apply custom component value
                 if (comp.viewModel.value !== undefined && isRxObservable(comp.viewModel.value)) {
                     internal.add(comp.viewModel.value.subscribe(val => {
-                        element["value"] = val;
+                        host["value"] = val;
                         const evt = this.engine.createEvent("change");
-                        element.dispatchEvent(evt);
+                        host.dispatchEvent(evt);
                     }));
                 }
                 // auto-dispose view-model
@@ -70,9 +74,9 @@ export class ComponentBinding<T> extends BaseHandler<string> {
         }));
         binding.cleanup.add(doCleanup);
     }
-    protected getComponent(element: HTMLElement, binding: IBinding<string>, state: INodeState): Observable<IComponent> {
+    protected getComponent(binding: IBinding<string>, state: INodeState): Observable<IComponent> {
         const name = binding.evaluate(state.context, this.dataFlow) as Observable<string>;
-        const descriptor = name.mergeMap(n => this.registry.load(n, this.engine));
+        const descriptor = name.mergeMap(n => this.registry.load(n));
         const params = this.getParams(state);
         const vm = this.getVm(state);
         return descriptor.map(desc => <IComponent> { viewModel: this.registry.initialize(desc, params, vm), template: desc.template });

@@ -74,4 +74,5 @@ export interface IComponent {
 }
 export interface IConfiguration {
     document?: Document;
+    router?: object;
 }
