@@ -1,11 +1,10 @@
-import * as Rx from "rxjs";
+import { Observable, Observer, BehaviorSubject, Symbol, Subscriber, Subject } from "rxjs";
 import { ComputedArray } from "./computed-array";
-import { Func, Action } from "./interfaces";
 
-export class ArrayImpl<T> extends ComputedArray<T> implements Rx.Observer<T[]> {
-    protected readonly source: Rx.BehaviorSubject<T[]>;
+export class ObservableArray<T> extends ComputedArray<T> implements Observer<T[]> {
+    protected readonly source: BehaviorSubject<T[]>;
     constructor(initial: T[] = []) {
-        super(new Rx.BehaviorSubject<T[]>(initial));
+        super(new BehaviorSubject<T[]>(initial));
     }
 
     public next(value: T[]) {
@@ -17,40 +16,40 @@ export class ArrayImpl<T> extends ComputedArray<T> implements Rx.Observer<T[]> {
     public complete() {
         this.source.complete();
     }
-    public [Rx.Symbol.rxSubscriber]() {
-        return new Rx.Subscriber<T[]>(this);
+    public [Symbol.rxSubscriber as symbol]() {
+        return new Subscriber<T[]>(this);
     }
     public getValue(): T[] {
         return this.source.getValue();
     }
-    public push(...items: T[]): void {
+    public push(...items: T[]): void { // add contigious
         if (items === null || items === undefined) {
             throw Error("items null/undefined");
         }
         const old = this.source.getValue();
         this.next(old.concat(items));
     }
-    public pop(): T {
+    public pop(): T { // remove 1
         const old = this.source.getValue();
         const last = old[old.length - 1];
         this.next(old.slice(0, old.length - 1));
         return last;
     }
-    public unshift(...items: T[]): void {
+    public unshift(...items: T[]): void { // add contigious, move contigious
         if (items === null || items === undefined) {
             throw Error("items null/undefined");
         }
         const old = this.source.getValue();
         this.next(items.concat(old));
     }
-    public shift(): T {
+    public shift(): T { // remove 1, move contigious
         const old = this.source.getValue();
         const first = old[0];
         const retained = old.slice(1, old.length);
         this.next(retained);
         return first;
     }
-    public remove(fn: (element: T) => boolean): T[] {
+    public remove(fn: (element: T) => boolean): T[] { // remove random, move random
         const old = this.source.getValue();
         const removed: T[] = [];
         const retained: T[] = [];
@@ -64,16 +63,16 @@ export class ArrayImpl<T> extends ComputedArray<T> implements Rx.Observer<T[]> {
         this.next(retained);
         return removed;
     }
-    public reverse(): void {
+    public reverse(): void { // move contigious
         const old = this.source.getValue().slice();
         this.next(old.reverse());
     }
-    public sort(fn: (a: T, b: T) => number): void {
+    public sort(fn: (a: T, b: T) => number): void { // move opaque
         const old = this.source.getValue();
         const sorted: T[] = old.slice().sort(fn);
         this.next(sorted);
     }
-    public splice(start: number, deleteCount: number): T[] {
+    public splice(start: number, deleteCount: number): T[] { // remove contigious, move contigious
         const old = this.source.getValue();
         const retained1 = old.slice(0, start);
         const retained2 = old.slice(start + deleteCount, old.length);
@@ -81,12 +80,11 @@ export class ArrayImpl<T> extends ComputedArray<T> implements Rx.Observer<T[]> {
         this.next(retained1.concat(retained2));
         return removed;
     }
-    public clear(): T[] {
+    public clear(): T[] {  // remove contigious
         const old = this.source.getValue();
         this.next(<T[]> []);
         return old;
     }
 
 }
-export interface ObservableArray<T> extends ArrayImpl<T>, Func<T[]>, Action<T[]> {
-}
+

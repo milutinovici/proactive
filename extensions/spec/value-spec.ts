@@ -100,13 +100,13 @@ it("multiple subscribers receive notifications, initial value, then subsequent",
 it("to Computed works", expect => {
     const val = px.value<number>(3);
     const max = val.scan((x, y) => x > y ? x : y, val()).toState(0);
-    expect.equal(max(), 3);
+    expect.equal(max.getValue(), 3);
     val(1);
-    expect.equal(max(), 3);
+    expect.equal(max.getValue(), 3);
     val(5);
-    expect.equal(max(), 5);
+    expect.equal(max.getValue(), 5);
     val(2);
-    expect.equal(max(), 5);
+    expect.equal(max.getValue(), 5);
     expect.end();
 });
 
@@ -115,18 +115,18 @@ it("computed chaining works", expect => {
     const max = val.scan((x, y) => x > y ? x : y, val()).toState(0);
     const evenMax = max.filter(x => x % 2 === 0).toState(0);
     val(1);
-    expect.equal(evenMax(), 0);
+    expect.equal(evenMax.getValue(), 0);
     val(6);
-    expect.equal(evenMax(), 6);
+    expect.equal(evenMax.getValue(), 6);
     val(9);
-    expect.equal(evenMax(), 6);
+    expect.equal(evenMax.getValue(), 6);
     expect.end();
 });
 it("combine 2 values", expect => {
     const val1 = px.value<number>(4);
     const val2 = px.value<number>(2);
     const ratio = val1.combineLatest(val2, (p1: number, p2: number) => p1 / p2).toState(0);
-    expect.equal(ratio(), 2);
+    expect.equal(ratio.getValue(), 2);
     expect.end();
 });
 it("value is also an observer", expect => {

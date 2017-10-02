@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { ObservableState } from "./interfaces";
+import { ObservableState } from "./state";
 import { state } from "./extensions";
 
 declare module "rxjs/Observable" {

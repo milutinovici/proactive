@@ -1,23 +1,29 @@
 import { Observable, BehaviorSubject } from "rxjs";
 import "./observable-extensions";
-import { ObservableValue, ObservableState } from "./interfaces";
-import { ObservableStateImpl } from "./state";
-import { ArrayImpl, ObservableArray } from "./array";
+import { ObservableState } from "./state";
+import { ObservableArray } from "./array";
 import { ComputedArray } from "./computed-array";
 
-export function state<T>(source: Observable<T>, initial: T): ObservableState<T> {
-    if ("call" in source && "source" in source) {
-        return <ObservableState<T>> source;
-    }
-    const observable = new ObservableStateImpl<T>(source, initial);
-    return createFunction(observable) as ObservableState<T>;
+export interface Func<T> {
+    (): T;
+}
+export interface Action<T> {
+    (val: T): void;
 }
 
-export function value<T>(initial: T): ObservableValue<T> {
-    return createFunction(new BehaviorSubject(initial)) as ObservableValue<T>;
+export function state<T>(source: Observable<T>, initial: T): ObservableState<T> & Func<T> {
+    if ("call" in source && "source" in source) {
+        return source as any;
+    }
+    const observable = source instanceof ObservableState ? source : new ObservableState<T>(source, initial);
+    return createFunction(observable) as ObservableState<T> & Func<T>;
 }
-export function array<T>(initial: T[] = []): ObservableArray<T> {
-    return createFunction(new ArrayImpl<T>(initial)) as ObservableArray<T>;
+
+export function value<T>(initial: T): BehaviorSubject<T> & Func<T> & Action<T> {
+    return createFunction(new BehaviorSubject(initial)) as BehaviorSubject<T> & Func<T> & Action<T>;
+}
+export function array<T>(initial: T[] = []): ObservableArray<T> & Func<T> & Action<T> {
+    return createFunction(new ObservableArray<T>(initial)) as ObservableArray<T> & Func<T> & Action<T>;
 }
 export function whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
     return ComputedArray._whenAny(observables);
@@ -39,4 +45,4 @@ function createFunction<T>(observable: Observable<T>): Observable<T> {
     return accessor;
 }
 
-export { ObservableState, ObservableValue, ObservableArray, ComputedArray };
+export { ObservableState, ObservableArray, ComputedArray };

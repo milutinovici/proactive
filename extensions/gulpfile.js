@@ -19,7 +19,7 @@ gulp.task("build",  () => {
 });
  
 gulp.task("test", () => {
-    const result = gulp.src("./lib/spec/*.js")
+    const result = gulp.src("./lib/spec/spec.js")
                        .pipe(tape({ reporter: spec() }));
     }
 );
