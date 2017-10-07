@@ -2,11 +2,13 @@
 
 Define a component
 ```typescript
+import { Observable } from "rxjs";
 class MyComponent {
-    greeting: string;
+    greeting: Observable<string>;
     constructor(props) {
-        this.greeting = props.greeting;
+        this.greeting = Observable.interval(500).map(x => props.greeting + Array(x + 1).join("!"));
     }
+
 }
 export const template = `<span x-text="greeting"></span>`
 export const viewmodel = MyComponent
@@ -25,7 +27,7 @@ index.html
 <!DOCTYPE html>
 <html lang="en">
     <body>
-        <my-component x-attr-greeting="'Hello world!!'"></my-component>
+        <my-component x-attr-greeting="'Hello world'"></my-component>
         <script src="./startup.js"></script>
     </body>
 </html>
