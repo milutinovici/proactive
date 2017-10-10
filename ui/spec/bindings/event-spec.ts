@@ -211,7 +211,7 @@ it("event: binds multiple keys to handler functions", expect => {
 });
 
 it("event: event delegation works", expect => {
-    const template = `<ul x-on-click-id="console.log">
+    const template = `<ul x-on-click-a="select">
                         <li><a id="1">Click to select</a></li>
                         <li><a id="2">Click to select</a></li>
                       </ul>`;
@@ -219,12 +219,14 @@ it("event: event delegation works", expect => {
 
     const viewModel = {
         selected: new Rx.BehaviorSubject(0),
+        select: function(e: Event) { this.selected.next(parseInt(e.target["id"])); },
     };
 
     expect.doesNotThrow(() => ui.applyBindings(viewModel, el));
     triggerEvent(el.children[0].children[0], "click");
+    expect.equal(viewModel.selected.getValue(), 1);
     triggerEvent(el.children[1].children[0], "click");
-    expect.fail("it doesn't actually work");
+    expect.equal(viewModel.selected.getValue(), 2);
     expect.end();
 });
 

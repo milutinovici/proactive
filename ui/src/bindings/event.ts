@@ -12,11 +12,17 @@ export class EventBinding extends SimpleHandler<Event> {
     }
 
     public apply(el: Element, observer: Observer<Event>, parameter: string): Subscription {
+        const parameters = parameter.split("-");
+        const selector = parameters.slice(1).join("-");
         if (!isRxObserver(observer)) {
             exception.next(new Error(`Observer or function must be supplied for ${this.name} binding on ${el}`));
             return Subscription.EMPTY;
         }
-        const events = Observable.fromEvent<Event>(el, parameter);
+        let events = Observable.fromEvent<Event>(el, parameters[0]);
+        if (selector !== "") {
+            events = events.filter(x => (<Element> x.target).matches(selector));
+        }
         return events.subscribe(observer);
     }
+
 }
