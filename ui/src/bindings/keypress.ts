@@ -30,11 +30,6 @@ export class KeyPressBinding extends SimpleHandler<KeyboardEvent> {
     }
 
     public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription {
-            if (!isRxObserver(observer)) {
-                exception.next(new Error(`must supply function or observer for ${this.name} binding on ${el.tagName}`));
-                return Subscription.EMPTY;
-            }
-
             const obs = Observable.fromEvent<KeyboardEvent>(el, "keydown")
                 .filter((x: KeyboardEvent) => !x.repeat)
                 .publish()
