@@ -1,7 +1,7 @@
 import { IBindingHandler, IBinding } from "./interfaces";
 import { Binding } from "./binding";
 import { isElement } from "./utils";
-import { ComponentRegistry } from "./components/registry";
+import { ComponentRegistry } from "./componentRegistry";
 import { exception } from "./exceptionHandlers";
 export class BindingProvider {
     public static readonly PREFIX = "x";

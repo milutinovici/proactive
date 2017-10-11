@@ -10,5 +10,4 @@ import "./bindings/event-spec";
 import "./bindings/if-spec";
 import "./bindings/value-spec";
 import "./bindings/checked-spec";
-import "./bindings/as-spec";
 import "./bindings/for-spec";

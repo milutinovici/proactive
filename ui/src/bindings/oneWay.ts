@@ -59,20 +59,3 @@ export class StyleBinding extends SimpleHandler<string | number | boolean> {
     }
 }
 
-export class HtmlBinding extends SimpleHandler<string> {
-    constructor(name: string) {
-        super(name);
-        this.controlsDescendants = true;
-        this.parametricity = Parametricity.Forbidden;
-        this.unique = true;
-    }
-
-    public apply(el: HTMLElement, observable: Observable<string>): Subscription {
-        return observable.subscribe(value => {
-            if ((value === null) || (value === undefined)) {
-                value = "";
-            }
-            el.innerHTML = value;
-        });
-    }
-}

@@ -1,20 +1,18 @@
 import { Observable } from "rxjs";
-import { ComponentRegistry } from "./components/registry";
+import { ComponentRegistry } from "./componentRegistry";
 import { DomManager } from "./domManager";
 import { HtmlEngine } from "./templateEngines";
 import { BindingProvider } from "./bindingProvider";
 import { IDataContext, IConfiguration } from "./interfaces";
 
 import { EventBinding } from "./bindings/event";
-import { IfBinding, IfNotBinding } from "./bindings/if";
+import { IfBinding } from "./bindings/if";
 import { TextBinding } from "./bindings/text";
-import { AttrBinding, CssBinding, StyleBinding, HtmlBinding } from "./bindings/oneWay";
+import { AttrBinding, CssBinding, StyleBinding } from "./bindings/oneWay";
 import { ForBinding } from "./bindings/for";
-import { AsBinding } from "./bindings/as";
 import { ValueBinding } from "./bindings/value";
 import { ComponentBinding } from "./bindings/component";
 import { KeyPressBinding } from "./bindings/keypress";
-import { FocusBinding } from "./bindings/focus";
 
 export class ProactiveUI {
     public readonly bindingProvider: BindingProvider;
@@ -66,20 +64,18 @@ export class ProactiveUI {
     }
 
     private registerCoreBindings(domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {
-        this.bindingProvider.registerHandler(new CssBinding("css"));
+        // out
+        this.bindingProvider.registerHandler(new TextBinding("text"));
         this.bindingProvider.registerHandler(new AttrBinding("attr"));
+        this.bindingProvider.registerHandler(new CssBinding("css"));
         this.bindingProvider.registerHandler(new StyleBinding("style"));
+        // in
         this.bindingProvider.registerHandler(new EventBinding("on"));
         this.bindingProvider.registerHandler(new KeyPressBinding("key"));
-        this.bindingProvider.registerHandler(new TextBinding("text"));
-        this.bindingProvider.registerHandler(new HtmlBinding("html"));
         // two way
         this.bindingProvider.registerHandler(new ValueBinding("value"));
-        this.bindingProvider.registerHandler(new FocusBinding("focus"));
 
-        this.bindingProvider.registerHandler(new AsBinding("as", domManager));
         this.bindingProvider.registerHandler(new IfBinding("if", domManager, engine));
-        this.bindingProvider.registerHandler(new IfNotBinding("ifnot", domManager, engine));
         this.bindingProvider.registerHandler(new ForBinding("for", domManager, engine));
         this.bindingProvider.registerHandler(new ComponentBinding("component", domManager, engine, registry));
 

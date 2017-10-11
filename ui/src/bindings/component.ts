@@ -1,10 +1,10 @@
 import { Observable, Subscription } from "rxjs";
 import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
-import { INodeState, IComponent, IDataContext, IBinding, Parametricity } from "../interfaces";
+import { INodeState, IComponent, IDataContext, IBinding } from "../interfaces";
 import { DataContext } from "../nodeState";
 import { BaseHandler } from "./baseHandler";
-import { ComponentRegistry } from "../components/registry";
+import { ComponentRegistry } from "../componentRegistry";
 import { HtmlEngine } from "../templateEngines";
 
 export class ComponentBinding<T> extends BaseHandler<string> {
@@ -21,7 +21,7 @@ export class ComponentBinding<T> extends BaseHandler<string> {
         this.engine = engine;
     }
 
-    public applyInternal(element: HTMLElement, binding: IBinding<string>, state: INodeState, shadowDom = true): void {
+    public applyInternal(element: HTMLElement, binding: IBinding<string>, state: INodeState, shadowDom = false): void {
         const host = element;
         if (element.attachShadow !== undefined && shadowDom) {
             element.attachShadow({ mode: "open" });
@@ -121,7 +121,7 @@ export class ComponentBinding<T> extends BaseHandler<string> {
         return params;
     }
     private getVm(state: INodeState): T | undefined {
-        const vm = state.getBindings<T>("as")[0];
+        const vm = state.getBindings<T>("attr").filter(x => x.parameter === "vm")[0];
         if (vm !== undefined) {
             return vm.expression(state.context) as T;
         }

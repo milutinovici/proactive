@@ -1,8 +1,8 @@
 import * as Rx from "rxjs";
-import { IComponentDescriptor, IViewModel } from "../interfaces";
-import { observableRequire, isFunction, isElement } from "../utils";
-import { HtmlEngine } from "../templateEngines";
-import { exception } from "../exceptionHandlers";
+import { IComponentDescriptor, IViewModel } from "./interfaces";
+import { observableRequire, isFunction, isElement } from "./utils";
+import { HtmlEngine } from "./templateEngines";
+import { exception } from "./exceptionHandlers";
 export class ComponentRegistry {
 
     private readonly components = new Map<string, IComponentDescriptor | string>();

@@ -65,11 +65,3 @@ export class IfBinding extends BaseHandler<boolean> {
         others.forEach(x => x.activate(element, state));
     }
 }
-
-export class IfNotBinding extends IfBinding {
-    constructor(name: string, domManager: DomManager, engine: HtmlEngine) {
-        super(name, domManager, engine);
-
-        this.inverse = true;
-    }
-}

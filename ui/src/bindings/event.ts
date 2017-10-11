@@ -1,7 +1,6 @@
 import { Observable, Observer, Subscription } from "rxjs";
 import { DataFlow, Parametricity } from "../interfaces";
 import { SimpleHandler } from "./baseHandler";
-import { exception } from "../exceptionHandlers";
 
 export class EventBinding extends SimpleHandler<Event> {
     constructor(name: string) {

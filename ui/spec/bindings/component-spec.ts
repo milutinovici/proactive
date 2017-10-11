@@ -313,13 +313,13 @@ it("component: Dynamic component", expect => {
 });
 
 it("component: Recursive component", expect => {
-    const str = `<tree-comp x-as-well="$data"></tree-comp>`;
+    const str = `<tree-comp x-attr-vm="$data"></tree-comp>`;
     const el = parse(str)[0] as HTMLElement;
 
     const t1 = `<ul>
                     <li x-for-item="$data">
                         <span x-text="item.key"></span>&nbsp<span x-if="typeof item.value !=='object'" x-text="item.value"></span>
-                        <tree-comp x-if="typeof item.value ==='object'" x-as-well="item.value"></tree-comp>
+                        <tree-comp x-if="typeof item.value ==='object'" x-attr-vm="item.value"></tree-comp>
                     </li>
                 </ul>`;
 

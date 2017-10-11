@@ -1,8 +1,6 @@
 import { Observable, Observer, Subscription } from "rxjs";
 import { DataFlow, Parametricity } from "../interfaces";
 import { SimpleHandler } from "./baseHandler";
-import { isRxObserver } from "../utils";
-import { exception } from "../exceptionHandlers";
 
 const keysByCode = {
     8: "backspace",
