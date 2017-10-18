@@ -1,4 +1,5 @@
 import { Observable, Observer, Subscription } from "rxjs";
+import { filter, share } from "rxjs/operators";
 import { DataFlow, Parametricity } from "../interfaces";
 import { SimpleHandler } from "./baseHandler";
 
@@ -28,14 +29,12 @@ export class KeyPressBinding extends SimpleHandler<KeyboardEvent> {
     }
 
     public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription {
-            const obs = Observable.fromEvent<KeyboardEvent>(el, "keydown")
-                .filter((x: KeyboardEvent) => !x.repeat)
-                .publish()
-                .refCount();
+            const obs = Observable.fromEvent<KeyboardEvent>(el, "keydown").pipe(
+                filter((x: KeyboardEvent) => !x.repeat), share());
 
             const combinations = this.getKeyCombination(parameter);
 
-            return obs.filter(e => this.testCombinations(combinations, e)).subscribe(e => {
+            return obs.pipe(filter(e => this.testCombinations(combinations, e))).subscribe(e => {
                 observer.next(e);
                 e.preventDefault();
             });

@@ -1,4 +1,5 @@
 import { Observable, Subscription } from "rxjs";
+import { map, mergeMap } from "rxjs/operators";
 import { DomManager } from "../domManager";
 import { isRxObservable } from "../utils";
 import { INodeState, IComponent, IDataContext, IBinding } from "../interfaces";
@@ -76,10 +77,10 @@ export class ComponentBinding<T> extends BaseHandler<string> {
     }
     protected getComponent(binding: IBinding<string>, state: INodeState): Observable<IComponent> {
         const name = binding.evaluate(state.context, this.dataFlow) as Observable<string>;
-        const descriptor = name.mergeMap(n => this.registry.load(n));
+        const descriptor = name.pipe(mergeMap(n => this.registry.load(n)));
         const params = this.getParams(state);
         const vm = this.getVm(state);
-        return descriptor.map(desc => <IComponent> { viewModel: this.registry.initialize(desc, params, vm), template: desc.template });
+        return descriptor.pipe(map(desc => <IComponent> { viewModel: this.registry.initialize(desc, params, vm), template: desc.template }));
     }
     protected applyTemplate(element: HTMLElement, childContext: IDataContext, component: IComponent, children: DocumentFragment) {
         if (component.template) {

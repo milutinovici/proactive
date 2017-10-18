@@ -1,4 +1,5 @@
 import { Observable, Observer, Subscription } from "rxjs";
+import { filter } from "rxjs/operators";
 import { DataFlow, Parametricity } from "../interfaces";
 import { SimpleHandler } from "./baseHandler";
 
@@ -14,7 +15,7 @@ export class EventBinding extends SimpleHandler<Event> {
         const selector = parameters.slice(1).join("-");
         let events = Observable.fromEvent<Event>(el, parameters[0]);
         if (selector !== "") {
-            events = events.filter(x => (<Element> x.target).matches(selector));
+            events = events.pipe(filter(x => (<Element> x.target).matches(selector)));
         }
         return events.subscribe(observer);
     }

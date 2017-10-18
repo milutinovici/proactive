@@ -1,4 +1,5 @@
 import * as Rx from "rxjs";
+import { map } from "rxjs/operators";
 import { IComponentDescriptor, IViewModel } from "./interfaces";
 import { observableRequire, isFunction, isElement } from "./utils";
 import { HtmlEngine } from "./templateEngines";
@@ -32,7 +33,7 @@ export class ComponentRegistry {
     public load(name: string): Rx.Observable<IComponentDescriptor> {
         name = name.toUpperCase();
         let result = this.getDescriptor(name);
-        result = result.map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel });
+        result = result.pipe(map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel }));
         result.do(x => this.components.set(name, x)); // cache descriptor
         return result;
     }

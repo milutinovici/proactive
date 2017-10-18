@@ -1,4 +1,5 @@
 import { Observable } from "rxjs";
+import { map, distinctUntilChanged } from "rxjs/operators";
 import { BaseHandler } from "./baseHandler";
 import { DomManager } from "../domManager";
 import { HtmlEngine } from "../templateEngines";
@@ -28,7 +29,7 @@ export class IfBinding extends BaseHandler<boolean> {
         this.domManager.setState(placeholder, state);
         parent.removeChild(element);
 
-        const visibility = observable.map(x => this.inverse ? !x : !!x).distinctUntilChanged();
+        const visibility = observable.pipe(map(x => this.inverse ? !x : !!x), distinctUntilChanged());
 
         // subscribe
         binding.cleanup.add(visibility.subscribe((x => {
