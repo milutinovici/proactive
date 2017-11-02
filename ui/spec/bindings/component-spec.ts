@@ -333,3 +333,24 @@ it("component: Recursive component", expect => {
     expect.end();
 
 });
+
+it("component: object passed instead of string", expect => {
+    const str = `<div x-component="obj"></div>`;
+    const el = parse(str)[0] as HTMLElement;
+
+    const t1 = `<p x-text="greeting"></p>`;
+    const c1 = {
+        template: t1, viewModel: function(props: object) {
+            // @ts-ignore
+            this["greeting"] = props["greeting"];
+        },
+    };
+
+    ui.components.register("obj-comp", c1);
+    expect.doesNotThrow(() => ui.applyBindings({ obj: { name: "obj-comp",  greeting: "hello" } }, el));
+
+    expect.equal(el.children[0].textContent, "hello");
+
+    expect.end();
+
+});

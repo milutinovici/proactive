@@ -8,7 +8,7 @@ import { BaseHandler } from "./baseHandler";
 import { ComponentRegistry } from "../componentRegistry";
 import { HtmlEngine } from "../templateEngines";
 
-export class ComponentBinding<T> extends BaseHandler<string> {
+export class ComponentBinding<T> extends BaseHandler<string|object> {
     private readonly domManager: DomManager;
     protected readonly registry: ComponentRegistry;
     private readonly engine: HtmlEngine;
@@ -22,7 +22,7 @@ export class ComponentBinding<T> extends BaseHandler<string> {
         this.engine = engine;
     }
 
-    public applyInternal(element: HTMLElement, binding: IBinding<string>, state: INodeState, shadowDom = false): void {
+    public applyInternal(element: HTMLElement, binding: IBinding<string|object>, state: INodeState, shadowDom = false): void {
         const host = element;
         if (element.attachShadow !== undefined && shadowDom) {
             element.attachShadow({ mode: "open" });
@@ -75,12 +75,17 @@ export class ComponentBinding<T> extends BaseHandler<string> {
         }));
         binding.cleanup.add(doCleanup);
     }
-    protected getComponent(binding: IBinding<string>, state: INodeState): Observable<IComponent> {
-        const name = binding.evaluate(state.context, this.dataFlow) as Observable<string>;
-        const descriptor = name.pipe(mergeMap(n => this.registry.load(n)));
+    protected getComponent(binding: IBinding<string|object>, state: INodeState): Observable<IComponent> {
+        const config = binding.evaluate(state.context, this.dataFlow) as Observable<string | object>;
         const params = this.getParams(state);
-        const vm = this.getVm(state);
-        return descriptor.pipe(map(desc => <IComponent> { viewModel: this.registry.initialize(desc, params, vm), template: desc.template }));
+        return config.pipe(mergeMap(cfg => {
+            const name = typeof (cfg) === "string" ? cfg : cfg["name"];
+            Object["assign"](params, cfg);
+            return this.registry.load(name).pipe(map(desc => {
+                const vm = this.registry.initialize(desc, params, this.getVm(state));
+                return { viewModel: vm, template: desc.template } as IComponent;
+            }));
+        }));
     }
     protected applyTemplate(element: HTMLElement, childContext: IDataContext, component: IComponent, children: DocumentFragment) {
         if (component.template) {
