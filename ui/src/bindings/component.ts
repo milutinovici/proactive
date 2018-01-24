@@ -123,6 +123,11 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         const props = {} as T;
         const attrBindings = state.getBindings<any>("attr");
         attrBindings.forEach(x => props[x.parameter as string] = x.expression(state.context));
+        Array.from(element.attributes).forEach(x => {
+            if (props[x.name] === undefined) {
+                props[x.name] = x.value;
+            }
+        });
         return props;
     }
     private getVm(state: INodeState): T | undefined {
