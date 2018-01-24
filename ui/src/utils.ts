@@ -142,9 +142,12 @@ export function groupBy<T>(array: T[], selector: (x: T) => any): Map<string, T[]
 };
 
 export function isHandlebarExpression(expression: string | null) {
+    if (expression === null || expression.length < 4) {
+        return false;
+    }
+    const trimmed = expression.trim();
     const open = "{";
     const closed = "}";
-    return expression !== null && expression.length > 4 &&
-           expression[0] === open && expression[1] === open &&
-           expression[expression.length - 1] === closed && expression[expression.length - 2] === closed;
+    return trimmed[0] === open && trimmed[1] === open &&
+           trimmed[trimmed.length - 1] === closed && trimmed[trimmed.length - 2] === closed;
 }
