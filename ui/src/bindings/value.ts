@@ -2,7 +2,7 @@ import { Observable } from "rxjs";
 import { map, filter, distinctUntilChanged } from "rxjs/operators";
 import { BaseHandler } from "./baseHandler";
 import { IBinding, INodeState, DataFlow } from "../interfaces";
-import { isRxObserver, nodeListToArray, tryParse } from "../utils";
+import { isObserver, tryParse } from "../utils";
 
 export class ValueBinding extends BaseHandler<string|number|boolean|string[]> {
     constructor(name: string) {
@@ -17,28 +17,28 @@ export class ValueBinding extends BaseHandler<string|number|boolean|string[]> {
         const event = binding.parameter || "change";
         if (ValueBinding.isCheckbox(el)) {
             binding.cleanup.add(observable.subscribe(value => ValueBinding.setChecked(el as HTMLInputElement, value as boolean)));
-            if (isRxObserver(observable)) {
+            if (isObserver(observable)) {
                  const events = ValueBinding.getEvents(el, event, true);
                  binding.cleanup.add(events.pipe(map(evt => evt.target["checked"]), distinctUntilChanged()).subscribe(observable));
             }
         } else if (ValueBinding.isRadio(el)) {
             binding.cleanup.add(observable.subscribe(value => ValueBinding.setRadio(el as HTMLInputElement, value as string|number|boolean)));
-            if (isRxObserver(observable)) {
+            if (isObserver(observable)) {
                  const events = ValueBinding.getEvents(el, event, true);
                  binding.cleanup.add(events.pipe(map(evt => evt.target["value"]), distinctUntilChanged(), map(tryParse)).subscribe(observable));
             }
         } else if (ValueBinding.isMultiSelect(el)) {
             binding.cleanup.add(observable.subscribe(value => ValueBinding.setMultiSelect(el as HTMLSelectElement, value)));
-            if (isRxObserver(observable)) {
+            if (isObserver(observable)) {
                 const events = ValueBinding.getEvents(el, event, false);
-                binding.cleanup.add(events.pipe(map(evt => (nodeListToArray(evt.target["options"]) as HTMLOptionElement[])
+                binding.cleanup.add(events.pipe(map(evt => (Array.from<HTMLOptionElement>(evt.target["options"]))
                                                     .filter(o => o.selected)
                                                     .map(o => tryParse(o.value || o.textContent || ""))))
                                                     .subscribe(observable as any));
             }
         } else {
             binding.cleanup.add(observable.subscribe(value => ValueBinding.setElementValue(el, value as string|number|boolean)));
-            if (isRxObserver(observable)) {
+            if (isObserver(observable)) {
                 const events = ValueBinding.getEvents(el, event, false);
                 binding.cleanup.add(events.pipe(map(evt => evt.target["value"] as string), distinctUntilChanged(), map(tryParse)).subscribe(observable));
             }
@@ -77,7 +77,7 @@ export class ValueBinding extends BaseHandler<string|number|boolean|string[]> {
     private static setMultiSelect(el: HTMLSelectElement, value: string|number|boolean|string[]) {
         if (Array.isArray(value)) {
             const stringy = value.map(x => x.toString());
-            const options = nodeListToArray(el["options"]) as HTMLOptionElement[];
+            const options = Array.from<HTMLOptionElement>(el["options"]);
             options.forEach(x => x.selected = stringy.indexOf(x.value) !== -1);
         } else {
             ValueBinding.setElementValue(el, value);

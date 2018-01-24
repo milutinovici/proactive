@@ -1,7 +1,7 @@
 import { Observable, Observer, Subscription } from "rxjs";
 import { IBindingHandler, INodeState, IBinding, DataFlow, Parametricity } from "../interfaces";
 import { exception } from "../exceptionHandlers";
-import { isRxObserver } from "../utils";
+import { isObserver } from "../utils";
 /**
  * Base class for bindings that takes a single expression and applies the result to one or more target elements
  * @class
@@ -42,7 +42,7 @@ export abstract class BaseHandler<T> implements IBindingHandler {
 export abstract class SimpleHandler<T> extends BaseHandler<T> {
     public applyInternal(node: Element, binding: IBinding<T>, state: INodeState) {
         const obs = binding.evaluate(state.context, this.dataFlow);
-        if (this.dataFlow === DataFlow.In && !isRxObserver(obs)) {
+        if (this.dataFlow === DataFlow.In && !isObserver(obs)) {
             exception.next(new Error(`binding "${this.name}" with expression "${binding.text}" on element ${node} must be supplied with an observer or a function`));
             return;
         }

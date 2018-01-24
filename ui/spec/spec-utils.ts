@@ -1,10 +1,9 @@
-import { nodeListToArray } from "../src/utils";
 import { JSDOM } from "jsdom";
 const dom = new JSDOM(`<!DOCTYPE html></html>`);
 export const document = dom.window.document;
 
 export function parse(template: string): Node[] {
-    return nodeListToArray(fragment(template).childNodes);
+    return Array.from(fragment(template).childNodes);
 }
 export function fragment(template: string): DocumentFragment {
     return JSDOM.fragment(template);

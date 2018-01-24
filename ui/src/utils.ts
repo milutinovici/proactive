@@ -1,20 +1,18 @@
-import * as Rx from "rxjs";
-
-const regexCssClassName = /\S+/g;
+import { Observable, Observer, Symbol, Subscription } from "rxjs";
 
 /**
 * Determines if target is an instance of a Rx.Observable
 * @param {any} target
 */
-export function isRxObservable<T>(target: T | Rx.Observable<T>): target is Rx.Observable<T> {
-    return target[Rx.Symbol.observable] !== undefined;
+export function isObservable<T>(target: T | Observable<T>): target is Observable<T> {
+    return target[Symbol.observable] !== undefined;
 }
 /**
 * Determines if target is an instance of a Rx.Observable
 * @param {any} target
 */
-export function isRxObserver<T>(target: T | Rx.Observer<T> | Rx.Observable<T>): target is Rx.Observer<T> {
-    return target[Rx.Symbol.rxSubscriber] !== undefined;
+export function isObserver<T>(target: T | Observer<T> | Observable<T>): target is Observer<T> {
+    return target[Symbol.rxSubscriber] !== undefined;
 }
 /**
 * Determines if Node is an instance of a Element
@@ -29,27 +27,6 @@ export function isElement(target: Node): target is Element {
 */
 export function isTextNode(target: Node): boolean {
     return target.nodeType === 3;
-}
-/**
-* Determines if Node is an instance of a HTMLInputElement
-* @param {any} target
-*/
-export function isInputElement(target: Node): target is HTMLInputElement {
-    if (isElement(target)) {
-        const tag = target.tagName.toLowerCase();
-        return tag === "input" || tag === "option" || tag === "select" || tag === "textarea";
-    }
-    return false;
-}
-
-/**
-* Determines if the specified DOM element has the specified CSS-Class
-* @param {Node} node The target element
-* @param {string} className The classe to check
-*/
-export function hasCssClass(node: HTMLElement, className: string): boolean {
-    const currentClassNames: string[] = node.className.match(regexCssClassName) || [];
-    return currentClassNames.indexOf(className) !== -1;
 }
 
 /**
@@ -80,22 +57,6 @@ export function isFunction(obj: any): obj is Function {
     return typeof obj === "function";
 }
 
-/**
- * Returns true if object is a Subscription
- * @param obj
- */
-export function isSubscription(obj: any): boolean {
-    return isFunction(obj.unsubscribe);
-}
-
-/**
- * Converts a NodeList into a javascript array
- * @param {NodeList} nodes
- */
-export function nodeListToArray(nodes: NodeList): Node[] {
-    return Array.prototype.slice.call(nodes);
-}
-
 declare function require(modules: string[], successCB: (s: any) => any, errCB: (err: Error) => any): void;
 
 /**
@@ -103,13 +64,13 @@ declare function require(modules: string[], successCB: (s: any) => any, errCB: (
 * @param {string} Module The module to load
 * @return {Rx.Observable<any>} An observable that yields a value and compconstes as soon as the module has been loaded
 */
-export function observableRequire<T>(module: string): Rx.Observable<T> {
+export function observableRequire<T>(module: string): Observable<T> {
     const requireFunc = require || (window != null ? window["require"] : null);
 
     if (!isFunction(requireFunc)) {
         throw Error("there's no AMD-module loader available (Hint: did you forget to include RequireJS in your project?)");
     }
-    return Rx.Observable.create((observer: Rx.Observer<T>) => {
+    return Observable.create((observer: Observer<T>) => {
         try {
             requireFunc([module], (m: T) => {
                 observer.next(m);
@@ -121,25 +82,9 @@ export function observableRequire<T>(module: string): Rx.Observable<T> {
             observer.error(e);
         }
 
-        return Rx.Subscription.EMPTY;
+        return Subscription.EMPTY;
     });
 }
-
-export function nodeIndex(node: Node) {
-    return node.parentElement ? Array.prototype.indexOf.call(node.parentElement.children, node) : -1;
-}
-
-export function groupBy<T>(array: T[], selector: (x: T) => any): Map<string, T[]>  {
-    const groups = new Map<string, T[]>();
-    for (const element of array) {
-        const key: string = selector(element).toString();
-        if (!groups.has(key)) {
-            groups.set(key, []);
-        }
-        (groups.get(key) as T[]).push(element);
-    }
-    return groups;
-};
 
 export function isHandlebarExpression(expression: string | null) {
     if (expression === null || expression.length < 4) {

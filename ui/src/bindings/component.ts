@@ -1,7 +1,7 @@
 import { Observable, Subscription } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
 import { DomManager } from "../domManager";
-import { isRxObservable } from "../utils";
+import { isObservable } from "../utils";
 import { INodeState, IComponent, IDataContext, IBinding } from "../interfaces";
 import { DataContext } from "../nodeState";
 import { BaseHandler } from "./baseHandler";
@@ -28,7 +28,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             element.attachShadow({ mode: "open" });
             element = element.shadowRoot as any;
         }
-        const component = this.getComponent(binding, state);
+        const component = this.getComponent(element, binding, state);
         // transclusion
         const children = this.engine.createFragment();
         this.domManager.applyBindingsToDescendants(state.context, element);
@@ -54,11 +54,11 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
                 newContext = new DataContext(comp.viewModel);
 
                 // wire custom events
-                if (comp.viewModel.emitter !== undefined && isRxObservable(comp.viewModel.emitter)) {
+                if (comp.viewModel.emitter !== undefined && isObservable(comp.viewModel.emitter)) {
                     internal.add(comp.viewModel.emitter.subscribe(evt => host.dispatchEvent(evt)));
                 }
                 // apply custom component value
-                if (comp.viewModel.value !== undefined && isRxObservable(comp.viewModel.value)) {
+                if (comp.viewModel.value !== undefined && isObservable(comp.viewModel.value)) {
                     internal.add(comp.viewModel.value.subscribe(val => {
                         host["value"] = val;
                         const evt = this.engine.createEvent("change");
@@ -75,14 +75,15 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         }));
         binding.cleanup.add(doCleanup);
     }
-    protected getComponent(binding: IBinding<string|object>, state: INodeState): Observable<IComponent> {
+    protected getComponent(element: Element, binding: IBinding<string|object>, state: INodeState): Observable<IComponent> {
         const config = binding.evaluate(state.context, this.dataFlow) as Observable<string | object>;
-        const params = this.getParams(state);
+        const props = this.getProps(element, state);
         return config.pipe(mergeMap(cfg => {
             const name = typeof (cfg) === "string" ? cfg : cfg["name"];
-            Object["assign"](params, cfg);
+            // object is useful for routes
+            Object["assign"](props, cfg);
             return this.registry.load(name).pipe(map(desc => {
-                const vm = this.registry.initialize(desc, params, this.getVm(state));
+                const vm = this.registry.initialize(desc, props, this.getVm(state));
                 return { viewModel: vm, template: desc.template } as IComponent;
             }));
         }));
@@ -118,13 +119,11 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         }
     }
 
-    private getParams(state: INodeState): T {
-        const params = {} as T;
-        const attributes = state.getBindings<any>("attr");
-        if (attributes.length > 0) {
-            attributes.forEach(x => params[x.parameter as string] = x.expression(state.context));
-        }
-        return params;
+    private getProps(element: Element, state: INodeState): T {
+        const props = {} as T;
+        const attrBindings = state.getBindings<any>("attr");
+        attrBindings.forEach(x => props[x.parameter as string] = x.expression(state.context));
+        return props;
     }
     private getVm(state: INodeState): T | undefined {
         const vm = state.getBindings<T>("attr").filter(x => x.parameter === "vm")[0];

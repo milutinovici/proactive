@@ -1,7 +1,7 @@
 import { exception } from "./exceptionHandlers";
 import { Observable, Observer, Subscriber, Subscription, Symbol } from "rxjs";
 import { IDataContext, IBinding, IBindingHandler, DataFlow, INodeState } from "./interfaces";
-import { isRxObservable, isRxObserver, isFunction } from "./utils";
+import { isObservable, isObserver, isFunction } from "./utils";
 
 export class Binding<T> implements IBinding<T> {
     private static expressionCache = new Map<string, Function>();
@@ -63,7 +63,7 @@ export class Binding<T> implements IBinding<T> {
             const result: any = this.expression(ctx);
             if (isFunction(result)) {
                 return result.bind(ctx.$data)(x);
-            } else if (result != null && isRxObserver(result)) {
+            } else if (result != null && isObserver(result)) {
                 return result.next(x);
             }
             return result;
@@ -72,7 +72,7 @@ export class Binding<T> implements IBinding<T> {
     }
     private createObservable(ctx: IDataContext): Observable<T> {
         const expression: any = this.expression(ctx);
-        if (expression != null && isRxObservable(expression)) {
+        if (expression != null && isObservable(expression)) {
             return expression;
         } else if (isFunction(expression)) {
             return Observable.of(expression.bind(ctx.$data)());
@@ -83,7 +83,7 @@ export class Binding<T> implements IBinding<T> {
     private createBoth(ctx: IDataContext): Observable<T> | Observer<T> {
         const expression: any = this.expression(ctx);
         const isFunc = isFunction(expression);
-        const isObs = expression != null && (isRxObservable(expression) || isRxObserver(expression));
+        const isObs = expression != null && (isObservable(expression) || isObserver(expression));
         if (!isObs && !isFunc) {
             const obs: any = Observable.of(expression);
             obs.next = this.write(ctx);
