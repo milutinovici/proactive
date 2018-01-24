@@ -3,8 +3,11 @@ import { Binding } from "./binding";
 import { isElement } from "./utils";
 import { ComponentRegistry } from "./componentRegistry";
 import { exception } from "./exceptionHandlers";
+
 export class BindingProvider {
     public static readonly PREFIX = "x";
+    public static readonly ATTR = ":";
+    public static readonly ON = "@";
     private readonly handlers: Map<string, IBindingHandler>;
     private readonly components: ComponentRegistry;
     constructor(components: ComponentRegistry) {
@@ -37,19 +40,11 @@ export class BindingProvider {
         let controlsDescendants = 0;
         const bindings: Binding<any>[] = [];
         for (let i = 0; i < element.attributes.length; i++) {
-            const attribute = element.attributes[i];
-            const array = attribute.name.split("-");
-            if (array[0] === BindingProvider.PREFIX) {
-                array.shift();
-                const name = array.shift() as string;
-                const handler = this.handlers.get(name);
-                if (!handler) {
-                    exception.next(new Error(`Binding handler "${name}" has not been registered.`));
-                } else {
-                    bindings.push(new Binding<any>(handler, attribute.value, array.join("-") || undefined));
-                    if (handler.controlsDescendants) {
-                        controlsDescendants += 1;
-                    }
+            const binding = this.attributeToBinding(element.attributes[i]);
+            if (binding !== null) {
+                bindings.push(binding);
+                if (binding.handler.controlsDescendants) {
+                    controlsDescendants += 1;
                 }
             }
         }
@@ -58,6 +53,30 @@ export class BindingProvider {
         }
         bindings.sort((a, b) => b.handler.priority - a.handler.priority);
         return bindings;
+    }
+
+    private attributeToBinding(attribute: Attr): Binding<any> | null {
+        const attrName = attribute.name;
+        if (attrName[0] === BindingProvider.PREFIX) {
+            const array = attribute.name.split("-");
+            array.shift();
+            const name = array.shift() as string;
+            const handler = this.handlers.get(name);
+            if (!handler) {
+                exception.next(new Error(`Binding handler "${name}" has not been registered.`));
+                return null;
+            } else {
+                return new Binding<any>(handler, attribute.value, array.join("-") || undefined);
+            }
+        } else if (attrName[0] === BindingProvider.ATTR) {
+            const handler = this.handlers.get("attr") as IBindingHandler;
+            return new Binding<any>(handler, attribute.value, attrName.substring(1));
+        } else if (attrName[0] === BindingProvider.ON) {
+            const handler = this.handlers.get("on") as IBindingHandler;
+            return new Binding<any>(handler, attribute.value, attrName.substring(1));
+        } else {
+            return null;
+        }
     }
 
     private handleBarsToBinding(node: Node): Binding<string> {

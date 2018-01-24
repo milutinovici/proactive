@@ -87,6 +87,17 @@ it("attr: binding multiple attr classes to multiple observable model properties"
     expect.end();
 });
 
+it("attr: you can use shorthand ':'", expect => {
+    const template = `<div :id="'shorthand'">empty</div>`;
+    const el = <HTMLInputElement> parse(template)[0];
+
+    let model = {};
+    expect.false(hasAttr(el, "id"));
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
+    expect.true(hasAttr(el, "id", "shorthand"));
+    expect.end();
+});
+
 function hasAttr(element: HTMLElement, attr: string, val?: string) {
     return Array.prototype.some.call(element.attributes, (x: Attr) => x.name === attr);
 }
