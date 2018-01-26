@@ -123,7 +123,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         const props = {} as T;
         const attrBindings = state.getBindings<any>("attr");
         attrBindings.forEach(x => props[x.parameter as string] = x.expression(state.scope));
-        Object.assign(props, state.otherProps);
+        Object.assign(props, state.constantProps);
         return props;
     }
     private getVm(state: INodeState): T | undefined {

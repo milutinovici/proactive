@@ -75,8 +75,8 @@ export class ForBinding<T> extends BaseHandler<T[]> {
 
             for (let i = current; i < merger.stopped; i++) {
                 let childState = indexName ?
-                                 new NodeState(state.scope.extend(itemName, additions[i].value, indexName, additions[i].index), otherBindings.map(x => x.clone()), state.otherProps) :
-                                 new NodeState(state.scope.extend(itemName, additions[i].value), otherBindings.map(x => x.clone()), state.otherProps);
+                                 new NodeState(state.scope.extend(itemName, additions[i].value, indexName, additions[i].index), otherBindings.map(x => x.clone()), state.constantProps) :
+                                 new NodeState(state.scope.extend(itemName, additions[i].value), otherBindings.map(x => x.clone()), state.constantProps);
 
                 this.domManager.setState(parent.childNodes[i + start + additions[current].index], childState);
                 this.domManager.applyBindingsRecursive(childState.scope, parent.childNodes[i + start + additions[current].index]);

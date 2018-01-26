@@ -4,13 +4,13 @@ import { IScope, INodeState, IViewModel, IBinding } from "./interfaces";
 export class NodeState implements INodeState {
     public readonly scope: IScope;        // scope model
     public readonly bindings: IBinding<any>[];
-    public readonly otherProps: object;
+    public readonly constantProps: object;
     public disabled: boolean;
 
-    constructor(scope: IScope, bindings: IBinding<any>[], otherProps: object) {
+    constructor(scope: IScope, bindings: IBinding<any>[], constantProps: object) {
         this.scope = scope;
         this.bindings = bindings;
-        this.otherProps = otherProps;
+        this.constantProps = constantProps;
         this.disabled = false;
     }
     public getBindings<T>(name: string): IBinding<T>[] {

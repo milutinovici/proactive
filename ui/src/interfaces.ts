@@ -51,7 +51,7 @@ export interface IScope {
 }
 export interface INodeState {
     readonly bindings: IBinding<any>[];
-    readonly otherProps: object;
+    readonly constantProps: object;
     scope: IScope;
     disabled: boolean;
     getBindings<T>(name: string): IBinding<T>[];
