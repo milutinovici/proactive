@@ -32,37 +32,37 @@ export class Binding<T> implements IBinding<T> {
     public clone(): Binding<T> {
         return new Binding<T>(this.handler, this.text, this.parameter);
     }
-    public evaluate(ctx: IScope, dataFlow: DataFlow): Observable<T> | Observer<T> {
+    public evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T> {
         if (dataFlow === DataFlow.Out) {
-            return this.createObservable(ctx);
+            return this.createObservable(scope);
         } else if (dataFlow === DataFlow.In) {
-            return this.createObserver(ctx);
+            return this.createObserver(scope);
         } else { // twoWay
-            return this.createBoth(ctx);
+            return this.createBoth(scope);
         }
     }
 
-    public expression(ctx: IScope): T | null {
+    public expression(scope: IScope): T | null {
         try {
             const fn = Binding.expressionCache.get(this.text);
             if (fn !== undefined) {
-                return fn(ctx);
+                return fn(scope);
             } else {
                 const readBody = this.text ? `with($scope){with($data||{}){return ${this.text};}}` : "return null;";
-                let read = new Function("$scope", readBody) as (ctx: IScope) => T | null;
+                let read = new Function("$scope", readBody) as (scope: IScope) => T | null;
                 Binding.expressionCache.set(this.text, read);
-                return read(ctx);
+                return read(scope);
             }
         } catch (e) {
             exception.next(new Error(`Binding ${this.handler.name}="${this.text}" failed. ${e.message}`));
             return null;
         }
     };
-    private createObserver(ctx: IScope): Observer<T> {
+    private createObserver(scope: IScope): Observer<T> {
         const subscriber = new Subscriber<T>(x => {
-            const result: any = this.expression(ctx);
+            const result: any = this.expression(scope);
             if (isFunction(result)) {
-                return result.bind(ctx.$data)(x);
+                return result.bind(scope.$data)(x);
             } else if (result != null && isObserver(result)) {
                 return result.next(x);
             }
@@ -70,43 +70,43 @@ export class Binding<T> implements IBinding<T> {
         }, exception.error);
         return subscriber;
     }
-    private createObservable(ctx: IScope): Observable<T> {
-        const expression: any = this.expression(ctx);
+    private createObservable(scope: IScope): Observable<T> {
+        const expression: any = this.expression(scope);
         if (expression != null && isObservable(expression)) {
             return expression;
         } else if (isFunction(expression)) {
-            return Observable.of(expression.bind(ctx.$data)());
+            return Observable.of(expression.bind(scope.$data)());
         } else {
             return Observable.of(expression);
         }
     }
-    private createBoth(ctx: IScope): Observable<T> | Observer<T> {
-        const expression: any = this.expression(ctx);
+    private createBoth(scope: IScope): Observable<T> | Observer<T> {
+        const expression: any = this.expression(scope);
         const isFunc = isFunction(expression);
         const isObs = expression != null && (isObservable(expression) || isObserver(expression));
         if (!isObs && !isFunc) {
             const obs: any = Observable.of(expression);
-            obs.next = this.write(ctx);
+            obs.next = this.write(scope);
             // obs.error = exception.error;
             obs.complete = () => {};
             obs[Symbol.rxSubscriber] = () => obs;
             return obs;
         } else if (isFunc && !isObs) {
-            const fn: (t: T) => void = expression.bind(ctx.$data);
+            const fn: (t: T) => void = expression.bind(scope.$data);
             return new Subscriber<T>(fn, exception.error);
         }
         return expression;
     }
-    private write(ctx: IScope): (value: T) => void {
+    private write(scope: IScope): (value: T) => void {
         try {
             const fn = Binding.writeCache.get(this.text);
             if (fn !== undefined) {
-                return fn(ctx);
+                return fn(scope);
             } else if (this.canWrite(this.text)) {
                 const writeBody = `with($scope){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
                 const write = new Function("$scope", writeBody);
                 Binding.writeCache.set(this.text, write);
-                return write(ctx) as (value: T) => void;
+                return write(scope) as (value: T) => void;
             } else {
             return (value: T) => {};
           }

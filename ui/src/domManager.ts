@@ -25,10 +25,10 @@ export class DomManager {
         this.applyBindingsRecursive(scope, rootNode);
     }
 
-    public applyBindingsToDescendants(ctx: IScope, node: Element): void {
+    public applyBindingsToDescendants(scope: IScope, node: Element): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
-                this.applyBindingsRecursive(ctx, node.childNodes[i] as Element);
+                this.applyBindingsRecursive(scope, node.childNodes[i] as Element);
             }
         }
     }
@@ -49,12 +49,12 @@ export class DomManager {
         }
     }
 
-    public applyBindingsRecursive(ctx: IScope, el: Node): void {
-        if (this.shouldBind(el) && !this.applyBindingsInternal(ctx, el) && el.hasChildNodes()) {
+    public applyBindingsRecursive(scope: IScope, el: Node): void {
+        if (this.shouldBind(el) && !this.applyBindingsInternal(scope, el) && el.hasChildNodes()) {
             let child = el.firstChild;
             // iterate over descendants
             while (child) {
-                this.applyBindingsRecursive(ctx, child);
+                this.applyBindingsRecursive(scope, child);
                 child = child.nextSibling;
             }
         }
@@ -100,7 +100,7 @@ export class DomManager {
         // support external per-node cleanup
         // env.cleanExternalData(node);
     }
-    private applyBindingsInternal(ctx: IScope, el: Node): boolean {
+    private applyBindingsInternal(scope: IScope, el: Node): boolean {
         // get or create elment-state
         let state = this.nodeStateManager.get(el);
         // create and set if necessary
@@ -110,7 +110,7 @@ export class DomManager {
             if (bindings.length === 0) {
                 return false;
             }
-            state = new NodeState(ctx, bindings, bindingsAndProps[1]);
+            state = new NodeState(scope, bindings, bindingsAndProps[1]);
             this.nodeStateManager.set(el, state);
         }
 
