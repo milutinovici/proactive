@@ -1,14 +1,14 @@
 import { Observable, Observer, Symbol, Subscription } from "rxjs";
 
 /**
-* Determines if target is an instance of a Rx.Observable
+* Determines if target is an instance of a Observable
 * @param {any} target
 */
 export function isObservable<T>(target: T | Observable<T>): target is Observable<T> {
     return target[Symbol.observable] !== undefined;
 }
 /**
-* Determines if target is an instance of a Rx.Observable
+* Determines if target is an instance of a Observable
 * @param {any} target
 */
 export function isObserver<T>(target: T | Observer<T> | Observable<T>): target is Observer<T> {
@@ -62,7 +62,7 @@ declare function require(modules: string[], successCB: (s: any) => any, errCB: (
 /**
 * Turns an AMD-Style require call into an observable
 * @param {string} Module The module to load
-* @return {Rx.Observable<any>} An observable that yields a value and compconstes as soon as the module has been loaded
+* @return {Observable<any>} An observable that yields a value and compconstes as soon as the module has been loaded
 */
 export function observableRequire<T>(module: string): Observable<T> {
     const requireFunc = require || (window != null ? window["require"] : null);

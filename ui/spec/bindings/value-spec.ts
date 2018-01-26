@@ -1,5 +1,5 @@
 import * as it from "tape";
-import * as Rx from "rxjs";
+import { Observable } from "rxjs";
 import * as px from "@proactive/extensions";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
@@ -67,7 +67,7 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
     const template = `<input type="text" x-value="prop" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
-    let observable = Rx.Observable.of("zzz");
+    let observable = Observable.of("zzz");
     let vm = { prop: observable };
     let value = "";
     observable.subscribe(x => value = x);

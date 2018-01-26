@@ -1,4 +1,4 @@
-import * as Rx from "rxjs";
+import { BehaviorSubject } from "rxjs";
 import { IScope, INodeState, IViewModel, IBinding } from "./interfaces";
 
 export class NodeState implements INodeState {
@@ -26,10 +26,10 @@ export class Scope implements IScope {
     }
 
     public extend(name: string, model: IViewModel, indexName?: string, index?: number): IScope {
-        const childScope = Object["assign"](new Scope(this.$data), this);
+        const childScope = Object.assign(new Scope(this.$data), this);
         childScope[name] = model;
         if (indexName !== undefined && index !== undefined) {
-            childScope[indexName] = new Rx.BehaviorSubject<number>(index);
+            childScope[indexName] = new BehaviorSubject<number>(index);
         }
         return childScope;
     }

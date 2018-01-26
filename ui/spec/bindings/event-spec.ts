@@ -1,5 +1,5 @@
 import * as it from "tape";
-import * as Rx from "rxjs";
+import { BehaviorSubject, Subject, Subscriber } from "rxjs";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
@@ -84,12 +84,12 @@ it("event: binds multiple events to observers", expect => {
     let clickCallCount = 0;
     let inputCallCount = 0;
 
-    let clickSubject = new Rx.Subject<Event>();
-    let inputSubject = new Rx.Subject<Event>();
+    let clickSubject = new Subject<Event>();
+    let inputSubject = new Subject<Event>();
 
     let model = {
-        clickObserver: new Rx.Subscriber<Event>((x) => { clickSubject.next(x); }),
-        inputObserver: new Rx.Subscriber<Event>((x) => { inputSubject.next(x); }),
+        clickObserver: new Subscriber<Event>((x) => { clickSubject.next(x); }),
+        inputObserver: new Subscriber<Event>((x) => { inputSubject.next(x); }),
     };
 
     clickSubject.subscribe(() => clickCallCount++);
@@ -218,7 +218,7 @@ it("event: event delegation works", expect => {
     const el = <HTMLElement> parse(template)[0];
 
     const viewModel = {
-        selected: new Rx.BehaviorSubject(0),
+        selected: new BehaviorSubject(0),
         select: function(e: Event) { this.selected.next(parseInt(e.target["id"])); },
     };
 
