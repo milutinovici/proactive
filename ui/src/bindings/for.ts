@@ -19,7 +19,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
     }
 
     public applyInternal(node: Element, binding: IBinding<T[]>, state: INodeState): void {
-        const observable = binding.evaluate(state.context, this.dataFlow) as Observable<T[]>;
+        const observable = binding.evaluate(state.scope, this.dataFlow) as Observable<T[]>;
         const parameters = (binding.parameter as string).split("-"); // item and index name
         const itemName = parameters[0];
         const indexName = parameters[1];
@@ -49,7 +49,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
         // apply bindings after repeated elements
         if (node.nextSibling === null && sibling !== null) {
             while (sibling !== null) {
-                this.domManager.applyBindingsRecursive(state.context, sibling);
+                this.domManager.applyBindingsRecursive(state.scope, sibling);
                 sibling = sibling.nextSibling;
             }
         }
@@ -75,17 +75,17 @@ export class ForBinding<T> extends BaseHandler<T[]> {
 
             for (let i = current; i < merger.stopped; i++) {
                 let childState = indexName ?
-                                 new NodeState(state.context.extend(itemName, additions[i].value, indexName, additions[i].index), otherBindings.map(x => x.clone())) :
-                                 new NodeState(state.context.extend(itemName, additions[i].value), otherBindings.map(x => x.clone()));
+                                 new NodeState(state.scope.extend(itemName, additions[i].value, indexName, additions[i].index), otherBindings.map(x => x.clone()), state.otherProps) :
+                                 new NodeState(state.scope.extend(itemName, additions[i].value), otherBindings.map(x => x.clone()), state.otherProps);
 
                 this.domManager.setState(parent.childNodes[i + start + additions[current].index], childState);
-                this.domManager.applyBindingsRecursive(childState.context, parent.childNodes[i + start + additions[current].index]);
+                this.domManager.applyBindingsRecursive(childState.scope, parent.childNodes[i + start + additions[current].index]);
             }
             if (indexName) {
                 for (let i = merger.stopped + 1; i < newLength; i++) {
                     let siblingState = this.domManager.getState(parent.childNodes[start + i]);
                     if (siblingState !== undefined) {
-                        siblingState.context[indexName].next(siblingState.context[indexName].getValue() + 1);
+                        siblingState.scope[indexName].next(siblingState.scope[indexName].getValue() + 1);
                     }
                 }
             }
@@ -105,7 +105,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
                 for (let i = deletion.index; i < newLength; i++) {
                     let siblingState  = this.domManager.getState(parent.childNodes[start + i]);
                     if (siblingState !== undefined) {
-                        siblingState.context[indexName].next(siblingState.context[indexName].getValue() - 1);
+                        siblingState.scope[indexName].next(siblingState.scope[indexName].getValue() - 1);
                     }
                 }
             }
@@ -120,12 +120,12 @@ export class ForBinding<T> extends BaseHandler<T[]> {
             parent.insertBefore(node, before);
             if (indexName) {
                 let state = this.domManager.getState(node) as INodeState;
-                state.context[indexName].next(move.moved as number);
+                state.scope[indexName].next(move.moved as number);
 
                 for (let i = Math.min(move.index, move.moved as number); i < Math.max(move.index, move.moved as number); i++) {
                     let siblingState  = this.domManager.getState(parent.childNodes[start + i]);
                     if (siblingState !== undefined) {
-                        siblingState.context[indexName].next(siblingState.context[indexName].getValue() + 1);
+                        siblingState.scope[indexName].next(siblingState.scope[indexName].getValue() + 1);
                     }
                 }
             }

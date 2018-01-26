@@ -1,7 +1,7 @@
-import { DataContext, NodeState } from "./nodeState";
+import { Scope, NodeState } from "./nodeState";
 import { BindingProvider } from "./bindingProvider";
 import { isElement, isTextNode, isHandlebarExpression } from "./utils";
-import { INodeState, IDataContext, IViewModel } from "./interfaces";
+import { INodeState, IScope, IViewModel } from "./interfaces";
 
 export class DomManager {
     private readonly nodeStateManager: WeakMap<Node, INodeState>;
@@ -19,13 +19,13 @@ export class DomManager {
             throw Error("first parameter should be your model, second parameter should be a DOM node!");
         }
         // create or update node state for root node
-        const context = new DataContext(model);
+        const scope = new Scope(model);
 
-        // calculate resulting data-context and apply bindings
-        this.applyBindingsRecursive(context, rootNode);
+        // calculate resulting scope and apply bindings
+        this.applyBindingsRecursive(scope, rootNode);
     }
 
-    public applyBindingsToDescendants(ctx: IDataContext, node: Element): void {
+    public applyBindingsToDescendants(ctx: IScope, node: Element): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
                 this.applyBindingsRecursive(ctx, node.childNodes[i] as Element);
@@ -49,7 +49,7 @@ export class DomManager {
         }
     }
 
-    public applyBindingsRecursive(ctx: IDataContext, el: Node): void {
+    public applyBindingsRecursive(ctx: IScope, el: Node): void {
         if (this.shouldBind(el) && !this.applyBindingsInternal(ctx, el) && el.hasChildNodes()) {
             let child = el.firstChild;
             // iterate over descendants
@@ -66,12 +66,12 @@ export class DomManager {
     public getState(node: Node): INodeState | undefined {
         return this.nodeStateManager.get(node);
     }
-    public getDataContext(node: Node): IDataContext | undefined {
+    public getScope(node: Node): IScope | undefined {
         let currentNode: Node | null = node;
         while (currentNode) {
             let state = this.nodeStateManager.get(currentNode);
             if (state !== undefined) {
-                return state.context;
+                return state.scope;
             }
             currentNode = currentNode.parentNode;
         }
@@ -93,23 +93,24 @@ export class DomManager {
             if (state.bindings != null) {
                 state.bindings.forEach(x => x.deactivate());
             }
-            delete state.context;
+            delete state.scope;
             // delete state itself
             this.nodeStateManager.delete(node);
         }
         // support external per-node cleanup
         // env.cleanExternalData(node);
     }
-    private applyBindingsInternal(ctx: IDataContext, el: Node): boolean {
+    private applyBindingsInternal(ctx: IScope, el: Node): boolean {
         // get or create elment-state
         let state = this.nodeStateManager.get(el);
         // create and set if necessary
         if (!state) {
-            const bindings = this.bindingProvider.getBindings(el);
+            const bindingsAndProps = this.bindingProvider.getBindingsAndProps(el);
+            const bindings = bindingsAndProps[0];
             if (bindings.length === 0) {
                 return false;
             }
-            state = new NodeState(ctx, bindings);
+            state = new NodeState(ctx, bindings, bindingsAndProps[1]);
             this.nodeStateManager.set(el, state);
         }
 

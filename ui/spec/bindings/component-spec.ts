@@ -1,6 +1,6 @@
 import * as it from "tape";
 import * as Rx from "rxjs";
-import { IDataContext } from "../../src/interfaces";
+import { IScope } from "../../src/interfaces";
 import { document, parse, fragment } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
@@ -108,7 +108,7 @@ it("component: Loads a template from a selector", expect => {
     expect.end();
 });
 
-it("component: When the component isn't supplying a view-model, binding against parent-context works as expected", expect => {
+it("component: When the component isn't supplying a view-model, binding against parent-scope works as expected", expect => {
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -225,7 +225,7 @@ it("component: Components are properly isolated", expect => {
     ui.components.register("test-component", {
         template: template,
         viewModel: { bar: value,
-            preInit: (element: HTMLElement, ctx: IDataContext) => {
+            preInit: (element: HTMLElement, ctx: IScope) => {
                 expect.notEqual(ctx.$data, viewModel, "viewModel of component is not equal to root viewModel");
                 expect.equal(ctx.$data["bar"], value);
             },

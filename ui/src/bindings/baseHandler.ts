@@ -41,7 +41,7 @@ export abstract class BaseHandler<T> implements IBindingHandler {
 */
 export abstract class SimpleHandler<T> extends BaseHandler<T> {
     public applyInternal(node: Element, binding: IBinding<T>, state: INodeState) {
-        const obs = binding.evaluate(state.context, this.dataFlow);
+        const obs = binding.evaluate(state.scope, this.dataFlow);
         if (this.dataFlow === DataFlow.In && !isObserver(obs)) {
             exception.next(new Error(`binding "${this.name}" with expression "${binding.text}" on element ${node} must be supplied with an observer or a function`));
             return;

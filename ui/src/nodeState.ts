@@ -1,13 +1,16 @@
 import * as Rx from "rxjs";
-import { IDataContext, INodeState, IViewModel, IBinding } from "./interfaces";
+import { IScope, INodeState, IViewModel, IBinding } from "./interfaces";
 
 export class NodeState implements INodeState {
-    public context: IDataContext;        // scope model
+    public readonly scope: IScope;        // scope model
     public readonly bindings: IBinding<any>[];
+    public readonly otherProps: object;
     public disabled: boolean;
-    constructor(context: IDataContext, bindings: IBinding<any>[]) {
-        this.context = context;
+
+    constructor(scope: IScope, bindings: IBinding<any>[], otherProps: object) {
+        this.scope = scope;
         this.bindings = bindings;
+        this.otherProps = otherProps;
         this.disabled = false;
     }
     public getBindings<T>(name: string): IBinding<T>[] {
@@ -15,19 +18,19 @@ export class NodeState implements INodeState {
     }
 }
 
-export class DataContext implements IDataContext {
+export class Scope implements IScope {
     public readonly $data: IViewModel;
 
     constructor(model: IViewModel) {
         this.$data = model;
     }
 
-    public extend(name: string, model: IViewModel, indexName?: string, index?: number): IDataContext {
-        const childContext = Object["assign"](new DataContext(this.$data), this);
-        childContext[name] = model;
+    public extend(name: string, model: IViewModel, indexName?: string, index?: number): IScope {
+        const childScope = Object["assign"](new Scope(this.$data), this);
+        childScope[name] = model;
         if (indexName !== undefined && index !== undefined) {
-            childContext[indexName] = new Rx.BehaviorSubject<number>(index);
+            childScope[indexName] = new Rx.BehaviorSubject<number>(index);
         }
-        return childContext;
+        return childScope;
     }
 }

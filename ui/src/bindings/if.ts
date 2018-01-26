@@ -20,7 +20,7 @@ export class IfBinding extends BaseHandler<boolean> {
     }
 
     public applyInternal(element: HTMLElement, binding: IBinding<boolean>, state: INodeState): void {
-        const observable = binding.evaluate(state.context, this.dataFlow) as Observable<boolean>;
+        const observable = binding.evaluate(state.scope, this.dataFlow) as Observable<boolean>;
         const parent = element.parentElement as HTMLElement;
         const placeholder: Comment = this.engine.createComment("if");
         parent.insertBefore(placeholder, element);
@@ -36,7 +36,7 @@ export class IfBinding extends BaseHandler<boolean> {
             state.disabled = !x;
             if (x) {
                 this.enableOtherBindings(element, state);
-                this.domManager.applyBindingsToDescendants(state.context, element);
+                this.domManager.applyBindingsToDescendants(state.scope, element);
                 parent.insertBefore(element, placeholder);
             } else if (element.parentElement === parent) {
                 parent.removeChild(element);
@@ -47,7 +47,7 @@ export class IfBinding extends BaseHandler<boolean> {
         // apply bindings after if element
         if (element.nextSibling === null && sibling !== null) {
             while (sibling !== null) {
-                this.domManager.applyBindingsRecursive(state.context, sibling);
+                this.domManager.applyBindingsRecursive(state.scope, sibling);
                 sibling = sibling.nextSibling;
             }
         }

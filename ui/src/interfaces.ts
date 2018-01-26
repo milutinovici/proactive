@@ -5,8 +5,8 @@ export interface IBinding<T> {
     readonly text: string;
     readonly parameter?: string;
     readonly cleanup: Subscription;
-    readonly expression: (scope: IDataContext) => T | null;
-    evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T>;
+    readonly expression: (scope: IScope) => T | null;
+    evaluate(ctx: IScope, dataFlow: DataFlow): Observable<T> | Observer<T>;
     activate(node: Node, state: INodeState): void;
     deactivate(): void;
     clone(): IBinding<T>;
@@ -37,7 +37,7 @@ export interface IBindingHandler {
         * Applies the binding to the specified element
         * @param {Node} node The target node
         * @param {any} options The options for the handler
-        * @param {IDataContext} ctx The curent data context
+        * @param {IScope} ctx The curent scope
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
@@ -45,13 +45,14 @@ export interface IBindingHandler {
 
 }
 
-export interface IDataContext {
+export interface IScope {
     readonly $data: IViewModel;
-    extend(name: string, model: IViewModel, indexName?: string, index?: number): IDataContext;
+    extend(name: string, model: IViewModel, indexName?: string, index?: number): IScope;
 }
 export interface INodeState {
     readonly bindings: IBinding<any>[];
-    context: IDataContext;
+    readonly otherProps: object;
+    scope: IScope;
     disabled: boolean;
     getBindings<T>(name: string): IBinding<T>[];
 }

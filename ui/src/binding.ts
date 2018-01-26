@@ -1,6 +1,6 @@
 import { exception } from "./exceptionHandlers";
 import { Observable, Observer, Subscriber, Subscription, Symbol } from "rxjs";
-import { IDataContext, IBinding, IBindingHandler, DataFlow, INodeState } from "./interfaces";
+import { IScope, IBinding, IBindingHandler, DataFlow, INodeState } from "./interfaces";
 import { isObservable, isObserver, isFunction } from "./utils";
 
 export class Binding<T> implements IBinding<T> {
@@ -32,7 +32,7 @@ export class Binding<T> implements IBinding<T> {
     public clone(): Binding<T> {
         return new Binding<T>(this.handler, this.text, this.parameter);
     }
-    public evaluate(ctx: IDataContext, dataFlow: DataFlow): Observable<T> | Observer<T> {
+    public evaluate(ctx: IScope, dataFlow: DataFlow): Observable<T> | Observer<T> {
         if (dataFlow === DataFlow.Out) {
             return this.createObservable(ctx);
         } else if (dataFlow === DataFlow.In) {
@@ -42,14 +42,14 @@ export class Binding<T> implements IBinding<T> {
         }
     }
 
-    public expression(ctx: IDataContext): T | null {
+    public expression(ctx: IScope): T | null {
         try {
             const fn = Binding.expressionCache.get(this.text);
             if (fn !== undefined) {
                 return fn(ctx);
             } else {
-                const readBody = this.text ? `with($context){with($data||{}){return ${this.text};}}` : "return null;";
-                let read = new Function("$context", readBody) as (ctx: IDataContext) => T | null;
+                const readBody = this.text ? `with($scope){with($data||{}){return ${this.text};}}` : "return null;";
+                let read = new Function("$scope", readBody) as (ctx: IScope) => T | null;
                 Binding.expressionCache.set(this.text, read);
                 return read(ctx);
             }
@@ -58,7 +58,7 @@ export class Binding<T> implements IBinding<T> {
             return null;
         }
     };
-    private createObserver(ctx: IDataContext): Observer<T> {
+    private createObserver(ctx: IScope): Observer<T> {
         const subscriber = new Subscriber<T>(x => {
             const result: any = this.expression(ctx);
             if (isFunction(result)) {
@@ -70,7 +70,7 @@ export class Binding<T> implements IBinding<T> {
         }, exception.error);
         return subscriber;
     }
-    private createObservable(ctx: IDataContext): Observable<T> {
+    private createObservable(ctx: IScope): Observable<T> {
         const expression: any = this.expression(ctx);
         if (expression != null && isObservable(expression)) {
             return expression;
@@ -80,7 +80,7 @@ export class Binding<T> implements IBinding<T> {
             return Observable.of(expression);
         }
     }
-    private createBoth(ctx: IDataContext): Observable<T> | Observer<T> {
+    private createBoth(ctx: IScope): Observable<T> | Observer<T> {
         const expression: any = this.expression(ctx);
         const isFunc = isFunction(expression);
         const isObs = expression != null && (isObservable(expression) || isObserver(expression));
@@ -97,14 +97,14 @@ export class Binding<T> implements IBinding<T> {
         }
         return expression;
     }
-    private write(ctx: IDataContext): (value: T) => void {
+    private write(ctx: IScope): (value: T) => void {
         try {
             const fn = Binding.writeCache.get(this.text);
             if (fn !== undefined) {
                 return fn(ctx);
             } else if (this.canWrite(this.text)) {
-                const writeBody = `with($context){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
-                const write = new Function("$context", writeBody);
+                const writeBody = `with($scope){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
+                const write = new Function("$scope", writeBody);
                 Binding.writeCache.set(this.text, write);
                 return write(ctx) as (value: T) => void;
             } else {

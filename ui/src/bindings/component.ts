@@ -2,8 +2,8 @@ import { Observable, Subscription } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
 import { DomManager } from "../domManager";
 import { isObservable } from "../utils";
-import { INodeState, IComponent, IDataContext, IBinding } from "../interfaces";
-import { DataContext } from "../nodeState";
+import { INodeState, IComponent, IScope, IBinding } from "../interfaces";
+import { Scope } from "../nodeState";
 import { BaseHandler } from "./baseHandler";
 import { ComponentRegistry } from "../componentRegistry";
 import { HtmlEngine } from "../templateEngines";
@@ -31,7 +31,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         const component = this.getComponent(element, binding, state);
         // transclusion
         const children = this.engine.createFragment();
-        this.domManager.applyBindingsToDescendants(state.context, element);
+        this.domManager.applyBindingsToDescendants(state.scope, element);
         while (element.firstChild) {
             children.appendChild(element.removeChild(element.firstChild));
         }
@@ -48,10 +48,10 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             doCleanup();
             internal = new Subscription();
             // isolated nodestate and ctx
-            let newContext = state.context;
+            let scope = state.scope;
 
             if (comp.viewModel) {
-                newContext = new DataContext(comp.viewModel);
+                scope = new Scope(comp.viewModel);
 
                 // wire custom events
                 if (comp.viewModel.emitter !== undefined && isObservable(comp.viewModel.emitter)) {
@@ -71,12 +71,12 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
                 }
             }
             // done
-            this.applyTemplate(element, newContext, comp, children);
+            this.applyTemplate(element, scope, comp, children);
         }));
         binding.cleanup.add(doCleanup);
     }
     protected getComponent(element: Element, binding: IBinding<string|object>, state: INodeState): Observable<IComponent> {
-        const config = binding.evaluate(state.context, this.dataFlow) as Observable<string | object>;
+        const config = binding.evaluate(state.scope, this.dataFlow) as Observable<string | object>;
         const props = this.getProps(element, state);
         return config.pipe(mergeMap(cfg => {
             const name = typeof (cfg) === "string" ? cfg : cfg["name"];
@@ -88,7 +88,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             }));
         }));
     }
-    protected applyTemplate(element: HTMLElement, childContext: IDataContext, component: IComponent, children: DocumentFragment) {
+    protected applyTemplate(element: HTMLElement, childScope: IScope, component: IComponent, children: DocumentFragment) {
         if (component.template) {
             // clear
             while (element.firstChild) {
@@ -100,10 +100,10 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
 
         // invoke preBindingInit
         if (component.viewModel && component.viewModel.hasOwnProperty("preInit")) {
-            (<any> component.viewModel).preInit(element, childContext);
+            (<any> component.viewModel).preInit(element, childScope);
         }
 
-        this.domManager.applyBindingsToDescendants(childContext, element);
+        this.domManager.applyBindingsToDescendants(childScope, element);
         // transclusion
         for (let i = 0; i < element.childNodes.length; i++) {
             const child = element.childNodes[i] as HTMLElement;
@@ -115,26 +115,29 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
 
         // invoke postBindingInit
         if (component.viewModel && component.viewModel.hasOwnProperty("postInit")) {
-            (<any> component.viewModel).postInit(element, childContext);
+            (<any> component.viewModel).postInit(element, childScope);
         }
     }
 
     private getProps(element: Element, state: INodeState): T {
         const props = {} as T;
         const attrBindings = state.getBindings<any>("attr");
-        attrBindings.forEach(x => props[x.parameter as string] = x.expression(state.context));
-        Array.from(element.attributes).forEach(x => {
-            if (props[x.name] === undefined) {
-                props[x.name] = x.value;
-            }
-        });
+        attrBindings.forEach(x => props[x.parameter as string] = x.expression(state.scope));
+        Object.assign(props, state.otherProps);
         return props;
     }
     private getVm(state: INodeState): T | undefined {
         const vm = state.getBindings<T>("attr").filter(x => x.parameter === "vm")[0];
         if (vm !== undefined) {
-            return vm.expression(state.context) as T;
+            return vm.expression(state.scope) as T;
         }
         return undefined;
     }
 }
+
+const api = `<app>
+                <h1 slot="header"><h1>
+                <div></div>
+                <p></p>
+                <div slot="footer"></div>
+            </app>`;

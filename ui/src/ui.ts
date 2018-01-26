@@ -3,7 +3,7 @@ import { ComponentRegistry } from "./componentRegistry";
 import { DomManager } from "./domManager";
 import { HtmlEngine } from "./templateEngines";
 import { BindingProvider } from "./bindingProvider";
-import { IDataContext, IConfiguration } from "./interfaces";
+import { IScope, IConfiguration } from "./interfaces";
 
 import { EventBinding } from "./bindings/event";
 import { IfBinding } from "./bindings/if";
@@ -30,7 +30,7 @@ export class ProactiveUI {
     }
 
     /**
-    * Applies bindings to the specified node and all of its children using the specified data context.
+    * Applies bindings to the specified node and all of its children using the specified data scope.
     * @param {Object} model The model to bind to
     * @param {Node} rootNode The node to be bound
     */
@@ -51,16 +51,20 @@ export class ProactiveUI {
         this.domManager.cleanNode(node);
     }
 
-    public contextFor(node: Element): IDataContext | undefined {
+    public scopeFor(node: Element): IScope | undefined {
         const nodeState = this.domManager.getState(node);
         if (nodeState !== undefined) {
-            return nodeState.context;
+            return nodeState.scope;
         }
         return undefined;
     }
 
-    public dataFor(node: Element): any {
-        return this.domManager.getDataContext(node);
+    public dataFor(node: Element): object | undefined {
+        const scope = this.domManager.getScope(node);
+        if (scope !== undefined) {
+            return scope.$data;
+        }
+        return undefined;
     }
 
     private registerCoreBindings(domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {
