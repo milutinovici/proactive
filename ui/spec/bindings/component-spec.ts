@@ -271,16 +271,14 @@ it("component: Components are properly isolated", expect => {
 // });
 
 it("component: Components support basic transclusion", expect => {
-    const str = `<test-component><span x-text="transclusion"></span></test-component>`;
+    const str = `<test-component>Hello</test-component>`;
     const el = <HTMLElement> parse(str)[0];
-    const template = `<header>Will it succeed?</header><slot>Oh noo!!!</slot><footer>Thank you for your patronage</footer>`;
+    const template = `<p></p><slot>Oh noo!!!</slot><br/>`;
 
     ui.components.register("test-component", { template: template });
 
-    const vm = { transclusion: "Oh Yeah!!!" };
-
-    expect.doesNotThrow(() => ui.applyBindings(vm, el));
-    expect.equal(el.childNodes[1]["innerHTML"], vm.transclusion);
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.equal(el.childNodes[1].textContent, "Hello");
     expect.end();
 });
 
@@ -316,12 +314,12 @@ it("component: Dynamic component", expect => {
     const vm = { name: new BehaviorSubject("test-one") };
     expect.doesNotThrow(() => ui.applyBindings(vm, el));
 
-    expect.equal(el.children[0].tagName, "P");
-    expect.equal(el.children[0].textContent, "first");
+    expect.equal(el.children[0].tagName, "P", "1st template inserted");
+    expect.equal(el.children[0].textContent, "first", "1st template correctly bound");
     vm.name.next("test-two");
 
-    expect.equal(el.children[0].tagName, "INPUT");
-    expect.equal(el.children[0]["value"], "second");
+    expect.equal(el.children[0].tagName, "INPUT", "2nd template inserted");
+    expect.equal(el.children[0]["value"], "second", "2nd template correctly bound");
 
     expect.end();
 

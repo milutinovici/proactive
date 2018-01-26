@@ -22,20 +22,22 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         this.engine = engine;
     }
 
-    public applyInternal(element: HTMLElement, binding: IBinding<string|object>, state: INodeState, shadowDom = false): void {
-        const host = element;
-        if (element.attachShadow !== undefined && shadowDom) {
-            element.attachShadow({ mode: "open" });
-            element = element.shadowRoot as any;
-        }
-        const component = this.getComponent(element, binding, state);
-        // transclusion
+    public applyInternal(element: HTMLElement, binding: IBinding<string | object>, state: INodeState, shadowDom = false): void {
+        // remove children for transclusion
         const children = this.engine.createFragment();
         this.domManager.applyBindingsToDescendants(state.scope, element);
         while (element.firstChild) {
             children.appendChild(element.removeChild(element.firstChild));
         }
 
+        // enable shadow-dom
+        const host = element;
+        if (element.attachShadow !== undefined && shadowDom) {
+            element.attachShadow({ mode: "open" });
+            element = element.shadowRoot as any;
+        }
+
+        const component = this.getComponent(element, binding, state);
         let internal: Subscription;
         function doCleanup() {
             if (internal) {
@@ -47,7 +49,12 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         binding.cleanup.add(component.subscribe(comp => {
             doCleanup();
             internal = new Subscription();
-
+            internal.add(() => {
+                this.domManager.cleanDescendants(element);
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild);
+                }
+            });
             // isolated nodestate and scope
             const scope = new Scope(comp.viewModel);
 
@@ -68,7 +75,6 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
                 internal.add(comp.viewModel.cleanup);
             }
 
-            // done
             this.applyTemplate(element, scope, comp, children);
         }));
         binding.cleanup.add(doCleanup);
@@ -86,34 +92,27 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             }));
         }));
     }
-    protected applyTemplate(element: HTMLElement, childScope: IScope, component: IComponent, children: DocumentFragment) {
-        if (component.template) {
-            // clear
-            while (element.firstChild) {
-                this.domManager.cleanNode(<Element> element.firstChild);
-                element.removeChild(element.firstChild);
-            }
-            element.appendChild(component.template);
-        }
-
+    protected applyTemplate(parent: HTMLElement, childScope: IScope, component: IComponent, boundChildren: DocumentFragment) {
         // invoke preBindingInit
-        if (component.viewModel && component.viewModel.hasOwnProperty("preInit")) {
-            (<any> component.viewModel).preInit(element, childScope);
+        if (component.viewModel.hasOwnProperty("preInit")) {
+            component.viewModel.preInit(parent, childScope);
         }
+        // apply bindings to component template
+        const inner = component.template.cloneNode(true) as Element;
+        this.domManager.applyBindingsToDescendants(childScope, inner);
 
-        this.domManager.applyBindingsToDescendants(childScope, element);
         // transclusion
-        for (let i = 0; i < element.childNodes.length; i++) {
-            const child = element.childNodes[i] as HTMLElement;
-            if (child.tagName === "SLOT") {
-                element.insertBefore(children.cloneNode(true), child);
-                this.domManager.cleanNode(element.removeChild(child) as HTMLElement);
-            }
+        const slots = Array.from(inner.querySelectorAll("slot"));
+        if (slots.length > 0 && boundChildren.childNodes.length) {
+            const slotParent = slots[0].parentNode as Node;
+            slotParent.insertBefore(boundChildren, slots[0]);
+            slotParent.removeChild(slots[0]);
         }
 
+        parent.appendChild(inner);
         // invoke postBindingInit
-        if (component.viewModel && component.viewModel.hasOwnProperty("postInit")) {
-            (<any> component.viewModel).postInit(element, childScope);
+        if (component.viewModel.hasOwnProperty("postInit")) {
+            component.viewModel.postInit(parent, childScope);
         }
     }
 
@@ -133,10 +132,3 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         return undefined;
     }
 }
-
-const api = `<app>
-                <h1 slot="header"><h1>
-                <div></div>
-                <p></p>
-                <div slot="footer"></div>
-            </app>`;
