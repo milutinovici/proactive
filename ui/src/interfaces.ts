@@ -6,7 +6,7 @@ export interface IBinding<T> {
     readonly parameter?: string;
     readonly cleanup: Subscription;
     readonly expression: (scope: IScope) => T | null;
-    evaluate(ctx: IScope, dataFlow: DataFlow): Observable<T> | Observer<T>;
+    evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T>;
     activate(node: Node, state: INodeState): void;
     deactivate(): void;
     clone(): IBinding<T>;
@@ -37,7 +37,7 @@ export interface IBindingHandler {
         * Applies the binding to the specified element
         * @param {Node} node The target node
         * @param {any} options The options for the handler
-        * @param {IScope} ctx The curent scope
+        * @param {IScope} scope The curent scope
         * @param {IDomElementState} state State of the target element
         * @param {IModule} module The module bound to the current binding scope
         **/
@@ -66,12 +66,12 @@ export interface IViewModel {
 export interface IComponentDescriptor {
     readonly name?: string;
     readonly template: DocumentFragment | string;
-    readonly viewModel?: IViewModel|(new (params?: Object) => IViewModel);
+    readonly viewModel?: IViewModel|(new (props?: Object) => IViewModel);
 }
 
 export interface IComponent {
     readonly template: DocumentFragment;
-    readonly viewModel?: IViewModel;
+    readonly viewModel: IViewModel;
 }
 export interface IConfiguration {
     document?: Document;

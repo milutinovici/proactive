@@ -47,29 +47,27 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         binding.cleanup.add(component.subscribe(comp => {
             doCleanup();
             internal = new Subscription();
-            // isolated nodestate and ctx
-            let scope = state.scope;
 
-            if (comp.viewModel) {
-                scope = new Scope(comp.viewModel);
+            // isolated nodestate and scope
+            const scope = new Scope(comp.viewModel);
 
-                // wire custom events
-                if (comp.viewModel.emitter !== undefined && isObservable(comp.viewModel.emitter)) {
-                    internal.add(comp.viewModel.emitter.subscribe(evt => host.dispatchEvent(evt)));
-                }
-                // apply custom component value
-                if (comp.viewModel.value !== undefined && isObservable(comp.viewModel.value)) {
-                    internal.add(comp.viewModel.value.subscribe(val => {
-                        host["value"] = val;
-                        const evt = this.engine.createEvent("change");
-                        host.dispatchEvent(evt);
-                    }));
-                }
-                // auto-dispose view-model
-                if (comp.viewModel.cleanup !== undefined) {
-                    internal.add(comp.viewModel.cleanup);
-                }
+            // wire custom events
+            if (comp.viewModel.emitter !== undefined && isObservable(comp.viewModel.emitter)) {
+                internal.add(comp.viewModel.emitter.subscribe(evt => host.dispatchEvent(evt)));
             }
+            // apply custom component value
+            if (comp.viewModel.value !== undefined && isObservable(comp.viewModel.value)) {
+                internal.add(comp.viewModel.value.subscribe(val => {
+                    host["value"] = val;
+                    const evt = this.engine.createEvent("change");
+                    host.dispatchEvent(evt);
+                }));
+            }
+            // auto-dispose view-model
+            if (comp.viewModel.cleanup !== undefined) {
+                internal.add(comp.viewModel.cleanup);
+            }
+
             // done
             this.applyTemplate(element, scope, comp, children);
         }));
@@ -81,7 +79,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         return config.pipe(mergeMap(cfg => {
             const name = typeof (cfg) === "string" ? cfg : cfg["name"];
             // object is useful for routes
-            Object["assign"](props, cfg);
+            Object.assign(props, cfg);
             return this.registry.load(name).pipe(map(desc => {
                 const vm = this.registry.initialize(desc, props, this.getVm(state));
                 return { viewModel: vm, template: desc.template } as IComponent;
@@ -126,6 +124,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         Object.assign(props, state.constantProps);
         return props;
     }
+    // for recursive components
     private getVm(state: INodeState): T | undefined {
         const vm = state.getBindings<T>("attr").filter(x => x.parameter === "vm")[0];
         if (vm !== undefined) {

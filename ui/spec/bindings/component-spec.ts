@@ -1,8 +1,8 @@
 import * as it from "tape";
-import * as Rx from "rxjs";
 import { IScope } from "../../src/interfaces";
 import { document, parse, fragment } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 const ui = new ProactiveUI({ document });
 
@@ -22,11 +22,11 @@ it("component: Loads a component using its name as tag", expect => {
     const str = `<test-component></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
-    const template = `<span x-text="foo">invalid</span>`;
+    const template = `<span>foo</span>`;
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings({ foo: "bar" }, el));
-    expect.equal(el.textContent, "bar");
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.equal(el.innerHTML, template);
     expect.end();
 });
 
@@ -35,9 +35,9 @@ it("component: Loads a component through an AMD module loader", expect => {
     const el = <HTMLElement> parse(str)[0];
     ui.components.register("test-component", "src/ui/components/my-select");
 
-    document["vmHook"] = (params: any) => {
-        expect.isNotEqual(params, undefined);
-        expect.equal(params.foo, 42);
+    document["vmHook"] = (props: any) => {
+        expect.isNotEqual(props, undefined);
+        expect.equal(props.foo, 42);
 
         // now install new hook for postBindingInit
         document["vmHook"] = () => {
@@ -108,28 +108,43 @@ it("component: Loads a template from a selector", expect => {
     expect.end();
 });
 
-it("component: When the component isn't supplying a view-model, binding against parent-scope works as expected", expect => {
-    const str = `<div x-component="'test-component'"></div>`;
+it("component: Stateless component with a constant prop", expect => {
+    const str = `<test-component name="John"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
-    const template = `<span x-text="foo">invalid</span>`;
+    const template = `<span>Hello my name is</span><span x-text="name">invalid</span>`;
 
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings({ foo: "bar" }, el));
-    expect.equal(el.children[0].textContent, "bar");
+    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.equal(el.children[1].textContent, "John");
     expect.end();
 });
 
-it("component: Params get passed to view-model constructor", expect => {
+it("component: Stateless component with an observable prop", expect => {
+    const str = `<test-component x-attr-name="foo"></test-component>`;
+    const el = <HTMLElement> parse(str)[0];
+
+    const template = `<span>Hello my name is</span><span x-text="name">invalid</span>`;
+
+    ui.components.register("test-component", { template: template });
+    const vm = { foo: new BehaviorSubject("John") };
+    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    expect.equal(el.children[1].textContent, "John");
+    vm.foo.next("Jim");
+    expect.equal(el.children[1].textContent, "Jim");
+    expect.end();
+});
+
+it("component: props get passed to view-model constructor", expect => {
     const str = `<div x-component="'test-component'" x-attr-foo="42"></div>`;
     const el = <HTMLElement> parse(str)[0];
 
     const template = `<span x-text="foo">invalid</span>`;
 
     // constructor 
-    function constr(this: any, params: any) {
-        this.foo = params.foo;
+    function constr(this: any, props: any) {
+        this.foo = props.foo;
     }
     ui.components.register("test-component", { template: template, viewModel: constr });
 
@@ -225,9 +240,9 @@ it("component: Components are properly isolated", expect => {
     ui.components.register("test-component", {
         template: template,
         viewModel: { bar: value,
-            preInit: (element: HTMLElement, ctx: IScope) => {
-                expect.notEqual(ctx.$data, viewModel, "viewModel of component is not equal to root viewModel");
-                expect.equal(ctx.$data["bar"], value);
+            preInit: (element: HTMLElement, scope: IScope) => {
+                expect.notEqual(scope.$data, viewModel, "viewModel of component is not equal to root viewModel");
+                expect.equal(scope.$data["bar"], value);
             },
         },
     });
@@ -236,12 +251,12 @@ it("component: Components are properly isolated", expect => {
     expect.equal(el.childNodes[0].childNodes[0].textContent, value);
     expect.end();
 });
-
+// doesn't work in jsdom
 // it("component: Components emit custom events", expect => {
 //     const str = `<test-component x-on-pulse="log"></test-component>`;
 //     const el = <HTMLElement> parse(str)[0];
 //     const template = `<span>pulse</span>`;
-//     const emitter = new Rx.Subject<CustomEvent>();
+//     const emitter = new Subject<CustomEvent>();
 //     ui.components.register("test-component", {
 //         template: template,
 //         viewModel: { emitter },
@@ -274,12 +289,12 @@ it("component: Components support value binding", expect => {
     const el = <HTMLElement> parse(str)[0];
 
     const template = `<input type="text" x-value="name"/><input type="text" x-value="surname"/>`;
-    const name = new Rx.BehaviorSubject("Hello");
-    const surname = new Rx.BehaviorSubject("World");
+    const name = new BehaviorSubject("Hello");
+    const surname = new BehaviorSubject("World");
     const component = { viewModel: { name, surname, value: name.combineLatest(surname, (n, s) => `${n} ${s}`) }, template: template };
     ui.components.register("test-component", component);
 
-    const vm = { obs: new Rx.BehaviorSubject("") };
+    const vm = { obs: new BehaviorSubject("") };
 
     expect.doesNotThrow(() => ui.applyBindings(vm, el));
     expect.equal("Hello World", vm.obs.getValue());
@@ -298,7 +313,7 @@ it("component: Dynamic component", expect => {
     ui.components.register("test-one", c1);
     ui.components.register("test-two", c2);
 
-    const vm = { name: new Rx.BehaviorSubject("test-one") };
+    const vm = { name: new BehaviorSubject("test-one") };
     expect.doesNotThrow(() => ui.applyBindings(vm, el));
 
     expect.equal(el.children[0].tagName, "P");

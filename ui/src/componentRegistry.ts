@@ -1,4 +1,4 @@
-import * as Rx from "rxjs";
+import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { IComponentDescriptor, IViewModel } from "./interfaces";
 import { observableRequire, isFunction, isElement } from "./utils";
@@ -30,7 +30,7 @@ export class ComponentRegistry {
         return this.components.has(name);
     }
 
-    public load(name: string): Rx.Observable<IComponentDescriptor> {
+    public load(name: string): Observable<IComponentDescriptor> {
         name = name.toUpperCase();
         let result = this.getDescriptor(name);
         result = result.pipe(map(x => <IComponentDescriptor> { name: name, template: this.compileTemplate(x.template), viewModel: x.viewModel }));
@@ -38,27 +38,27 @@ export class ComponentRegistry {
         return result;
     }
 
-    private getDescriptor(name: string): Rx.Observable<IComponentDescriptor> {
+    private getDescriptor(name: string): Observable<IComponentDescriptor> {
         const descriptor = this.components.get(name);
         if (descriptor != null) {
             if (typeof descriptor === "string") {
                 return observableRequire<IComponentDescriptor>(descriptor);
             } else {
-                return Rx.Observable.of<IComponentDescriptor>(descriptor);
+                return Observable.of<IComponentDescriptor>(descriptor);
             }
         } else {
             exception.next(new Error(`No component with name '${name}' is registered`));
-            return Rx.Observable.empty<IComponentDescriptor>();
+            return Observable.empty<IComponentDescriptor>();
         }
     }
 
-    public initialize<T extends Object>(descriptor: IComponentDescriptor, params: T, viewModel?: T): IViewModel | undefined {
-        let vm = viewModel || descriptor.viewModel;
+    public initialize<T extends Object>(descriptor: IComponentDescriptor, props: T, viewModel?: T): IViewModel | undefined {
+        let vm = viewModel || descriptor.viewModel || props; // if no vm defined, props are vm, aka stateless
         if (isFunction(vm)) {
             let model: IViewModel | undefined;
             try {
-                params["$router"] = this.router;
-                model = new vm(params);
+                props["$router"] = this.router;
+                model = new vm(props);
             } catch (e) {
                 exception.next(new Error(`Failed in constructor of component "${descriptor.name}". ${e.message}`));
             }
