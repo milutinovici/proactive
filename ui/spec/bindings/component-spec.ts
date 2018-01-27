@@ -282,6 +282,20 @@ it("component: Components support basic transclusion", expect => {
     expect.end();
 });
 
+it("component: Components support named transclusion", expect => {
+    const str = `<test-component><h1 slot="header">Hello</h1></test-component>`;
+    const el = <HTMLElement> parse(str)[0];
+    const template = `<header><slot name="header"></slot></header>
+                      <main><slot>Default</slot></main>
+                      <footer><slot name="footer"></slot></footer>`;
+
+    ui.components.register("test-component", { template: template });
+
+    expect.doesNotThrow(() => ui.applyBindings({}, el));
+    expect.equal(el.childNodes[0].childNodes[0].textContent, "Hello");
+    expect.end();
+});
+
 it("component: Components support value binding", expect => {
     const str = `<test-component x-value="obs"></test-component>`;
     const el = <HTMLElement> parse(str)[0];

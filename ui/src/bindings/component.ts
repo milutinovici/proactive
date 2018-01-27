@@ -1,12 +1,13 @@
 import { Observable, Subscription } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
 import { DomManager } from "../domManager";
-import { isObservable } from "../utils";
+import { isObservable, isElement } from "../utils";
 import { INodeState, IComponent, IScope, IBinding } from "../interfaces";
 import { Scope } from "../nodeState";
 import { BaseHandler } from "./baseHandler";
 import { ComponentRegistry } from "../componentRegistry";
 import { HtmlEngine } from "../templateEngines";
+import { exception } from "../exceptionHandlers";
 
 export class ComponentBinding<T> extends BaseHandler<string|object> {
     private readonly domManager: DomManager;
@@ -79,7 +80,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         }));
         binding.cleanup.add(doCleanup);
     }
-    protected getComponent(element: Element, binding: IBinding<string|object>, state: INodeState): Observable<IComponent> {
+    private getComponent(element: Element, binding: IBinding<string|object>, state: INodeState): Observable<IComponent> {
         const config = binding.evaluate(state.scope, this.dataFlow) as Observable<string | object>;
         const props = this.getProps(element, state);
         return config.pipe(mergeMap(cfg => {
@@ -92,30 +93,6 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             }));
         }));
     }
-    protected applyTemplate(parent: HTMLElement, childScope: IScope, component: IComponent, boundChildren: DocumentFragment) {
-        // invoke preBindingInit
-        if (component.viewModel.hasOwnProperty("preInit")) {
-            component.viewModel.preInit(parent, childScope);
-        }
-        // apply bindings to component template
-        const inner = component.template.cloneNode(true) as Element;
-        this.domManager.applyBindingsToDescendants(childScope, inner);
-
-        // transclusion
-        const slots = Array.from(inner.querySelectorAll("slot"));
-        if (slots.length > 0 && boundChildren.childNodes.length) {
-            const slotParent = slots[0].parentNode as Node;
-            slotParent.insertBefore(boundChildren, slots[0]);
-            slotParent.removeChild(slots[0]);
-        }
-
-        parent.appendChild(inner);
-        // invoke postBindingInit
-        if (component.viewModel.hasOwnProperty("postInit")) {
-            component.viewModel.postInit(parent, childScope);
-        }
-    }
-
     private getProps(element: Element, state: INodeState): T {
         const props = {} as T;
         const attrBindings = state.getBindings<any>("attr");
@@ -130,5 +107,50 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             return vm.expression(state.scope) as T;
         }
         return undefined;
+    }
+    protected applyTemplate(parent: HTMLElement, childScope: IScope, component: IComponent, boundChildren: DocumentFragment) {
+        // invoke preBindingInit
+        if (component.viewModel.hasOwnProperty("preInit")) {
+            component.viewModel.preInit(parent, childScope);
+        }
+
+        const template = component.template.cloneNode(true) as DocumentFragment;
+        this.domManager.applyBindingsToDescendants(childScope, template);
+
+        if (boundChildren.childNodes.length) {
+            this.transclude(template, boundChildren);
+        }
+        parent.appendChild(template);
+        // invoke postBindingInit
+        if (component.viewModel.hasOwnProperty("postInit")) {
+            component.viewModel.postInit(parent, childScope);
+        }
+    }
+    private transclude(boundTemplate: DocumentFragment, boundChildren: DocumentFragment) {
+        const slots = Array.from(boundTemplate.querySelectorAll("slot"));
+        if (slots.length === 0) {
+            exception.next(new Error(`Component ${parent} doesn't have a slot defined, but was passed ${boundChildren}`));
+        } else {
+            const defaultSlot = slots.find(x => !x.hasAttribute("name")) || slots[0];
+            for (let i = 0; i < boundChildren.childNodes.length; i++) {
+                const child = boundChildren.childNodes[i];
+                if (isElement(child) && child.hasAttribute("slot")) {
+                    const attr = child.attributes.getNamedItem("slot");
+                    const slot = slots.find(st => st.getAttribute("name") === attr.value);
+                    if (slot === undefined) {
+                        exception.next(new Error(`Component ${parent} doesn't have a slot with a name ${attr.value} defined`));
+                    } else {
+                        const slotParent = slot.parentNode as Node;
+                        slotParent.insertBefore(boundChildren, slot);
+                        slotParent.removeChild(slot);
+                    }
+                } else {
+                    const slotParent = defaultSlot.parentNode as Node;
+                    slotParent.insertBefore(boundChildren, defaultSlot);
+                }
+            }
+            const slotParent = defaultSlot.parentNode as Node;
+            slotParent.removeChild(defaultSlot);
+        }
     }
 }
