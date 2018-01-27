@@ -25,22 +25,22 @@ export class DomManager {
         this.applyBindingsRecursive(scope, rootNode);
     }
 
-    public applyBindingsToDescendants(scope: IScope, node: Element): void {
+    public applyBindingsToDescendants(scope: IScope, node: Node): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
-                this.applyBindingsRecursive(scope, node.childNodes[i] as Element);
+                this.applyBindingsRecursive(scope, node.childNodes[i]);
             }
         }
     }
 
-    public cleanNode(rootNode: Element): void {
+    public cleanNode(rootNode: Node): void {
         if (!isElement(rootNode) && !isTextNode(rootNode)) {
             return;
         }
         this.cleanNodeRecursive(rootNode);
     }
 
-    public cleanDescendants(node: Element): void {
+    public cleanDescendants(node: Node): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
                 this.cleanNodeRecursive(node.childNodes[i]);
