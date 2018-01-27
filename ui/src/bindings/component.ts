@@ -25,10 +25,10 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
 
     public applyInternal(element: HTMLElement, binding: IBinding<string | object>, state: INodeState, shadowDom = false): void {
         // remove children for transclusion
-        const children = this.engine.createFragment();
+        const children: Node[] = [];
         this.domManager.applyBindingsToDescendants(state.scope, element);
         while (element.firstChild) {
-            children.appendChild(element.removeChild(element.firstChild));
+            children.push(element.removeChild(element.firstChild));
         }
 
         // enable shadow-dom
@@ -88,8 +88,8 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             // object is useful for routes
             Object.assign(props, cfg);
             return this.registry.load(name).pipe(map(desc => {
-                const vm = this.registry.initialize(desc, props, this.getVm(state));
-                return { viewModel: vm, template: desc.template } as IComponent;
+                const vm = this.registry.initialize(name, desc, props, this.getVm(state));
+                return { viewModel: vm, template: desc.template, name: name } as IComponent;
             }));
         }));
     }
@@ -108,7 +108,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         }
         return undefined;
     }
-    protected applyTemplate(parent: HTMLElement, childScope: IScope, component: IComponent, boundChildren: DocumentFragment) {
+    protected applyTemplate(parent: HTMLElement, childScope: IScope, component: IComponent, boundChildren: Node[]) {
         // invoke preBindingInit
         if (component.viewModel.hasOwnProperty("preInit")) {
             component.viewModel.preInit(parent, childScope);
@@ -117,8 +117,8 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         const template = component.template.cloneNode(true) as DocumentFragment;
         this.domManager.applyBindingsToDescendants(childScope, template);
 
-        if (boundChildren.childNodes.length) {
-            this.transclude(template, boundChildren);
+        if (boundChildren.length) {
+            this.transclude(component.name, template, boundChildren);
         }
         parent.appendChild(template);
         // invoke postBindingInit
@@ -126,27 +126,27 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             component.viewModel.postInit(parent, childScope);
         }
     }
-    private transclude(boundTemplate: DocumentFragment, boundChildren: DocumentFragment) {
+    private transclude(name: string, boundTemplate: DocumentFragment, boundChildren: Node[]) {
         const slots = Array.from(boundTemplate.querySelectorAll("slot"));
         if (slots.length === 0) {
-            exception.next(new Error(`Component ${parent} doesn't have a slot defined, but was passed ${boundChildren}`));
+            exception.next(new Error(`Component ${name} doesn't have a slot defined, but was passed ${boundChildren}`));
         } else {
             const defaultSlot = slots.find(x => !x.hasAttribute("name")) || slots[0];
-            for (let i = 0; i < boundChildren.childNodes.length; i++) {
-                const child = boundChildren.childNodes[i];
+            for (let i = 0; i < boundChildren.length; i++) {
+                const child = boundChildren[i];
                 if (isElement(child) && child.hasAttribute("slot")) {
                     const attr = child.attributes.getNamedItem("slot");
                     const slot = slots.find(st => st.getAttribute("name") === attr.value);
                     if (slot === undefined) {
-                        exception.next(new Error(`Component ${parent} doesn't have a slot with a name ${attr.value} defined`));
+                        exception.next(new Error(`Component ${name} doesn't have a slot with a name ${attr.value} defined`));
                     } else {
                         const slotParent = slot.parentNode as Node;
-                        slotParent.insertBefore(boundChildren, slot);
+                        slotParent.insertBefore(child, slot);
                         slotParent.removeChild(slot);
                     }
                 } else {
                     const slotParent = defaultSlot.parentNode as Node;
-                    slotParent.insertBefore(boundChildren, defaultSlot);
+                    slotParent.insertBefore(child, defaultSlot);
                 }
             }
             const slotParent = defaultSlot.parentNode as Node;

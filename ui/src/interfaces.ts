@@ -64,12 +64,12 @@ export interface IViewModel {
 }
 
 export interface IComponentDescriptor {
-    readonly name?: string;
     readonly template: DocumentFragment | string;
     readonly viewModel?: IViewModel|(new (props?: Object) => IViewModel);
 }
 
 export interface IComponent {
+    readonly name: string;
     readonly template: DocumentFragment;
     readonly viewModel: IViewModel;
 }

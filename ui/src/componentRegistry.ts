@@ -52,7 +52,7 @@ export class ComponentRegistry {
         }
     }
 
-    public initialize<T extends Object>(descriptor: IComponentDescriptor, props: T, viewModel?: T): IViewModel | undefined {
+    public initialize<T extends Object>(name: string, descriptor: IComponentDescriptor, props: T, viewModel?: T): IViewModel | undefined {
         let vm = viewModel || descriptor.viewModel || props; // if no vm defined, props are vm, aka stateless
         if (isFunction(vm)) {
             let model: IViewModel | undefined;
@@ -60,7 +60,7 @@ export class ComponentRegistry {
                 props["$router"] = this.router;
                 model = new vm(props);
             } catch (e) {
-                exception.next(new Error(`Failed in constructor of component "${descriptor.name}". ${e.message}`));
+                exception.next(new Error(`Failed in constructor of component "${name}". ${e.message}`));
             }
             return model;
         }
