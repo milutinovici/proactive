@@ -11,25 +11,28 @@
   "author": "Ivan Milutinović",
   "license": "MIT",
   "dependencies": {
-    "rxjs": "^5.5.0"
+    "rxjs": "^5.5.6"
   },
   "devDependencies": {
-    "typescript": "^2.5.3",
+    "typescript": "^2.6.2",
     "tape": "^4.8.0",
     "tap-spec": "^4.1.1",
     "benchmark": "^2.1.4",
     "gulp": "^3.9.1",
-    "gulp-typescript": "^3.2.2",
+    "gulp-typescript": "^3.2.4",
     "gulp-tape": "^0.0.9",
     "gulp-benchmark": "^1.1.1",
-    "gulp-sourcemaps": "^2.6.1",
-    "merge2": "^1.2.0",
-    "@types/tape": "^4.2.30",
-    "@types/benchmark": "^1.0.30"
+    "gulp-sourcemaps": "^2.6.4",
+    "merge2": "^1.2.1",
+    "@types/tape": "^4.2.31",
+    "@types/benchmark": "^1.0.31"
   },
   "main": "lib/src/extensions.js",
   "types": "lib/src/extensions.d.ts",
   "directories": {
     "lib": "lib/src"
-  }
+  },
+  "files": [
+    "lib/src"
+  ]
 }

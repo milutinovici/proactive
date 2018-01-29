@@ -18,10 +18,10 @@ gulp.task("build",  () => {
     ]);
 });
  
-gulp.task("test", () => {
+gulp.task("test", ["build"], () => {
     const result = gulp.src("./lib/spec/spec.js")
                        .pipe(tape({ reporter: spec() }));
     }
 );
 
-gulp.task("bench", () => gulp.src("./lib/perf/**/*.js", {read: false}).pipe(benchmark()));
+gulp.task("bench", ["build"], () => gulp.src("./lib/perf/**/*.js", {read: false}).pipe(benchmark()));
