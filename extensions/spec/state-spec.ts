@@ -3,7 +3,7 @@ import * as it from "tape";
 import "../src/extensions";
 
 it("can be created using factory method", expect => {
-    const value = Rx.Observable.never().toState(0);
+    const value = Rx.Observable.never<number>().toState(0);
     expect.true(value !== undefined);
     expect.end();
 });

@@ -37,11 +37,11 @@ function createFunction<T>(observable: Observable<T>): Observable<T> {
             return accessor.getValue();
         }
     } as any;
-    const call = accessor["call"];
-    const apply = accessor["apply"];
-    Object["setPrototypeOf"](accessor, observable);
-    accessor["call"] = call;
-    accessor["apply"] = apply;
+    const call = accessor.call;
+    const apply = accessor.apply;
+    Object.setPrototypeOf(accessor, observable);
+    accessor.call = call;
+    accessor.apply = apply;
     return accessor;
 }
 
