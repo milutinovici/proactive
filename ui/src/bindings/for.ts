@@ -20,9 +20,8 @@ export class ForBinding<T> extends BaseHandler<T[]> {
 
     public applyInternal(node: Element, binding: IBinding<T[]>, state: INodeState): void {
         const observable = binding.evaluate(state.scope, this.dataFlow) as Observable<T[]>;
-        const parameters = (binding.parameter as string).split("-"); // item and index name
-        const itemName = parameters[0];
-        const indexName = parameters[1];
+        const itemName = binding.parameters[0];
+        const indexName = binding.parameters[1];
         const parent = node.parentElement as HTMLElement;
         const placeholder: Comment = this.engine.createComment(`for ${binding.text}`);
         this.domManager.setState(placeholder, state);

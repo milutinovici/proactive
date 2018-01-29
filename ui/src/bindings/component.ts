@@ -1,7 +1,7 @@
 import { Observable, Subscription } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
 import { DomManager } from "../domManager";
-import { isObservable, isElement, isTextNode, removeEmptyChildren } from "../utils";
+import { isObservable, isElement, removeEmptyChildren } from "../utils";
 import { INodeState, IComponent, IScope, IBinding } from "../interfaces";
 import { Scope } from "../nodeState";
 import { BaseHandler } from "./baseHandler";
@@ -87,9 +87,12 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         const config = binding.evaluate(state.scope, this.dataFlow) as Observable<string | object>;
         const props = this.getProps(element, state);
         return config.pipe(mergeMap(cfg => {
-            const name = typeof (cfg) === "string" ? cfg : cfg["name"];
-            // object is useful for routes
-            Object.assign(props, cfg);
+            const isObj = typeof (cfg) !== "string";
+            const name = isObj  ? cfg["name"] : cfg;
+            if (isObj) {
+                // object is useful for routes
+                Object.assign(props, cfg);
+            }
             return this.registry.load(name).pipe(map(desc => {
                 const vm = this.registry.initialize(name, desc, props, this.getVm(state));
                 return { viewModel: vm, template: desc.template, name: name } as IComponent;
@@ -99,13 +102,13 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
     private getProps(element: Element, state: INodeState): T {
         const props = {} as T;
         const attrBindings = state.getBindings<any>("attr");
-        attrBindings.forEach(x => props[x.parameter as string] = x.expression(state.scope));
+        attrBindings.forEach(x => props[x.parameters[0] as string] = x.expression(state.scope));
         Object.assign(props, state.constantProps);
         return props;
     }
     // for recursive components
     private getVm(state: INodeState): T | undefined {
-        const vm = state.getBindings<T>("attr").filter(x => x.parameter === "vm")[0];
+        const vm = state.getBindings<T>("attr").filter(x => x.parameters[0] === "vm")[0];
         if (vm !== undefined) {
             return vm.expression(state.scope) as T;
         }

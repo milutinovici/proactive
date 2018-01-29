@@ -33,7 +33,7 @@ export class BindingProvider {
         // check if element is custom element (component)
         if (this.components.registered(tag)) {
             // when a component is referenced as custom-element, apply a virtual 'component' binding
-            bindings.push(new Binding<string>(this.handlers.get("component") as IBindingHandler, `'${tag}'`));
+            bindings.push(new Binding<string>(this.handlers.get("component") as IBindingHandler, `'${tag}'`, []));
             controlsDescendants += 1;
         }
         const props = {};
@@ -60,23 +60,22 @@ export class BindingProvider {
 
     private attributeToBindingOrProp(attribute: Attr): Binding<any> | [string, string|boolean|number] {
         const attrName = attribute.name;
-        if (attrName[0] === BindingProvider.PREFIX) {
-            const array = attribute.name.split("-");
-            array.shift();
+        if (attrName[0] === BindingProvider.PREFIX && attrName[1] === "-") {
+            const array = attrName.slice(2).split(":");
             const name = array.shift() as string;
             const handler = this.handlers.get(name);
             if (!handler) {
                 exception.next(new Error(`Binding handler "${name}" has not been registered.`));
                 return [attrName, attribute.value];
             } else {
-                return new Binding<any>(handler, attribute.value, array.join("-") || undefined);
+                return new Binding<any>(handler, attribute.value, array);
             }
         } else if (attrName[0] === BindingProvider.ATTR) {
             const handler = this.handlers.get("attr") as IBindingHandler;
-            return new Binding<any>(handler, attribute.value, attrName.substring(1));
+            return new Binding<any>(handler, attribute.value, [attrName.substring(1)]);
         } else if (attrName[0] === BindingProvider.ON) {
             const handler = this.handlers.get("on") as IBindingHandler;
-            return new Binding<any>(handler, attribute.value, attrName.substring(1));
+            return new Binding<any>(handler, attribute.value, [attrName.substring(1)]);
         } else {
             return [attrName, attribute.value === "" ? true : tryParse(attribute.value)];
         }
@@ -85,6 +84,6 @@ export class BindingProvider {
     private handleBarsToBinding(node: Node): Binding<string> {
         const trimmed = (node.nodeValue as string).trim();
         const expression = trimmed.slice(2, trimmed.length - 2);
-        return new Binding<string>(this.handlers.get("text") as IBindingHandler, expression, expression);
+        return new Binding<string>(this.handlers.get("text") as IBindingHandler, expression, [expression]);
     }
 }

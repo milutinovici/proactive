@@ -23,10 +23,10 @@ export abstract class BaseHandler<T> implements IBindingHandler {
             exception.next(new Error(`more than 1 ${this.name} binding on element ${node}`));
             return;
         }
-        if (this.parametricity === Parametricity.Forbidden && binding.parameter !== undefined) {
+        if (this.parametricity === Parametricity.Forbidden && binding.parameters.length > 0) {
             exception.next(new Error(`binding "${this.name}" with expression "${binding.text}" on element ${node} can't have parameters`));
             return;
-        } else if (this.parametricity === Parametricity.Required && binding.parameter === undefined) {
+        } else if (this.parametricity === Parametricity.Required && binding.parameters.length === 0) {
             exception.next(new Error(`binding "${this.name}" with expression "${binding.text}" on element ${node} must have a parameter`));
             return;
         }
@@ -46,7 +46,7 @@ export abstract class SimpleHandler<T> extends BaseHandler<T> {
             exception.next(new Error(`binding "${this.name}" with expression "${binding.text}" on element ${node} must be supplied with an observer or a function`));
             return;
         }
-        binding.cleanup.add(this.apply(node, obs, binding.parameter));
+        binding.cleanup.add(this.apply(node, obs, binding.parameters[0]));
     }
     public abstract apply(el: Element, observable: Observable<T> | Observer<T>, parameter?: string): Subscription;
 }

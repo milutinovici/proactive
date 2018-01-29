@@ -71,3 +71,9 @@ export function range(start: number, end: number) {
     }
     return array;
 }
+export function hasAttr(element: HTMLElement, attr: string, val?: string) {
+    return Array.prototype.some.call(element.attributes, (x: Attr) => x.name === attr);
+}
+export function hasClass(element: HTMLElement, css: string) {
+    return element.className.indexOf(css) !== -1;
+}

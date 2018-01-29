@@ -1,14 +1,14 @@
 import * as it from "tape";
-import * as px from "@proactive/extensions";
-import { document, parse } from "../spec-utils";
+import { BehaviorSubject } from "rxjs";
+import { document, parse, hasClass } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 const ui = new ProactiveUI({ document });
 
 it("css: binding to a string constant", expect => {
-    const template = `<div x-css-foo="true">empty</div>`;
+    const template = `<div x-css:foo="true">empty</div>`;
     const el = <HTMLElement> parse(template)[0];
 
-    let model = {};
+    const model = {};
     expect.false(hasClass(el, "foo"));
     expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasClass(el, "foo"));
@@ -16,11 +16,10 @@ it("css: binding to a string constant", expect => {
 });
 
 it("css: binding to a non-observable model value", expect => {
-    const template = `<div x-css-foo="constantBool">empty</div>`;
+    const template = `<div x-css:foo="bool">empty</div>`;
     const el = <HTMLElement> parse(template)[0];
 
-    let model = createCssModel();
-    model.constantString = "foo";
+    const model = { bool: true };
 
     expect.false(hasClass(el, "foo"));
     expect.doesNotThrow(() => ui.applyBindings(model, el));
@@ -29,31 +28,31 @@ it("css: binding to a non-observable model value", expect => {
 });
 
 it("css: binding to a observable model value", expect => {
-    const template = `<div x-css-foo="observableBool">empty</div>`;
+    const template = `<div x-css:foo="obs">empty</div>`;
     const el = <HTMLElement> parse(template)[0];
 
-    let model = createCssModel();
+    const model = { obs: new BehaviorSubject(true) };
 
     expect.false(hasClass(el, "foo"));
     expect.doesNotThrow(() => ui.applyBindings(model, el));
     expect.true(hasClass(el, "foo"));
 
     // should reflect value changes
-    model.observableBool(false);
+    model.obs.next(false);
     expect.false(hasClass(el, "foo"));
 
     // binding should stop updating after getting disposed
     ui.cleanNode(el);
-    model.observableBool(true);
+    model.obs.next(true);
     expect.false(hasClass(el, "foo"));
     expect.end();
 });
 
 it("css: binding multiple css classes to multiple observable model properties", expect => {
-    const template = `<div x-css-foo="observableBool" x-css-bar="observableBool2">empty</div>`;
+    const template = `<div x-css:foo="obs1" x-css:bar="obs2">empty</div>`;
     const el = <HTMLElement> parse(template)[0];
 
-    let model = createCssModel();
+    let model = { obs1: new BehaviorSubject(true), obs2: new BehaviorSubject(false) };
 
     expect.false(hasClass(el, "foo"));
     expect.false(hasClass(el, "bar"));
@@ -62,43 +61,26 @@ it("css: binding multiple css classes to multiple observable model properties", 
     expect.false(hasClass(el, "bar"));
 
     // should reflect value changes
-    model.observableBool(false);
-    model.observableBool2(true);
+    model.obs1.next(false);
+    model.obs2.next(true);
     expect.false(hasClass(el, "foo"));
     expect.true(hasClass(el, "bar"));
 
-    model.observableBool(false);
-    model.observableBool2(false);
+    model.obs1.next(false);
+    model.obs2.next(false);
     expect.false(hasClass(el, "foo"));
     expect.false(hasClass(el, "bar"));
 
-    model.observableBool(true);
-    model.observableBool2(true);
+    model.obs1.next(true);
+    model.obs2.next(true);
     expect.true(hasClass(el, "foo"));
     expect.true(hasClass(el, "bar"));
 
     // binding should stop updating after getting disposed
     ui.cleanNode(el);
-    model.observableBool(false);
-    model.observableBool2(false);
+    model.obs1.next(false);
+    model.obs2.next(false);
     expect.true(hasClass(el, "foo"));
     expect.true(hasClass(el, "bar"));
     expect.end();
 });
-
-function createCssModel() {
-    return {
-        constantBool: true,
-        constantNumeric: 42,
-        constantString: "bar",
-        observableBool: px.value(true),
-        observableBool2: px.value(false),
-        observableNumeric: px.value(96),
-        observableString: px.value("voodoo"),
-        observableString2: px.value("magic"),
-    };
-};
-
-function hasClass(element: HTMLElement, css: string) {
-    return element.className.indexOf(css) !== -1;
-}

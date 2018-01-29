@@ -31,7 +31,7 @@ it("component: Loads a component using its name as tag", expect => {
 });
 
 it("component: Loads a component through an AMD module loader", expect => {
-    const str = `<div x-component="'test-component'" x-attr-foo="42"></div>`;
+    const str = `<div x-component="'test-component'" foo="42"></div>`;
     const el = <HTMLElement> parse(str)[0];
     ui.components.register("test-component", "src/ui/components/my-select");
 
@@ -122,7 +122,7 @@ it("component: Stateless component with a constant prop", expect => {
 });
 
 it("component: Stateless component with an observable prop", expect => {
-    const str = `<test-component x-attr-name="foo"></test-component>`;
+    const str = `<test-component x-attr:name="foo"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
     const template = `<span>Hello my name is</span><span x-text="name">invalid</span>`;
@@ -137,7 +137,7 @@ it("component: Stateless component with an observable prop", expect => {
 });
 
 it("component: props get passed to view-model constructor", expect => {
-    const str = `<div x-component="'test-component'" x-attr-foo="42"></div>`;
+    const str = `<div x-component="'test-component'" foo="42"></div>`;
     const el = <HTMLElement> parse(str)[0];
 
     const template = `<span x-text="foo">invalid</span>`;
@@ -154,7 +154,7 @@ it("component: props get passed to view-model constructor", expect => {
 });
 
 it("component: Invokes preBindingInit", expect => {
-    const str = `<test-component id="fixture5" x-attr-foo="42"></test-component>`;
+    const str = `<test-component id="fixture5" foo="42"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
     const template = "<span>foo</span>";
@@ -181,7 +181,7 @@ it("component: Invokes preBindingInit", expect => {
 });
 
 it("component: Invokes postBindingInit", expect => {
-    const str = `<test-component id="fixture5" x-attr-foo="42"></test-component>`;
+    const str = `<test-component id="fixture5" foo="42"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
     const template = "<span>foo</span>";
@@ -311,7 +311,6 @@ it("component: Components support value binding", expect => {
     expect.doesNotThrow(() => ui.applyBindings(vm, el));
     expect.equal("Hello World", vm.obs.getValue());
     expect.end();
-
 });
 
 it("component: Dynamic component", expect => {
@@ -336,17 +335,16 @@ it("component: Dynamic component", expect => {
     expect.equal(el.children[0]["value"], "second", "2nd template correctly bound");
 
     expect.end();
-
 });
 
 it("component: Recursive component", expect => {
-    const str = `<tree-comp x-attr-vm="$data"></tree-comp>`;
+    const str = `<tree-comp x-attr:vm="$data"></tree-comp>`;
     const el = parse(str)[0] as HTMLElement;
 
     const t1 = `<ul>
-                    <li x-for-item="$data">
+                    <li x-for:item="$data">
                         <span x-text="item.key"></span>&nbsp<span x-if="typeof item.value !=='object'" x-text="item.value"></span>
-                        <tree-comp x-if="typeof item.value ==='object'" x-attr-vm="item.value"></tree-comp>
+                        <tree-comp x-if="typeof item.value ==='object'" x-attr:vm="item.value"></tree-comp>
                     </li>
                 </ul>`;
 
@@ -358,7 +356,6 @@ it("component: Recursive component", expect => {
     expect.equal(el.children[0].children[1].children[1].children[0].children[1].children[1].textContent, "!!!");
 
     expect.end();
-
 });
 
 it("component: object passed instead of string", expect => {
@@ -379,5 +376,4 @@ it("component: object passed instead of string", expect => {
     expect.equal(el.children[0].textContent, "hello");
 
     expect.end();
-
 });

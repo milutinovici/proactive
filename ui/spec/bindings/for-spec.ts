@@ -6,7 +6,7 @@ import { ProactiveUI } from "../../src/ui";
 const ui = new ProactiveUI({ document });
 
 it("for: binding to a standard array", expect => {
-    const template = `<ul><li x-for-number="array" x-text="number"></li></ul>`;
+    const template = `<ul><li x-for:number="array" x-text="number"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = [1, 5, 7];
@@ -19,7 +19,7 @@ it("for: binding to a standard array", expect => {
 });
 
 it("for: binding to a standard array and template accessing index", expect => {
-    const template = `<ul><li x-for-item-i="array" x-text="i"></li></ul>`;
+    const template = `<ul><li x-for:item:i="array" x-text="i"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = [1, 5, 7];
@@ -32,7 +32,7 @@ it("for: binding to a standard array and template accessing index", expect => {
 });
 
 it("for: binding to a value yielding an array", expect => {
-    const template = `<ul><li x-for-item-i="src" x-text="i"></li></ul>`;
+    const template = `<ul><li x-for:item:i="src" x-text="i"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let prop = new BehaviorSubject<number[]>([]);
@@ -49,7 +49,7 @@ it("for: binding to a value yielding an array", expect => {
 });
 
 it("for: binding to a observable array containing numbers", expect => {
-    const template = `<ul><li x-for-item-i="array" x-text="i"></li></ul>`;
+    const template = `<ul><li x-for:item:i="array" x-text="i"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array =  new BehaviorSubject<number[]>([1, 5, 7]);
@@ -61,7 +61,7 @@ it("for: binding to a observable array containing numbers", expect => {
 });
 
 it("for: binding to a observable array containing numbers without initialContents", expect => {
-    const template = `<ul><li x-for-value="src" x-text="value"></li></ul>`;
+    const template = `<ul><li x-for:value="src" x-text="value"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray<number>([]);
@@ -79,7 +79,7 @@ it("for: binding to a observable array containing numbers without initialContent
 });
 
 it("for: binding to a observable array adding/removing", expect => {
-    const template = `<ul><li x-for-value="src" x-text="value"></li></ul>`;
+    const template = `<ul><li x-for:value="src" x-text="value"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([1, 3, 5]);
@@ -105,7 +105,7 @@ it("for: binding to a observable array adding/removing", expect => {
 });
 
 it("for: binding to a observable array moving", expect => {
-    const template = `<ul><li x-for-item="$data" x-text="item"></li></ul>`;
+    const template = `<ul><li x-for:item="$data" x-text="item"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([1, 3, 5]);
@@ -121,7 +121,7 @@ it("for: binding to a observable array moving", expect => {
 });
 
 it("for: binding to a observable array containing model", expect => {
-    const template = `<ul><li x-for-item="$data">
+    const template = `<ul><li x-for:item="$data">
                         <span class="part1" x-text="item.foo"></span>
                       </li></ul>`;
     const el = <HTMLElement> parse(template)[0];
@@ -136,7 +136,7 @@ it("for: binding to a observable array containing model", expect => {
 });
 
 it("for: observable array of observables", expect => {
-    const template = `<ul><li x-for-item="src">
+    const template = `<ul><li x-for:item="src">
                         <span class="part1" x-text="item.foo"></span>
                       </li></ul>`;
     const el = <HTMLElement> parse(template)[0];
@@ -152,7 +152,7 @@ it("for: observable array of observables", expect => {
 
 it("for: binds items after for", expect => {
     const template = `<ul>
-                        <li x-for-item="src" x-text="item"></li>
+                        <li x-for:item="src" x-text="item"></li>
                         <li x-text="'hello'">BAD</li>
                       </ul>`;
     const el = <HTMLElement> parse(template)[0];
@@ -165,7 +165,7 @@ it("for: binds items after for", expect => {
 
 it("for: works on a map", expect => {
     const template = `<ul>
-                        <li x-for-item="src" x-text="item.value"></li>
+                        <li x-for:item="src" x-text="item.value"></li>
                       </ul>`;
     const el = <HTMLElement> parse(template)[0];
     let map = new Map();
@@ -181,7 +181,7 @@ it("for: works on a map", expect => {
 
 it("for: works on an object", expect => {
     const template = `<ul>
-                        <li x-for-item="src" x-text="item.value" x-attr-title="item.key"></li>
+                        <li x-for:item="src" x-text="item.value" x-attr-title="item.key"></li>
                       </ul>`;
     const el = <HTMLElement> parse(template)[0];
 
@@ -195,7 +195,7 @@ it("for: works on an object", expect => {
 });
 
 it("for: cleans up after iteself", expect => {
-    const template = `<ul><li x-for-item="src" x-text="item"></li></ul>`;
+    const template = `<ul><li x-for:item="src" x-text="item"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
     const array = [1, 5, 7];
 

@@ -6,79 +6,74 @@ import { ProactiveUI } from "../../src/ui";
 const ui = new ProactiveUI({ document });
 
 it("event: binds a single event to a handler function", expect => {
-    const template = `<button x-on-click="clickHandler">Click me</button>`;
+    const template = `<button x-on:click="firstHandler">Click me</button>`;
     const el = <HTMLInputElement> parse(template)[0];
 
-    let called = false;
-    let eventName: string | undefined = undefined;
-    let callCount = 0;
-
-    let model = {
-        clickHandler: (e: Event) => {
-            callCount++;
-            called = true;
-            eventName = e.type;
-        },
-    };
+    const model = new TestVM();
 
     expect.doesNotThrow(() => ui.applyBindings(model, el));
     triggerEvent(el, "click");
 
-    expect.true(called, "handler was called");
-    expect.equal(eventName, "click", "click event was triggered");
-    expect.equal(callCount, 1, "event was triggered once");
+    expect.equal(model.firstCount, 1, `handler was called`);
+    expect.equal(model.firstName, "click", "click event was triggered");
 
     ui.cleanNode(el);
-    called = false;
 
     // should no longer fire
     triggerEvent(el, "click");
 
-    expect.false(called, "handler is not called after clean operation");
+    expect.equal(model.firstCount, 1, "handler is not called after clean operation");
+    expect.end();
+});
+
+it("event: use shorthand for event binding", expect => {
+    const template = `<button @click="firstHandler">Click me</button>`;
+    const el = <HTMLInputElement> parse(template)[0];
+    const model = new TestVM();
+
+    expect.doesNotThrow(() => ui.applyBindings(model, el));
+    triggerEvent(el, "click");
+
+    expect.equal(model.firstCount, 1, `handler was called`);
+    expect.equal(model.firstName, "click", "click event was triggered");
+
+    ui.cleanNode(el);
+
+    // should no longer fire
+    triggerEvent(el, "click");
+
+    expect.equal(model.firstCount, 1, "handler is not called after clean operation");
     expect.end();
 });
 
 it("event: binds multiple events to handler functions", expect => {
-    const template = `<input type="text" x-on-click="clickHandler" x-on-input="inputHandler" />`;
+    const template = `<input type="text" x-on:click="firstHandler" x-on:input="secondHandler" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
-    let clickCallCount = 0;
-    let inputCallCount = 0;
-
-    let model = {
-        clickHandler: (e: Event) => {
-            clickCallCount++;
-        },
-        inputHandler: (e: Event) => {
-            inputCallCount++;
-        },
-    };
+    const model = new TestVM();
 
     expect.doesNotThrow(() => ui.applyBindings(model, el));
 
     triggerEvent(el, "click");
-    expect.equal(clickCallCount, 1, "click handler was called 1 time");
+    expect.equal(model.firstCount, 1, "click handler was called 1 time");
 
     el.value = "new";
     triggerEvent(el, "input");
-    expect.equal(inputCallCount, 1, "input handler was called 1 time");
+    expect.equal(model.secondCount, 1, "input handler was called 1 time");
 
     ui.cleanNode(el);
-    clickCallCount = 0;
-    inputCallCount = 0;
 
-    // should no longer fire
     triggerEvent(el, "click");
-    expect.equal(clickCallCount, 0);
+    expect.equal(model.firstCount, 1, "handler is not called after clean operation");
 
     el.value = "old";
     triggerEvent(el, "input");
-    expect.equal(inputCallCount, 0);
+    expect.equal(model.secondCount, 1, "handler is not called after clean operation");
     expect.end();
 });
 
 it("event: binds multiple events to observers", expect => {
-    const template = `<input type="text" x-on-click="clickObserver" x-on-input="inputObserver" />`;
+    const template = `<input type="text" x-on:click="clickObserver" x-on:input="inputObserver" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let clickCallCount = 0;
@@ -119,7 +114,7 @@ it("event: binds multiple events to observers", expect => {
 });
 
 it("event: pass parameters to function", expect => {
-    const template = `<input type="text" x-on-click="custom(5, 2)" />`;
+    const template = `<input type="text" x-on:click="custom(5, 2)" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let first = 0;
@@ -138,80 +133,58 @@ it("event: pass parameters to function", expect => {
 });
 
 it("event: binds a single key to a handler function", expect => {
-    const template = `<input x-key-enter="clickHandler"/>`;
+    const template = `<input x-key:enter="firstHandler"/>`;
     const el = <HTMLInputElement> parse(template)[0];
-    let callCount = 0;
 
-    let model = {
-        clickHandler: (on: KeyboardEvent) => {
-            callCount++;
-        },
-    };
+    let model = new TestVM();
 
     expect.doesNotThrow(() => ui.applyBindings(model, el));
-    expect.true(callCount === 0, "call count is initially 0");
+    expect.equal(model.firstCount, 0, "call count is initially 0");
 
     triggerEvent(el, "keydown", 13);
-
-    expect.true(callCount === 1,  "call count is 1 after pressing enter");
+    expect.equal(model.firstCount, 1,  "call count is 1 after pressing enter");
 
     triggerEvent(el, "keydown", 14);
-    expect.true(callCount === 1, "call count is still 1 after pressing another key");
+    expect.equal(model.firstCount, 1, "call count is still 1 after pressing another key");
 
     ui.cleanNode(el);
-    callCount = 0;
 
-    // should no longer fire
     triggerEvent(el, "click");
-
-    expect.true(callCount === 0, "not called, after clean operation");
+    expect.equal(model.firstCount, 1, "not called, after clean operation");
     expect.end();
 });
 
 it("event: binds multiple keys to handler functions", expect => {
-    const template = `<input type="text" x-key-tab="clickHandler" x-key-enter="inputHandler"/>`;
+    const template = `<input type="text" x-key:tab="firstHandler" x-key:enter="secondHandler"/>`;
     const el = <HTMLInputElement> parse(template)[0];
 
-    let clickCallCount = 0;
-    let inputCallCount = 0;
-
-    let model = {
-        clickHandler: (e: Event) => {
-            clickCallCount++;
-        },
-        inputHandler: (e: Event) => {
-            inputCallCount++;
-        },
-    };
+    let model = new TestVM();
 
     expect.doesNotThrow(() => ui.applyBindings(model, el));
 
-    expect.equal(clickCallCount, 0);
-    expect.equal(inputCallCount, 0);
+    expect.equal(model.firstCount, 0);
+    expect.equal(model.firstCount, 0);
 
     triggerEvent(el, "keydown", 9);
-    expect.equal(clickCallCount, 1);
+    expect.equal(model.firstCount, 1);
 
     el.value = "new";
     triggerEvent(el, "keydown", 13);
-    expect.equal(inputCallCount, 1);
+    expect.equal(model.secondCount, 1);
 
     ui.cleanNode(el);
-    clickCallCount = 0;
-    inputCallCount = 0;
 
-    // should no longer fire
     triggerEvent(el, "keydown", 9);
-    expect.equal(clickCallCount, 0);
+    expect.equal(model.firstCount, 1, "should no longer fire");
 
     el.value = "old";
     triggerEvent(el, "keydown", 13);
-    expect.equal(inputCallCount, 0);
+    expect.equal(model.secondCount, 1, "should no longer fire");
     expect.end();
 });
 
 it("event: event delegation works", expect => {
-    const template = `<ul x-on-click-a="select">
+    const template = `<ul x-on:click:a="select">
                         <li><a id="1">Click to select</a></li>
                         <li><a id="2">Click to select</a></li>
                       </ul>`;
@@ -231,8 +204,16 @@ it("event: event delegation works", expect => {
 });
 
 class TestVM {
-    public constant = "hello";
-    public clickHandler(e: Event) {
-        this.constant = "world";
+    public firstCount = 0;
+    public firstName = "";
+    public secondCount = 0;
+    public secondName = "";
+    public firstHandler(e: Event) {
+        this.firstCount += 1;
+        this.firstName = e.type;
+    }
+    public secondHandler(e: Event) {
+        this.secondCount += 1;
+        this.secondName = e.type;
     }
 }

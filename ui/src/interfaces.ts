@@ -3,7 +3,7 @@ import { Observable, Subscription, Observer } from "rxjs";
 export interface IBinding<T> {
     readonly handler: IBindingHandler;
     readonly text: string;
-    readonly parameter?: string;
+    readonly parameters: string[];
     readonly cleanup: Subscription;
     readonly expression: (scope: IScope) => T | null;
     evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T>;

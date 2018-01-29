@@ -58,4 +58,3 @@ export class StyleBinding extends SimpleHandler<string | number | boolean> {
         });
     }
 }
-

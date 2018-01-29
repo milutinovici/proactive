@@ -14,7 +14,7 @@ export class ValueBinding extends BaseHandler<string|number|boolean|string[]> {
 
     public applyInternal(el: HTMLElement, binding: IBinding<string | number | boolean | string[]>, state: INodeState): void {
         const observable = binding.evaluate(state.scope, this.dataFlow) as Observable<string | number | boolean | string[]>;
-        const event = binding.parameter || "change";
+        const event = binding.parameters[0] || "change";
         if (ValueBinding.isCheckbox(el)) {
             binding.cleanup.add(observable.subscribe(value => ValueBinding.setChecked(el as HTMLInputElement, value as boolean)));
             if (isObserver(observable)) {

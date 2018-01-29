@@ -8,14 +8,14 @@ export class Binding<T> implements IBinding<T> {
     private static writeCache = new Map<string, Function>();
     public readonly handler: IBindingHandler;
     public readonly text: string;
-    public readonly parameter?: string;
+    public readonly parameters: string[];
     public readonly cleanup: Subscription;
     private activated: number;
 
-    constructor(handler: IBindingHandler, text: string, parameter?: string) {
+    constructor(handler: IBindingHandler, text: string, parameters: string[]) {
         this.handler = handler;
         this.text = text;
-        this.parameter = parameter;
+        this.parameters = parameters;
         this.cleanup = new Subscription();
         this.activated = 0;
     }
@@ -30,7 +30,7 @@ export class Binding<T> implements IBinding<T> {
         this.activated -= 1;
     }
     public clone(): Binding<T> {
-        return new Binding<T>(this.handler, this.text, this.parameter);
+        return new Binding<T>(this.handler, this.text, this.parameters);
     }
     public evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T> {
         if (dataFlow === DataFlow.Out) {
