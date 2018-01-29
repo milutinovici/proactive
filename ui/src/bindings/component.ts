@@ -1,7 +1,7 @@
 import { Observable, Subscription } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
 import { DomManager } from "../domManager";
-import { isObservable, isElement } from "../utils";
+import { isObservable, isElement, isTextNode, removeEmptyChildren } from "../utils";
 import { INodeState, IComponent, IScope, IBinding } from "../interfaces";
 import { Scope } from "../nodeState";
 import { BaseHandler } from "./baseHandler";
@@ -26,6 +26,9 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
     public applyInternal(element: HTMLElement, binding: IBinding<string | object>, state: INodeState, shadowDom = false): void {
         // remove children for transclusion
         const children: Node[] = [];
+        removeEmptyChildren(element);
+
+        // bind children using parent (not component) scope
         this.domManager.applyBindingsToDescendants(state.scope, element);
         while (element.firstChild) {
             children.push(element.removeChild(element.firstChild));
@@ -132,8 +135,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             exception.next(new Error(`Component ${name} doesn't have a slot defined, but was passed ${boundChildren}`));
         } else {
             const defaultSlot = slots.find(x => !x.hasAttribute("name")) || slots[0];
-            for (let i = 0; i < boundChildren.length; i++) {
-                const child = boundChildren[i];
+            for (const child of boundChildren) {
                 if (isElement(child) && child.hasAttribute("slot")) {
                     const attr = child.attributes.getNamedItem("slot");
                     const slot = slots.find(st => st.getAttribute("name") === attr.value);

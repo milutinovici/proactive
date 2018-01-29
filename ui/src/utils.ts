@@ -96,3 +96,13 @@ export function isHandlebarExpression(expression: string | null) {
     return trimmed[0] === open && trimmed[1] === open &&
            trimmed[trimmed.length - 1] === closed && trimmed[trimmed.length - 2] === closed;
 }
+
+export function removeEmptyChildren(element: Node) {
+    let child = element.firstChild;
+    while (child !== null) {
+        if (isTextNode(child) && (child.textContent as string).trim() === "") {
+            element.removeChild(child);
+        }
+        child = child.nextSibling;
+    }
+}
