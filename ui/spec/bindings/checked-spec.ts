@@ -7,7 +7,7 @@ import { ProactiveUI } from "../../src/ui";
 const ui = new ProactiveUI({ document });
 
 it("value: Triggering a click should toggle a checkbox's checked state before the event handler fires", expect => {
-    // This isn't strictly to do with the checked binding, but if this doesn't work, the rest of the specs aren't meaningful
+    // This isn't strictly to do with the checked directive, but if this doesn't work, the rest of the specs aren't meaningful
     const template = `<input type="checkbox" />`;
     const element = <HTMLInputElement> parse(template)[0];
 
@@ -37,7 +37,7 @@ it("value: Should be able to control a checkbox's checked state", expect => {
 
     let myobservable = px.value(true);
 
-    ui.applyBindings({ someProp: myobservable }, element);
+    ui.render({ someProp: myobservable }, element);
     expect.equal(element.checked, true);
 
     myobservable(false);
@@ -51,7 +51,7 @@ it("value: Should be able to control a radio's checked state", expect => {
 
     let myobservable = px.value("my");
 
-    ui.applyBindings({ someProp: myobservable }, element);
+    ui.render({ someProp: myobservable }, element);
     expect.equal(element.checked, true);
 
     myobservable("other");
@@ -64,7 +64,7 @@ it("value: Should update observable properties on the model when the checkbox cl
     const element = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value(false);
-    ui.applyBindings({ someProp: myobservable }, element);
+    ui.render({ someProp: myobservable }, element);
 
     triggerEvent(element, "click");
     expect.equal(myobservable(), true);
@@ -76,7 +76,7 @@ it("value: Should update observable properties on the model when the radio's cli
     const element = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value("other");
-    ui.applyBindings({ someProp: myobservable }, element);
+    ui.render({ someProp: myobservable }, element);
 
     triggerEvent(element, "click");
     expect.equal(myobservable(), "my");
@@ -91,7 +91,7 @@ it("value: Should only notify observable properties on the model once even if th
     let timesNotified = 0;
     myobservable.subscribe(() => { timesNotified++; });
     timesNotified = 0; // ignore initial value notification
-    ui.applyBindings({ someProp: myobservable }, element);
+    ui.render({ someProp: myobservable }, element);
 
     // Multiple events only cause one notification...
     triggerEvent(element, "click");
@@ -114,7 +114,7 @@ it("value: Should only notify observable properties on the model once even if th
     let timesNotified = 0;
     myobservable.subscribe(() => { timesNotified++; });
     timesNotified = 0; // ignore initial value notification
-    ui.applyBindings({ someProp: myobservable }, element);
+    ui.render({ someProp: myobservable }, element);
 
     // Multiple events only cause one notification...
     triggerEvent(element, "click");
@@ -134,7 +134,7 @@ it("value: should update non observable values", expect => {
     const template = `<input type="checkbox" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
     const viewModel = { someProp: false };
-    ui.applyBindings(viewModel, el);
+    ui.render(viewModel, el);
 
     triggerEvent(el, "click");
     expect.equal(viewModel.someProp, true);
@@ -150,7 +150,7 @@ it("value: multiple radios bound to a single value", expect => {
     const obs = px.value(false);
     const el = <HTMLElement> parse(template)[0];
     const viewModel = { someProp: obs };
-    ui.applyBindings(viewModel, el);
+    ui.render(viewModel, el);
 
     triggerEvent(el.children[0], "click");
     expect.equal(viewModel.someProp(), "1st");

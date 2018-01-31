@@ -3,10 +3,10 @@ import { BaseHandler } from "./baseHandler";
 import { DomManager } from "../domManager";
 import { NodeState } from "../nodeState";
 import { HtmlEngine } from "../templateEngines";
-import { IBinding, INodeState, Parametricity } from "../interfaces";
+import { IDirective, INodeState, Parametricity } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
-export class ForBinding<T> extends BaseHandler<T[]> {
+export class ForDirective<T> extends BaseHandler<T[]> {
     private readonly domManager: DomManager;
     private readonly engine: HtmlEngine;
     constructor(name: string, domManager: DomManager, engine: HtmlEngine) {
@@ -18,12 +18,12 @@ export class ForBinding<T> extends BaseHandler<T[]> {
         this.engine = engine;
     }
 
-    public applyInternal(node: Element, binding: IBinding<T[]>, state: INodeState): void {
-        const observable = binding.evaluate(state.scope, this.dataFlow) as Observable<T[]>;
-        const itemName = binding.parameters[0];
-        const indexName = binding.parameters[1];
+    public applyInternal(node: Element, directive: IDirective<T[]>, state: INodeState): void {
+        const observable = directive.evaluate(state.scope, this.dataFlow) as Observable<T[]>;
+        const itemName = directive.parameters[0];
+        const indexName = directive.parameters[1];
         const parent = node.parentElement as HTMLElement;
-        const placeholder: Comment = this.engine.createComment(`for ${binding.text}`);
+        const placeholder: Comment = this.engine.createComment(`for ${directive.text}`);
         this.domManager.setState(placeholder, state);
         // backup inner HTML
         parent.insertBefore(placeholder, node);
@@ -32,7 +32,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
 
         let oldArray: T[] = [];
         // subscribe
-        binding.cleanup.add(observable.subscribe(array => {
+        directive.cleanup.add(observable.subscribe(array => {
             let changes = compareLists(oldArray, array);
             if (changes.deleted.length > 0) {
                 this.removeRows(parent, indexName, changes.deleted, placeholder, array.length);
@@ -45,15 +45,15 @@ export class ForBinding<T> extends BaseHandler<T[]> {
             }
             oldArray = array;
         }));
-        // apply bindings after repeated elements
+        // apply directives after repeated elements
         if (node.nextSibling === null && sibling !== null) {
             while (sibling !== null) {
-                this.domManager.applyBindingsRecursive(sibling, state.scope);
+                this.domManager.applyDirectivesRecursive(sibling, state.scope);
                 sibling = sibling.nextSibling;
             }
         }
         // cleanup after itself
-        binding.cleanup.add(() => {
+        directive.cleanup.add(() => {
             let changes = compareLists(oldArray, []);
             this.removeRows(parent, indexName, changes.deleted, placeholder, 0);
             parent.removeChild(placeholder);
@@ -65,7 +65,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
     private addRows(parent: Element, template: Element, state: INodeState, itemName: string, indexName: string, additions: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
         let current = 0;
-        const otherBindings = state.bindings.filter(x => x.handler.name !== "for");
+        const otherDirectives = state.directives.filter(x => x.handler.name !== "for");
 
         while (current <= additions.length) {
             const merger = this.mergeConsecutiveRows(additions, template, current);
@@ -74,11 +74,11 @@ export class ForBinding<T> extends BaseHandler<T[]> {
 
             for (let i = current; i < merger.stopped; i++) {
                 let childState = indexName ?
-                                 new NodeState(otherBindings.map(x => x.clone()), state.constantProps, state.scope.extend(itemName, additions[i].value, indexName, additions[i].index)) :
-                                 new NodeState(otherBindings.map(x => x.clone()), state.constantProps, state.scope.extend(itemName, additions[i].value));
+                                 new NodeState(otherDirectives.map(x => x.clone()), state.constantProps, state.scope.extend(itemName, additions[i].value, indexName, additions[i].index)) :
+                                 new NodeState(otherDirectives.map(x => x.clone()), state.constantProps, state.scope.extend(itemName, additions[i].value));
 
                 this.domManager.setState(parent.childNodes[i + start + additions[current].index], childState);
-                this.domManager.applyBindingsRecursive(parent.childNodes[i + start + additions[current].index], childState.scope);
+                this.domManager.applyDirectivesRecursive(parent.childNodes[i + start + additions[current].index], childState.scope);
             }
             if (indexName) {
                 for (let i = merger.stopped + 1; i < newLength; i++) {

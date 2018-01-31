@@ -2,7 +2,7 @@ import { Observable, Subscription } from "rxjs";
 import { SimpleHandler } from "./baseHandler";
 import { isTextNode } from "../utils";
 
-export class TextBinding extends SimpleHandler<string> {
+export class TextDirective extends SimpleHandler<string> {
     constructor(name: string) {
         super(name);
         this.unique = true;
@@ -24,9 +24,9 @@ export class TextBinding extends SimpleHandler<string> {
                 el.textContent = value;
             }
         });
-        if (isText) {
-            sub.add(() => el.nodeValue = "{{" + textExpression + "}}");
-        }
+        // if (isText) {
+        //     sub.add(() => el.nodeValue = "{{" + textExpression + "}}");
+        // }
         return sub;
     }
 }

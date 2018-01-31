@@ -9,7 +9,7 @@ it("value: Should treat null values as empty strings", expect => {
     const template = `<input type="text" x-value="myProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
-    ui.applyBindings({ myProp: px.value(0) }, el);
+    ui.render({ myProp: px.value(0) }, el);
     expect.equal(el.value, "0");
     expect.end();
 });
@@ -18,7 +18,7 @@ it("value: Should assign an empty string as value if the model value is undefine
     const template = `<input type="text" x-value="undefined" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
-    ui.applyBindings({ }, el);
+    ui.render({ }, el);
     expect.equal(el.value, "");
     expect.end();
 });
@@ -28,7 +28,7 @@ it("value: For observable values, should unwrap the value and update on change",
     const el = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value(123);
-    ui.applyBindings({ someProp: myobservable }, el);
+    ui.render({ someProp: myobservable }, el);
     expect.equal(el.value, "123");
     myobservable(456);
     expect.equal(el.value, "456");
@@ -40,7 +40,7 @@ it("value: For observable values, should update on change if new value is 'stric
     const el = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value<string | number>("+123");
-    ui.applyBindings({ someProp: myobservable }, el);
+    ui.render({ someProp: myobservable }, el);
     expect.equal(el.value, "+123");
     myobservable(123);
     expect.equal(el.value, "123");
@@ -52,7 +52,7 @@ it("value: For writeable observable values, should catch the node's onchange and
     const el = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value(123);
-    ui.applyBindings({ someProp: myobservable }, el);
+    ui.render({ someProp: myobservable }, el);
     el.value = "some user-entered value";
     triggerEvent(el, "change");
 
@@ -71,7 +71,7 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
     let vm = { prop: observable };
     let value = "";
     observable.subscribe(x => value = x);
-    ui.applyBindings(vm, el);
+    ui.render(vm, el);
     expect.equal(el.value, "zzz");
 
     // Change the input value and trigger change event; verify that the view model wasn't changed
@@ -93,14 +93,14 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
 //     let newSubproperty = px.value<string>();
 //     let model = { myprop: px.value<any>({ subproperty: originalSubproperty }) };
 
-//     ui.applyBindings(model, el);
+//     ui.render(model, el);
 //     expect.equal(el.value, "original value");
 
-//     model.myprop({ subproperty: newSubproperty }); // Note that myprop (and hence its subproperty) is changed *after* the bindings are applied
+//     model.myprop({ subproperty: newSubproperty }); // Note that myprop (and hence its subproperty) is changed *after* the directives are applied
 //     el.value = "Some new value";
 //     triggerEvent(el, "change");
 
-//     // Verify that the change was written to the *new* subproperty, not the one referenced when the bindings were first established
+//     // Verify that the change was written to the *new* subproperty, not the one referenced when the directives were first established
 //     expect.equal(newSubproperty(), "Some new value");
 //     expect.equal(originalSubproperty(), "original value");
 //     expect.end();
@@ -115,7 +115,7 @@ it("value: Should only register one single onchange handler", expect => {
     myobservable.subscribe(value => { notifiedValues.push(value); });
     expect.equal(notifiedValues.length, 1);
 
-    ui.applyBindings({ someProp: myobservable }, el);
+    ui.render({ someProp: myobservable }, el);
 
     // Implicitly observe the number of handlers by seeing how many times "myobservable"
     // receives a new value for each onchange on the text box. If there's just one handler,
@@ -134,7 +134,7 @@ it("value: should update non observable values", expect => {
     const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
     const viewModel = { someProp: "ABC" };
-    ui.applyBindings(viewModel, el);
+    ui.render(viewModel, el);
 
     el.value = "DEF";
     triggerEvent(el, "change");
@@ -148,7 +148,7 @@ it("value: input values type should be consistent", expect => {
     const number = px.value(0);
     const el = <HTMLInputElement> parse(template)[0];
     const viewModel = { someProp: number };
-    ui.applyBindings(viewModel, el);
+    ui.render(viewModel, el);
 
     el.value = "3";
     triggerEvent(el, "change");
@@ -165,7 +165,7 @@ it("value: select multiple can be bound to an array", expect => {
     const selected = px.array<string>([]);
     const el = <HTMLSelectElement> parse(template)[0];
     const viewModel = { selected };
-    ui.applyBindings(viewModel, el);
+    ui.render(viewModel, el);
     selected.push("A");
     expect.equal(el.options[0]["selected"], true);
 

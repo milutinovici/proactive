@@ -3,7 +3,7 @@ import { filter } from "rxjs/operators";
 import { DataFlow, Parametricity } from "../interfaces";
 import { SimpleHandler } from "./baseHandler";
 
-export class EventBinding extends SimpleHandler<Event> {
+export class EventDirective extends SimpleHandler<Event> {
     constructor(name: string) {
         super(name);
         this.dataFlow = DataFlow.In;

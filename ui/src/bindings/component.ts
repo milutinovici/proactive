@@ -2,14 +2,14 @@ import { Observable, Subscription } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
 import { DomManager } from "../domManager";
 import { isObservable, isElement, removeEmptyChildren } from "../utils";
-import { INodeState, IComponent, IScope, IBinding } from "../interfaces";
+import { INodeState, IComponent, IScope, IDirective } from "../interfaces";
 import { Scope } from "../nodeState";
 import { BaseHandler } from "./baseHandler";
 import { ComponentRegistry } from "../componentRegistry";
 import { HtmlEngine } from "../templateEngines";
 import { exception } from "../exceptionHandlers";
 
-export class ComponentBinding<T> extends BaseHandler<string|object> {
+export class ComponentDirective<T> extends BaseHandler<string|object> {
     private readonly domManager: DomManager;
     protected readonly registry: ComponentRegistry;
     private readonly engine: HtmlEngine;
@@ -23,13 +23,13 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         this.engine = engine;
     }
 
-    public applyInternal(element: HTMLElement, binding: IBinding<string | object>, state: INodeState, shadowDom = false): void {
+    public applyInternal(element: HTMLElement, directive: IDirective<string | object>, state: INodeState, shadowDom = false): void {
         // remove children for transclusion
         const children: Node[] = [];
         removeEmptyChildren(element);
 
         // bind children using parent (not component) scope
-        this.domManager.applyBindingsToDescendants(element, state.scope);
+        this.domManager.applyDirectivesToDescendants(element, state.scope);
         while (element.firstChild) {
             children.push(element.removeChild(element.firstChild));
         }
@@ -41,7 +41,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             element = element.shadowRoot as any;
         }
 
-        const component = this.getComponent(element, binding, state);
+        const component = this.getComponent(element, directive, state);
         let internal: Subscription;
         function doCleanup() {
             if (internal) {
@@ -50,7 +50,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         }
 
         // subscribe to any input changes
-        binding.cleanup.add(component.subscribe(comp => {
+        directive.cleanup.add(component.subscribe(comp => {
             doCleanup();
             internal = new Subscription();
 
@@ -90,10 +90,10 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
                 }
             });
         }));
-        binding.cleanup.add(doCleanup);
+        directive.cleanup.add(doCleanup);
     }
-    private getComponent(element: Element, binding: IBinding<string|object>, state: INodeState): Observable<IComponent> {
-        const config = binding.evaluate(state.scope, this.dataFlow) as Observable<string | object>;
+    private getComponent(element: Element, directive: IDirective<string|object>, state: INodeState): Observable<IComponent> {
+        const config = directive.evaluate(state.scope, this.dataFlow) as Observable<string | object>;
         const props = this.getProps(element, state);
         return config.pipe(mergeMap(cfg => {
             const isObj = typeof (cfg) !== "string";
@@ -110,14 +110,14 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
     }
     private getProps(element: Element, state: INodeState): T {
         const props = {} as T;
-        const attrBindings = state.getBindings<any>("attr");
-        attrBindings.forEach(x => props[x.parameters[0] as string] = x.expression(state.scope));
+        const attrDirectives = state.getDirectives<any>("attr");
+        attrDirectives.forEach(x => props[x.parameters[0] as string] = x.expression(state.scope));
         Object.assign(props, state.constantProps);
         return props;
     }
     // for recursive components
     private getVm(state: INodeState): T | undefined {
-        const vm = state.getBindings<T>("attr").filter(x => x.parameters[0] === "vm")[0];
+        const vm = state.getDirectives<T>("attr").filter(x => x.parameters[0] === "vm")[0];
         if (vm !== undefined) {
             return vm.expression(state.scope) as T;
         }
@@ -125,7 +125,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
     }
     protected applyTemplate(parent: HTMLElement, childScope: IScope, component: IComponent, boundChildren: Node[]) {
         const template = component.template.cloneNode(true) as DocumentFragment;
-        this.domManager.applyBindingsToDescendants(template, childScope);
+        this.domManager.applyDirectivesToDescendants(template, childScope);
 
         if (boundChildren.length) {
             this.transclude(component.name, template, boundChildren);

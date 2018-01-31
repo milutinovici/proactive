@@ -13,7 +13,7 @@ it("component: Loads a component using simple string options", expect => {
     const template = "<span>foo</span>";
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.equal(el.innerHTML, template);
     expect.end();
 });
@@ -25,7 +25,7 @@ it("component: Loads a component using its name as tag", expect => {
     const template = `<span>foo</span>`;
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.equal(el.innerHTML, template);
     expect.end();
 });
@@ -39,7 +39,7 @@ it("component: Loads a component through an AMD module loader", expect => {
         expect.isNotEqual(props, undefined);
         expect.equal(props.foo, 42);
 
-        // now install new hook for postBindingInit
+        // now install new hook
         document["vmHook"] = () => {
             delete document["vmHook"];
 
@@ -48,7 +48,7 @@ it("component: Loads a component through an AMD module loader", expect => {
         };
     };
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.end();
 });
 
@@ -59,7 +59,7 @@ it("component: Loads a template from a string", expect => {
     const template = "<span>foo</span>";
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.equal(el.innerHTML, template);
     expect.end();
 });
@@ -73,7 +73,7 @@ it("component: Loads a template from a fragment", expect => {
         template: fragment(template),
     });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.equal(el.innerHTML, template);
     expect.end();
 });
@@ -86,7 +86,7 @@ it("component: Loads a template from an id", expect => {
 
     ui.components.register("test-component", { template: "#template1" });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.equal(el.innerHTML, "bar");
     expect.end();
 });
@@ -99,7 +99,7 @@ it("component: Stateless component with a constant prop", expect => {
 
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.equal(el.children[1].textContent, "John");
     expect.end();
 });
@@ -112,7 +112,7 @@ it("component: Stateless component with an observable prop", expect => {
 
     ui.components.register("test-component", { template: template });
     const vm = { foo: new BehaviorSubject("John") };
-    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    expect.doesNotThrow(() => ui.render(vm, el));
     expect.equal(el.children[1].textContent, "John");
     vm.foo.next("Jim");
     expect.equal(el.children[1].textContent, "Jim");
@@ -131,7 +131,7 @@ it("component: props get passed to view-model constructor", expect => {
     }
     ui.components.register("test-component", { template: template, viewModel: constr });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.equal(el.childNodes[0].textContent, "42");
     expect.end();
 });
@@ -151,7 +151,7 @@ it("component: Invokes created hook", expect => {
         created: created,
     });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.true(invoked);
     expect.end();
 });
@@ -172,7 +172,7 @@ it("component: Invokes destroy hook", expect => {
         destroy,
     });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.false(invoked);
 
     ui.clean(el);
@@ -197,7 +197,7 @@ it("component: Unsubscribes a component's viewmodel if has cleanup subscription"
     });
 
     expect.false(unsubscribed);
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     ui.clean(el);
     expect.true(unsubscribed);
     expect.end();
@@ -219,7 +219,7 @@ it("component: Components are properly isolated", expect => {
         },
     });
 
-    expect.doesNotThrow(() => ui.applyBindings(viewModel, el));
+    expect.doesNotThrow(() => ui.render(viewModel, el));
     expect.equal(el.childNodes[0].childNodes[0].textContent, value);
     expect.end();
 });
@@ -236,7 +236,7 @@ it("component: Components are properly isolated", expect => {
 //     let value = "";
 //     const vm = { log: (x: CustomEvent) => value = x.detail };
 
-//     expect.doesNotThrow(() => ui.applyBindings(vm, el));
+//     expect.doesNotThrow(() => ui.render(vm, el));
 //     emitter.next(new CustomEvent("pulse", { detail: "myPulse" }));
 //     expect.equal(value, "myPulse");
 //     expect.end();
@@ -249,7 +249,7 @@ it("component: Components support basic transclusion", expect => {
 
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings({ }, el));
+    expect.doesNotThrow(() => ui.render({ }, el));
     expect.equal(el.childNodes[1].textContent, "Hello");
     expect.end();
 });
@@ -263,12 +263,12 @@ it("component: Components support named transclusion", expect => {
 
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.applyBindings({}, el));
+    expect.doesNotThrow(() => ui.render({}, el));
     expect.equal(el.childNodes[0].childNodes[0].textContent, "Hello");
     expect.end();
 });
 
-it("component: Components support value binding", expect => {
+it("component: Components support value directive", expect => {
     const str = `<test-component x-value="obs"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -280,7 +280,7 @@ it("component: Components support value binding", expect => {
 
     const vm = { obs: new BehaviorSubject("") };
 
-    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    expect.doesNotThrow(() => ui.render(vm, el));
     expect.equal("Hello World", vm.obs.getValue());
     expect.end();
 });
@@ -297,7 +297,7 @@ it("component: Dynamic component", expect => {
     ui.components.register("test-two", c2);
 
     const vm = { name: new BehaviorSubject("test-one") };
-    expect.doesNotThrow(() => ui.applyBindings(vm, el));
+    expect.doesNotThrow(() => ui.render(vm, el));
 
     expect.equal(el.children[0].tagName, "P", "1st template inserted");
     expect.equal(el.children[0].textContent, "first", "1st template correctly bound");
@@ -323,7 +323,7 @@ it("component: Recursive component", expect => {
     const c1 = { template: t1 };
 
     ui.components.register("tree-comp", c1);
-    expect.doesNotThrow(() => ui.applyBindings({ hello: "my", baby: { hello: "my", honey: "!!!" } }, el));
+    expect.doesNotThrow(() => ui.render({ hello: "my", baby: { hello: "my", honey: "!!!" } }, el));
 
     expect.equal(el.children[0].children[1].children[1].children[0].children[1].children[1].textContent, "!!!");
 
@@ -343,7 +343,7 @@ it("component: object passed instead of string", expect => {
     };
 
     ui.components.register("obj-comp", c1);
-    expect.doesNotThrow(() => ui.applyBindings({ obj: { name: "obj-comp",  greeting: "hello" } }, el));
+    expect.doesNotThrow(() => ui.render({ obj: { name: "obj-comp",  greeting: "hello" } }, el));
 
     expect.equal(el.children[0].textContent, "hello");
 

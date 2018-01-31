@@ -1,35 +1,35 @@
 import { Scope } from "./nodeState";
-import { BindingProvider } from "./bindingProvider";
+import { DirectiveRegistry } from "./bindingProvider";
 import { isElement, isTextNode, isHandlebarExpression } from "./utils";
 import { INodeState, IScope, IViewModel } from "./interfaces";
 import { exception } from "./exceptionHandlers";
 
 export class DomManager {
     private readonly nodeStateManager: WeakMap<Node, INodeState>;
-    private readonly bindingProvider: BindingProvider;
+    private readonly directiveRegistry: DirectiveRegistry;
 
     private readonly ignore = ["SCRIPT", "TEXTAREA", "TEMPLATE"];
 
-    constructor(bindingProvider: BindingProvider) {
+    constructor(directiveRegistry: DirectiveRegistry) {
         this.nodeStateManager = new WeakMap<Node, INodeState>();
-        this.bindingProvider = bindingProvider;
+        this.directiveRegistry = directiveRegistry;
     }
 
-    public applyBindings(model: IViewModel, rootNode: Element): void {
+    public applyDirectives(model: IViewModel, rootNode: Element): void {
         if (rootNode === undefined || !isElement(rootNode)) {
             throw Error("first parameter should be your model, second parameter should be a DOM node!");
         }
         // create or update node state for root node
         const scope = new Scope(model);
 
-        // calculate resulting scope and apply bindings
-        this.applyBindingsRecursive(rootNode, scope);
+        // calculate resulting scope and apply directives
+        this.applyDirectivesRecursive(rootNode, scope);
     }
 
-    public applyBindingsToDescendants(node: Node, scope: IScope): void {
+    public applyDirectivesToDescendants(node: Node, scope: IScope): void {
         if (node.hasChildNodes()) {
             for (let i = 0; i < node.childNodes.length; i++) {
-                this.applyBindingsRecursive(node.childNodes[i], scope);
+                this.applyDirectivesRecursive(node.childNodes[i], scope);
             }
         }
     }
@@ -50,12 +50,12 @@ export class DomManager {
         }
     }
 
-    public applyBindingsRecursive(node: Node, scope: IScope): void {
-        if (this.shouldBind(node) && !this.applyBindingsInternal(node, scope) && node.hasChildNodes()) {
+    public applyDirectivesRecursive(node: Node, scope: IScope): void {
+        if (this.shouldBind(node) && !this.applyDirectivesInternal(node, scope) && node.hasChildNodes()) {
             let child = node.firstChild;
             // iterate over descendants
             while (child) {
-                this.applyBindingsRecursive(child, scope);
+                this.applyDirectivesRecursive(child, scope);
                 child = child.nextSibling;
             }
         }
@@ -91,8 +91,8 @@ export class DomManager {
         const state = this.nodeStateManager.get(node);
 
         if (state != null) {
-            if (state.bindings != null) {
-                state.bindings.forEach(x => x.deactivate());
+            if (state.directives != null) {
+                state.directives.forEach(x => x.deactivate());
             }
             // delete state itself
             this.nodeStateManager.delete(node);
@@ -100,36 +100,36 @@ export class DomManager {
         // support external per-node cleanup
         // env.cleanExternalData(node);
     }
-    private applyBindingsInternal(node: Node, scope: IScope): boolean {
+    private applyDirectivesInternal(node: Node, scope: IScope): boolean {
         // create and set if necessary
         const state = this.nodeStateManager.get(node) || this.createState(node, scope);
         if (state === null) {
             return false;
         }
 
-        // apply all bindings
-        for (const binding of state.bindings) {
-            // if binding disables other bindings when false 
+        // apply all directives
+        for (const directive of state.directives) {
+            // if directive disables other directive when false 
             if (state.disabled === true) {
                 return true;
             }
             // apply for before anything else, then imediately return
-            if (binding.handler.name === "for") {
-                binding.activate(node, state);
+            if (directive.handler.name === "for") {
+                directive.activate(node, state);
                 return true;
             }
-            binding.activate(node, state);
+            directive.activate(node, state);
         }
 
-        return state.bindings.some(x => x.handler.controlsDescendants);
+        return state.directives.some(x => x.handler.controlsDescendants);
     }
 
     private createState(node: Node, scope: IScope): INodeState | null {
-        const state = this.bindingProvider.createNodeState(node);
+        const state = this.directiveRegistry.createNodeState(node);
         if (state === null) {
             return null;
         } else if (state.controlsDescendants > 1) {
-            exception.next(new Error(`bindings are competing for descendants of ${node}`));
+            exception.next(new Error(`directives are competing for descendants of ${node}`));
         }
         state.scope = scope;
         this.nodeStateManager.set(node, state);

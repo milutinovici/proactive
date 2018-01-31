@@ -5,33 +5,33 @@ import { ProactiveUI } from "../../src/ui";
 
 const ui = new ProactiveUI({ document });
 
-it("if: binding to a boolean constant (true) using static template", expect => {
+it("if: bind to a boolean constant (true) using static template", expect => {
     const template = `<div><span x-if="true">foo</span></div>`;
     const el = <HTMLElement> parse(template)[0];
     const span = el.firstElementChild as HTMLElement;
 
-    expect.doesNotThrow(() => ui.applyBindings({}, el));
+    expect.doesNotThrow(() => ui.render({}, el));
     expect.equal(span.parentElement, el, "span is div's child");
     expect.end();
 });
 
-it("if: binding to a boolean constant (false) using static template", expect => {
+it("if: bind to a boolean constant (false) using static template", expect => {
     const template = `<div><span x-if="false">foo</span></div>`;
     const el = <HTMLElement> parse(template)[0];
     const span = el.firstElementChild as HTMLElement;
 
-    expect.doesNotThrow(() => ui.applyBindings({}, el));
+    expect.doesNotThrow(() => ui.render({}, el));
     expect.equal(span.parentElement, null, "span isn't div's child");
     expect.end();
 });
 
-it("if: binding to a boolean observable value using static template", expect => {
+it("if: bind to a boolean observable value using static template", expect => {
     const template = `<div><span x-if="$data">foo</span></div>`;
     const el = <HTMLElement> parse(template)[0];
 
     const span = el.firstElementChild as HTMLElement;
     const prop = px.value(true);
-    expect.doesNotThrow(() => ui.applyBindings(prop, el));
+    expect.doesNotThrow(() => ui.render(prop, el));
 
     expect.equal(span.parentElement, el);
     prop(false);
@@ -39,27 +39,27 @@ it("if: binding to a boolean observable value using static template", expect => 
     prop(true);
     ui.clean(el);
     prop(false);
-    expect.equal(span.parentElement, el, "binding should stop updating after getting disposed");
+    expect.equal(span.parentElement, el, "should stop updating after getting disposed");
     expect.end();
 });
 
-it("if: binding to a boolean observable value using dynamic template", expect => {
+it("if: bind to a boolean observable value using dynamic template", expect => {
     const template = `<div><span x-if="$data" x-text="'foo'">bar</span></div>`;
     const el = <HTMLElement> parse(template)[0];
 
     let prop = px.value(true);
-    expect.doesNotThrow(() => ui.applyBindings(prop, el));
+    expect.doesNotThrow(() => ui.render(prop, el));
     expect.equal(el.children[0].textContent, "foo");
 
     // try it again
     ui.clean(el);
-    expect.doesNotThrow(() => ui.applyBindings(prop, el));
+    expect.doesNotThrow(() => ui.render(prop, el));
     expect.equal(el.children.length, 1);
     expect.equal(el.children[0].textContent, "foo");
     expect.end();
 });
 
-it("if: binding to a boolean observable value using dynamic template with event", expect => {
+it("if: bind to a boolean observable value using dynamic template with event", expect => {
     const template = `<div><button x-if="$data" x-on:click="cmd">Click me</button></div>`;
     const el = <HTMLElement> parse(template)[0];
     let count = 0;
@@ -68,7 +68,7 @@ it("if: binding to a boolean observable value using dynamic template with event"
         show: px.value(true),
     };
 
-    expect.doesNotThrow(() => ui.applyBindings(model, el));
+    expect.doesNotThrow(() => ui.render(model, el));
     expect.equal(count, 0);
     triggerEvent(<HTMLElement> el.children[0], "click");
     expect.equal(count, 1);
@@ -80,11 +80,11 @@ it("if: binding to a boolean observable value using dynamic template with event"
     expect.end();
 });
 
-it("if: binding after removed element", expect => {
+it("if: bind after removed element", expect => {
     const template = `<ul><li x-if="false"></li><li x-text="'foo'">bar</li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
-    expect.doesNotThrow(() => ui.applyBindings({}, el));
+    expect.doesNotThrow(() => ui.render({}, el));
     expect.equal(el.children[0].textContent, "foo");
 
     // try it again
@@ -93,12 +93,12 @@ it("if: binding after removed element", expect => {
     expect.end();
 });
 
-it("if: binding toggles other bindings on an element", expect => {
+it("if: directive toggles other directives on an element", expect => {
     const template = `<div><div x-if="active" x-text="active"></div></div>`;
     const el = <HTMLElement> parse(template)[0];
     const active = px.value(false);
     const child = el.firstChild as Node;
-    expect.doesNotThrow(() => ui.applyBindings({ active }, el));
+    expect.doesNotThrow(() => ui.render({ active }, el));
     expect.equal(child.textContent, "");
     active(true);
     expect.equal(child.textContent, "true");
@@ -111,7 +111,7 @@ it("if: cleans up after itself", expect => {
     const el = <HTMLElement> parse(template)[0];
     const active = false;
     const child = el.firstChild as Node;
-    expect.doesNotThrow(() => ui.applyBindings({ active }, el));
+    expect.doesNotThrow(() => ui.render({ active }, el));
     expect.equal(el.children.length, 0);
     ui.clean(el);
     expect.equal(el.children[0], child);

@@ -1,18 +1,18 @@
 import { exception } from "./exceptionHandlers";
 import { Observable, Observer, Subscriber, Subscription, Symbol } from "rxjs";
-import { IScope, IBinding, IBindingHandler, DataFlow, INodeState } from "./interfaces";
+import { IScope, IDirective, IDirectiveHandler, DataFlow, INodeState } from "./interfaces";
 import { isObservable, isObserver, isFunction } from "./utils";
 
-export class Binding<T> implements IBinding<T> {
+export class Directive<T> implements IDirective<T> {
     private static expressionCache = new Map<string, Function>();
     private static writeCache = new Map<string, Function>();
-    public readonly handler: IBindingHandler;
+    public readonly handler: IDirectiveHandler;
     public readonly text: string;
     public readonly parameters: string[];
     public readonly cleanup: Subscription;
     private activated: number;
 
-    constructor(handler: IBindingHandler, text: string, parameters: string[]) {
+    constructor(handler: IDirectiveHandler, text: string, parameters: string[]) {
         this.handler = handler;
         this.text = text;
         this.parameters = parameters;
@@ -21,7 +21,7 @@ export class Binding<T> implements IBinding<T> {
     }
     public activate(node: Node, state: INodeState) {
         if (this.activated === 0) {
-            this.handler.applyBinding(node, this, state);
+            this.handler.applyDirective(node, this, state);
             this.activated += 1;
         }
     }
@@ -29,8 +29,8 @@ export class Binding<T> implements IBinding<T> {
         this.cleanup.unsubscribe();
         this.activated -= 1;
     }
-    public clone(): Binding<T> {
-        return new Binding<T>(this.handler, this.text, this.parameters);
+    public clone(): Directive<T> {
+        return new Directive<T>(this.handler, this.text, this.parameters);
     }
     public evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T> {
         if (dataFlow === DataFlow.Out) {
@@ -44,17 +44,17 @@ export class Binding<T> implements IBinding<T> {
 
     public expression(scope: IScope): T | null {
         try {
-            const fn = Binding.expressionCache.get(this.text);
+            const fn = Directive.expressionCache.get(this.text);
             if (fn !== undefined) {
                 return fn(scope);
             } else {
                 const readBody = this.text ? `with($scope){with($data||{}){return ${this.text};}}` : "return null;";
                 let read = new Function("$scope", readBody) as (scope: IScope) => T | null;
-                Binding.expressionCache.set(this.text, read);
+                Directive.expressionCache.set(this.text, read);
                 return read(scope);
             }
         } catch (e) {
-            exception.next(new Error(`Binding ${this.handler.name}="${this.text}" failed. ${e.message}`));
+            exception.next(new Error(`directive ${this.handler.name}="${this.text}" failed. ${e.message}`));
             return null;
         }
     };
@@ -99,19 +99,19 @@ export class Binding<T> implements IBinding<T> {
     }
     private write(scope: IScope): (value: T) => void {
         try {
-            const fn = Binding.writeCache.get(this.text);
+            const fn = Directive.writeCache.get(this.text);
             if (fn !== undefined) {
                 return fn(scope);
             } else if (this.canWrite(this.text)) {
                 const writeBody = `with($scope){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
                 const write = new Function("$scope", writeBody);
-                Binding.writeCache.set(this.text, write);
+                Directive.writeCache.set(this.text, write);
                 return write(scope) as (value: T) => void;
             } else {
             return (value: T) => {};
           }
         } catch (e) {
-            exception.next(new Error(`Binding ${this.handler.name}="${this.text}" failed. ${e.message}`));
+            exception.next(new Error(`directive ${this.handler.name}="${this.text}" failed. ${e.message}`));
             return (value: T) => {};
         }
     }

@@ -1,7 +1,7 @@
 import { Observable, Subscription, Observer } from "rxjs";
 
-export interface IBinding<T> {
-    readonly handler: IBindingHandler;
+export interface IDirective<T> {
+    readonly handler: IDirectiveHandler;
     readonly text: string;
     readonly parameters: string[];
     readonly cleanup: Subscription;
@@ -9,39 +9,39 @@ export interface IBinding<T> {
     evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T>;
     activate(node: Node, state: INodeState): void;
     deactivate(): void;
-    clone(): IBinding<T>;
+    clone(): IDirective<T>;
 }
 
 export enum DataFlow { Out = 1, In = 2 }
 export enum Parametricity { Required, Forbidden, Optional }
-export interface IBindingHandler {
+export interface IDirectiveHandler {
         readonly name: string;
         /**
-        * When there are multiple bindings defined on a single DOM element,
-        * sometimes it is necessary to specify the order in which the bindings are applied.
+        * When there are multiple directives defined on a single DOM element,
+        * sometimes it is necessary to specify the order in which the directives are applied.
         */
         readonly priority: number;
-        // Data flow of the binding, can be In, Out (unidirectional), or both (bidirectional)
+        // Data flow of the directive, can be In, Out (unidirectional), or both (bidirectional)
         readonly dataFlow: DataFlow;
-        // are aditional parameters of a binding required, optional or forbidden
+        // are aditional parameters of a directive required, optional or forbidden
         readonly parametricity: Parametricity;
-        // if true, only 1 binding of this type can be on a node
+        // if true, only 1 directive of this type can be on a node
         readonly unique: boolean;
        /**
-        * If set to true then bindings won't be applied to children
-        * of the element such binding is encountered on. Instead
+        * If set to true then directives won't be applied to children
+        * of the element such directive is encountered on. Instead
         * the handler will be responsible for that.
         **/
         readonly controlsDescendants: boolean;
        /**
-        * Applies the binding to the specified element
+        * Applies the directive to the specified element
         * @param {Node} node The target node
         * @param {any} options The options for the handler
         * @param {IScope} scope The curent scope
         * @param {IDomElementState} state State of the target element
-        * @param {IModule} module The module bound to the current binding scope
+        * @param {IModule} module The module bound to the current directive scope
         **/
-        applyBinding(node: Node, binding: IBinding<any>, state: INodeState): void;
+        applyDirective(node: Node, directive: IDirective<any>, state: INodeState): void;
 
 }
 
@@ -50,12 +50,12 @@ export interface IScope {
     extend(name: string, model: IViewModel, indexName?: string, index?: number): IScope;
 }
 export interface INodeState {
-    readonly bindings: IBinding<any>[];
+    readonly directives: IDirective<any>[];
     readonly constantProps: object;
     readonly controlsDescendants: number;
     readonly scope: IScope;
     disabled: boolean;
-    getBindings<T>(name: string): IBinding<T>[];
+    getDirectives<T>(name: string): IDirective<T>[];
 }
 export interface IViewModel {
     readonly cleanup?: Subscription;

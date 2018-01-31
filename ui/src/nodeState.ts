@@ -1,22 +1,22 @@
 import { BehaviorSubject } from "rxjs";
-import { IScope, INodeState, IViewModel, IBinding } from "./interfaces";
+import { IScope, INodeState, IViewModel, IDirective } from "./interfaces";
 
 export class NodeState implements INodeState {
     public scope: IScope;        // scope model
-    public readonly bindings: IBinding<any>[];
+    public readonly directives: IDirective<any>[];
     public readonly constantProps: object;
     public disabled: boolean;
     public controlsDescendants: number;
 
-    constructor(bindings: IBinding<any>[], constantProps: object, scope?: IScope) {
+    constructor(directives: IDirective<any>[], constantProps: object, scope?: IScope) {
         this.scope = scope as IScope;
-        this.bindings = bindings;
+        this.directives = directives;
         this.constantProps = constantProps;
         this.disabled = false;
         this.controlsDescendants = 0;
     }
-    public getBindings<T>(name: string): IBinding<T>[] {
-        return this.bindings.filter(x => x.handler.name === name);
+    public getDirectives<T>(name: string): IDirective<T>[] {
+        return this.directives.filter(x => x.handler.name === name);
     }
 }
 

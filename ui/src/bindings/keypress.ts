@@ -21,7 +21,7 @@ const keysByCode = {
     46: "deconste",
 };
 
-export class KeyPressBinding extends SimpleHandler<KeyboardEvent> {
+export class KeyPressDirective extends SimpleHandler<KeyboardEvent> {
     constructor(name: string) {
         super(name);
         this.dataFlow = DataFlow.In;

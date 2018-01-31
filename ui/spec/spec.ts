@@ -1,6 +1,6 @@
 // import "./bindingProvider-spec";
 /////////////////////////
-/// bindings specs
+/// directive specs
 /////////////////////////
 import "./bindings/text-spec";
 import "./bindings/attr-spec";
