@@ -3,7 +3,7 @@ import { ComponentRegistry } from "./componentRegistry";
 import { DomManager } from "./domManager";
 import { HtmlEngine } from "./templateEngines";
 import { BindingProvider } from "./bindingProvider";
-import { IScope, IConfiguration } from "./interfaces";
+import { IScope, IConfiguration, IViewModel } from "./interfaces";
 
 import { EventBinding } from "./bindings/event";
 import { IfBinding } from "./bindings/if";
@@ -22,7 +22,7 @@ export class ProactiveUI {
 
     constructor(config: IConfiguration = {}) {
         this.engine = new HtmlEngine(config.document || document);
-        this.components = new ComponentRegistry(this.engine, config.router);
+        this.components = new ComponentRegistry(this.engine);
         this.bindingProvider = new BindingProvider(this.components);
         this.domManager = new DomManager(this.bindingProvider);
         this.registerCoreBindings(this.domManager, this.engine, this.components);
@@ -34,7 +34,7 @@ export class ProactiveUI {
     * @param {Object} model The model to bind to
     * @param {Node} rootNode The node to be bound
     */
-    public applyBindings(viewModel: Object, node: Element = document.documentElement) {
+    public applyBindings(viewModel: IViewModel, node: Element = document.documentElement) {
         this.domManager.applyBindings(viewModel, node);
         if (typeof window !== "undefined") {
             const sub = Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {

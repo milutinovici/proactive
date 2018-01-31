@@ -7,10 +7,8 @@ export class ComponentRegistry {
 
     private readonly components = new Map<string, IComponentDescriptor | string>();
     private readonly engine: HtmlEngine;
-    private readonly router?: object;
-    constructor(engine: HtmlEngine, router?: object) {
+    constructor(engine: HtmlEngine) {
         this.engine = engine;
-        this.router = router;
     }
 
     // component is either a descriptor or a require string
@@ -60,7 +58,6 @@ export class ComponentRegistry {
         if (isFunction(vm)) {
             let model: IViewModel | undefined;
             try {
-                props["$router"] = this.router;
                 model = new vm(props);
             } catch (e) {
                 exception.next(new Error(`Failed in constructor of component "${name}". ${e.message}`));
