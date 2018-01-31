@@ -20,14 +20,14 @@ import * as myComponent from "./mycomponent";
 
 const ui = new ProactiveUI();
 ui.components.register("my-component", myComponent);
-ui.applyBindings({}, document.body);
+ui.render({}, document.body);
 ```
 index.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
     <body>
-        <my-component x-attr-greeting="'Hello world'"></my-component>
+        <my-component x-attr:greeting="'Hello world'"></my-component>
         <script src="./startup.js"></script>
     </body>
 </html>
