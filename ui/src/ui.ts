@@ -26,7 +26,6 @@ export class ProactiveUI {
         this.directives = new DirectiveRegistry(this.components);
         this.domManager = new DomManager(this.directives);
         this.registerDirectives(this.domManager, this.engine, this.components);
-
     }
 
     /**
@@ -51,12 +50,8 @@ export class ProactiveUI {
         this.domManager.cleanNode(node);
     }
 
-    public scopeFor(node: Element): IScope | undefined {
-        const nodeState = this.domManager.getState(node);
-        if (nodeState !== undefined) {
-            return nodeState.scope;
-        }
-        return undefined;
+    public getScope(node: Element): IScope | undefined {
+        return this.domManager.getScope(node);
     }
 
     public dataFor(node: Element): IViewModel | undefined {
@@ -82,7 +77,6 @@ export class ProactiveUI {
         this.directives.register(new IfDirective("if", domManager, engine));
         this.directives.register(new ForDirective("for", domManager, engine));
         this.directives.register(new ComponentDirective("component", domManager, engine, registry));
-
     }
 
 }
