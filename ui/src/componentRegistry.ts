@@ -1,5 +1,4 @@
 import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
 import { IComponentDescriptor, IViewModel } from "./interfaces";
 import { observableRequire, isFunction, isElement } from "./utils";
 import { HtmlEngine } from "./templateEngines";
