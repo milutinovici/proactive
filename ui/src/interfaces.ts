@@ -11,8 +11,9 @@ export interface IDirective<T> {
     deactivate(): void;
     clone(): IDirective<T>;
 }
-
+// Data flow of the directive, can be In, Out (unidirectional), or both (bidirectional)
 export enum DataFlow { Out = 1, In = 2 }
+// Defines whether the directive accepts parameters
 export enum Parametricity { Required, Forbidden, Optional }
 export interface IDirectiveHandler {
         readonly name: string;
@@ -36,19 +37,17 @@ export interface IDirectiveHandler {
        /**
         * Applies the directive to the specified element
         * @param {Node} node The target node
-        * @param {any} options The options for the handler
-        * @param {IScope} scope The curent scope
-        * @param {IDomElementState} state State of the target element
-        * @param {IModule} module The module bound to the current directive scope
+        * @param {IDirective} directive The directive to be applied
+        * @param {INodeState} state State of the target element
         **/
         applyDirective(node: Node, directive: IDirective<any>, state: INodeState): void;
-
 }
-
+// Scope of the view
 export interface IScope {
     readonly $data: IViewModel;
     extend(name: string, model: IViewModel, indexName?: string, index?: number): IScope;
 }
+// Node metadata
 export interface INodeState {
     readonly directives: IDirective<any>[];
     readonly constantProps: object;
@@ -57,6 +56,7 @@ export interface INodeState {
     disabled: boolean;
     getDirectives<T>(name: string): IDirective<T>[];
 }
+// Component viewmodel
 export interface IViewModel {
     readonly cleanup?: Subscription;
     readonly value?: Observable<string>;
