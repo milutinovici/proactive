@@ -142,24 +142,17 @@ it("component: Invokes created hook", expect => {
 
     const template = "<span>foo</span>";
     let invoked = false;
-    let self: any;
-    let vm: any;
-
-    vm = {
-        created: function (this: any, element: HTMLElement) {  // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
-            invoked = true;
-            self = this;
-        },
+    const created = function (element: HTMLElement) {  // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
+        invoked = true;
     };
 
     ui.components.register("test-component", {
         template: template,
-        viewModel:  vm,
+        created: created,
     });
 
     expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.true(invoked);
-    expect.equal(self, vm);
     expect.end();
 });
 
@@ -169,30 +162,22 @@ it("component: Invokes destroy hook", expect => {
 
     const template = "<span>foo</span>";
     let invoked = false;
-    let self: any;
 
-    let vm: any;
-
-    vm = {
-        destroy: function(this: any, element: HTMLElement) {   // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
-            invoked = true;
-            self = this;
-        },
+    const destroy = function (element: HTMLElement) {   // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
+        invoked = true;
     };
 
     ui.components.register("test-component", {
         template: template,
-        viewModel: vm,
+        destroy,
     });
 
     expect.doesNotThrow(() => ui.applyBindings({ }, el));
-
     expect.false(invoked);
 
     ui.cleanNode(el);
-
     expect.true(invoked);
-    expect.equal(self, vm);
+
     expect.end();
 });
 

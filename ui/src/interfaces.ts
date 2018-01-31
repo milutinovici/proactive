@@ -60,20 +60,22 @@ export interface IViewModel {
     readonly cleanup?: Subscription;
     readonly value?: Observable<string>;
     readonly emitter?: Observable<CustomEvent>;
-    readonly created?: (el: Element) => void;
-    readonly destroy?: (el: Element) => void;
     [others: string]: any;
 }
 
 export interface IComponentDescriptor {
-    readonly template: DocumentFragment | string;
-    readonly viewModel?: IViewModel|(new (props?: Object) => IViewModel);
+    template: DocumentFragment | string;
+    readonly viewModel?: IViewModel | (new (props?: Object) => IViewModel);
+    readonly created?: (element: HTMLElement, scope?: IScope) => void;
+    readonly destroy?: (element: HTMLElement, scope?: IScope) => void;
 }
 
 export interface IComponent {
     readonly name: string;
     readonly template: DocumentFragment;
     readonly viewModel: IViewModel;
+    readonly created?: (element: Element, scope?: IScope) => void;
+    readonly destroy?: (element: Element, scope?: IScope) => void;
 }
 export interface IConfiguration {
     document?: Document;

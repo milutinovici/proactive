@@ -76,13 +76,13 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
 
             this.applyTemplate(element, scope, comp, children);
             // created lifecycle hook
-            if (comp.viewModel.created !== undefined) {
-                comp.viewModel.created(element);
+            if (comp.created !== undefined) {
+                comp.created(element, scope);
             }
 
             internal.add(() => {
-                if (comp.viewModel.destroy !== undefined) {
-                    comp.viewModel.destroy(element);
+                if (comp.destroy !== undefined) {
+                    comp.destroy(element, scope);
                 }
                 this.domManager.cleanDescendants(element);
                 while (element.firstChild) {
@@ -104,7 +104,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             }
             return this.registry.load(name).pipe(map(desc => {
                 const vm = this.registry.initialize(name, desc, props, this.getVm(state));
-                return { viewModel: vm, template: desc.template, name: name } as IComponent;
+                return { name: name, viewModel: vm, template: desc.template, created: desc.created, destroy: desc.destroy} as IComponent;
             }));
         }));
     }
