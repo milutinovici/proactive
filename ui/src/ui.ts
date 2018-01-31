@@ -2,17 +2,17 @@ import { Observable } from "rxjs";
 import { ComponentRegistry } from "./componentRegistry";
 import { DomManager } from "./domManager";
 import { HtmlEngine } from "./templateEngines";
-import { DirectiveRegistry } from "./bindingProvider";
+import { DirectiveRegistry } from "./directiveRegistry";
 import { IScope, IConfiguration, IViewModel } from "./interfaces";
 
-import { EventDirective } from "./bindings/event";
-import { IfDirective } from "./bindings/if";
-import { TextDirective } from "./bindings/text";
-import { AttrDirective, CssDirective, StyleDirective } from "./bindings/oneWay";
-import { ForDirective } from "./bindings/for";
-import { ValueDirective } from "./bindings/value";
-import { ComponentDirective } from "./bindings/component";
-import { KeyPressDirective } from "./bindings/keypress";
+import { EventDirective } from "./directives/event";
+import { IfDirective } from "./directives/if";
+import { TextDirective } from "./directives/text";
+import { AttrDirective, CssDirective, StyleDirective } from "./directives/oneWay";
+import { ForDirective } from "./directives/for";
+import { ValueDirective } from "./directives/value";
+import { ComponentDirective } from "./directives/component";
+import { KeyPressDirective } from "./directives/keypress";
 
 export class ProactiveUI {
     public readonly directives: DirectiveRegistry;

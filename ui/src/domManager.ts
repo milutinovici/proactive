@@ -1,5 +1,5 @@
 import { Scope } from "./nodeState";
-import { DirectiveRegistry } from "./bindingProvider";
+import { DirectiveRegistry } from "./directiveRegistry";
 import { isElement, isTextNode, isHandlebarExpression } from "./utils";
 import { INodeState, IScope, IViewModel } from "./interfaces";
 import { exception } from "./exceptionHandlers";

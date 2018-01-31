@@ -1,6 +1,6 @@
-import { IDirectiveHandler, IDirective, INodeState } from "./interfaces";
+import { IDirectiveHandler, IDirective } from "./interfaces";
 import { NodeState } from "./nodeState";
-import { Directive } from "./binding";
+import { Directive } from "./directive";
 import { isElement, tryParse } from "./utils";
 import { ComponentRegistry } from "./componentRegistry";
 import { exception } from "./exceptionHandlers";

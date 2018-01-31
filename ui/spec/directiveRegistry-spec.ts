@@ -1,7 +1,7 @@
 // import * as it from "tape";
 // import { HtmlEngine } from "../src/templateEngines";
 // import { ComponentRegistry } from "../src/componentRegistry";
-// import { DirectiveRegistry } from "../src/bindingProvider";
+// import { DirectiveRegistry } from "../src/directiveRegistry";
 // import { document, parse } from "./spec-utils";
 
 // it("get directives from element with a single directive", expect => {
