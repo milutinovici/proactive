@@ -129,7 +129,7 @@ export class DomManager {
         if (state === null) {
             return null;
         } else if (state.controlsDescendants > 1) {
-            exception.next(new Error(`bindings are competing for descendants of target element!`));
+            exception.next(new Error(`bindings are competing for descendants of ${node}`));
         }
         state.scope = scope;
         this.nodeStateManager.set(node, state);

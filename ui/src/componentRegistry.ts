@@ -30,12 +30,8 @@ export class ComponentRegistry {
     public load(name: string): Observable<IComponentDescriptor> {
         name = name.toUpperCase();
         let result = this.getDescriptor(name);
-        result = result.do((x: any) => {
-            if (typeof x.template === "string") {
-                x.template = this.compileTemplate(x.template);
-            }
-            this.components.set(name, x); // cache descriptor
-        });
+        result = result.map(desc => Object.assign({}, desc, { template: this.compileTemplate(desc.template)}) as IComponentDescriptor)
+                       .do((x) => this.components.set(name, x)); // cache descriptor
         return result;
     }
 
