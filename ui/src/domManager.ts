@@ -121,7 +121,7 @@ export class DomManager {
             directive.activate(node, state);
         }
 
-        return state.directives.some(x => x.handler.controlsDescendants);
+        return state.controlsDescendants > 0;
     }
 
     private createState(node: Node, scope: IScope): INodeState | null {
