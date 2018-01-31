@@ -52,7 +52,8 @@ export interface IScope {
 export interface INodeState {
     readonly bindings: IBinding<any>[];
     readonly constantProps: object;
-    scope: IScope;
+    readonly controlsDescendants: number;
+    readonly scope: IScope;
     disabled: boolean;
     getBindings<T>(name: string): IBinding<T>[];
 }
@@ -79,5 +80,4 @@ export interface IComponent {
 }
 export interface IConfiguration {
     document?: Document;
-    router?: object;
 }

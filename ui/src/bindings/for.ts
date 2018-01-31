@@ -48,7 +48,7 @@ export class ForBinding<T> extends BaseHandler<T[]> {
         // apply bindings after repeated elements
         if (node.nextSibling === null && sibling !== null) {
             while (sibling !== null) {
-                this.domManager.applyBindingsRecursive(state.scope, sibling);
+                this.domManager.applyBindingsRecursive(sibling, state.scope);
                 sibling = sibling.nextSibling;
             }
         }
@@ -74,11 +74,11 @@ export class ForBinding<T> extends BaseHandler<T[]> {
 
             for (let i = current; i < merger.stopped; i++) {
                 let childState = indexName ?
-                                 new NodeState(state.scope.extend(itemName, additions[i].value, indexName, additions[i].index), otherBindings.map(x => x.clone()), state.constantProps) :
-                                 new NodeState(state.scope.extend(itemName, additions[i].value), otherBindings.map(x => x.clone()), state.constantProps);
+                                 new NodeState(otherBindings.map(x => x.clone()), state.constantProps, state.scope.extend(itemName, additions[i].value, indexName, additions[i].index)) :
+                                 new NodeState(otherBindings.map(x => x.clone()), state.constantProps, state.scope.extend(itemName, additions[i].value));
 
                 this.domManager.setState(parent.childNodes[i + start + additions[current].index], childState);
-                this.domManager.applyBindingsRecursive(childState.scope, parent.childNodes[i + start + additions[current].index]);
+                this.domManager.applyBindingsRecursive(parent.childNodes[i + start + additions[current].index], childState.scope);
             }
             if (indexName) {
                 for (let i = merger.stopped + 1; i < newLength; i++) {

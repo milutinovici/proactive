@@ -17,7 +17,7 @@ it("event: binds a single event to a handler function", expect => {
     expect.equal(model.firstCount, 1, `handler was called`);
     expect.equal(model.firstName, "click", "click event was triggered");
 
-    ui.cleanNode(el);
+    ui.clean(el);
 
     // should no longer fire
     triggerEvent(el, "click");
@@ -37,7 +37,7 @@ it("event: use shorthand for event binding", expect => {
     expect.equal(model.firstCount, 1, `handler was called`);
     expect.equal(model.firstName, "click", "click event was triggered");
 
-    ui.cleanNode(el);
+    ui.clean(el);
 
     // should no longer fire
     triggerEvent(el, "click");
@@ -61,7 +61,7 @@ it("event: binds multiple events to handler functions", expect => {
     triggerEvent(el, "input");
     expect.equal(model.secondCount, 1, "input handler was called 1 time");
 
-    ui.cleanNode(el);
+    ui.clean(el);
 
     triggerEvent(el, "click");
     expect.equal(model.firstCount, 1, "handler is not called after clean operation");
@@ -99,7 +99,7 @@ it("event: binds multiple events to observers", expect => {
     triggerEvent(el, "input");
     expect.equal(inputCallCount, 1, "input observer was called 1 time");
 
-    ui.cleanNode(el);
+    ui.clean(el);
     clickCallCount = 0;
     inputCallCount = 0;
 
@@ -147,7 +147,7 @@ it("event: binds a single key to a handler function", expect => {
     triggerEvent(el, "keydown", 14);
     expect.equal(model.firstCount, 1, "call count is still 1 after pressing another key");
 
-    ui.cleanNode(el);
+    ui.clean(el);
 
     triggerEvent(el, "click");
     expect.equal(model.firstCount, 1, "not called, after clean operation");
@@ -172,7 +172,7 @@ it("event: binds multiple keys to handler functions", expect => {
     triggerEvent(el, "keydown", 13);
     expect.equal(model.secondCount, 1);
 
-    ui.cleanNode(el);
+    ui.clean(el);
 
     triggerEvent(el, "keydown", 9);
     expect.equal(model.firstCount, 1, "should no longer fire");

@@ -201,7 +201,7 @@ it("for: cleans up after iteself", expect => {
 
     expect.doesNotThrow(() => ui.applyBindings({ src: array }, el));
     expect.equal(el.children.length, 3);
-    ui.cleanNode(el);
+    ui.clean(el);
     expect.equal(el.children.length, 1);
     expect.doesNotThrow(() => ui.applyBindings({ src: array }, el));
     expect.equal(el.children.length, 3);

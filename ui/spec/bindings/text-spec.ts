@@ -27,9 +27,9 @@ it("text: binding to a numeric constant", expect => {
 });
 
 it("text: binding to a falsy numeric model value", expect => {
-    const template = `<span x-text="$data">invalid</span>`;
+    const template = `<span x-text="zero">invalid</span>`;
     const el = <HTMLElement> parse(template)[0];
-    let model = 0;
+    let model = { zero: 0 };
 
     expect.equal(el.textContent, "invalid");
     expect.doesNotThrow(() => ui.applyBindings(model, el));
@@ -75,7 +75,7 @@ it("text: binding to a observable model value", expect => {
 
     // binding should stop updating after getting disposed
     let oldValue = model.observableString();
-    ui.cleanNode(el);
+    ui.clean(el);
     model.observableString("nope");
     expect.equal(el.textContent, oldValue);
     expect.end();
@@ -109,7 +109,7 @@ it("text: handlebar binding works", expect => {
     expect.equal(el.textContent, model.observableString());
 
     // binding should stop updating after getting disposed
-    ui.cleanNode(el);
+    ui.clean(el);
     model.observableString("nope");
     expect.equal(el.textContent, "{{observableString}}");
     expect.end();

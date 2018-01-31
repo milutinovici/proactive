@@ -36,7 +36,7 @@ export class IfBinding extends BaseHandler<boolean> {
             state.disabled = !x;
             if (x) {
                 this.enableOtherBindings(element, state);
-                this.domManager.applyBindingsToDescendants(state.scope, element);
+                this.domManager.applyBindingsToDescendants(element, state.scope);
                 parent.insertBefore(element, placeholder);
             } else if (element.parentElement === parent) {
                 parent.removeChild(element);
@@ -47,7 +47,7 @@ export class IfBinding extends BaseHandler<boolean> {
         // apply bindings after if element
         if (element.nextSibling === null && sibling !== null) {
             while (sibling !== null) {
-                this.domManager.applyBindingsRecursive(state.scope, sibling);
+                this.domManager.applyBindingsRecursive(sibling, state.scope);
                 sibling = sibling.nextSibling;
             }
         }

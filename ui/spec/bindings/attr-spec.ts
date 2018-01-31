@@ -54,7 +54,7 @@ it("attr: binding to a observable model value", expect => {
     expect.true(hasAttr(el, "id", "my"));
 
     // binding should stop updating after getting disposed
-    ui.cleanNode(el);
+    ui.clean(el);
     model.obs.next("baby");
     expect.true(hasAttr(el, "id", "my"));
     expect.end();
@@ -79,7 +79,7 @@ it("attr: binding multiple attributes to multiple observables", expect => {
     expect.true(hasAttr(el, "name", "my"));
 
     // binding should stop updating after getting disposed
-    ui.cleanNode(el);
+    ui.clean(el);
     model.obs1.next(3);
     model.obs2.next("baby");
     expect.true(hasAttr(el, "id", "2"));

@@ -42,7 +42,7 @@ it("css: binding to a observable model value", expect => {
     expect.false(hasClass(el, "foo"));
 
     // binding should stop updating after getting disposed
-    ui.cleanNode(el);
+    ui.clean(el);
     model.obs.next(true);
     expect.false(hasClass(el, "foo"));
     expect.end();
@@ -77,7 +77,7 @@ it("css: binding multiple css classes to multiple observable model properties", 
     expect.true(hasClass(el, "bar"));
 
     // binding should stop updating after getting disposed
-    ui.cleanNode(el);
+    ui.clean(el);
     model.obs1.next(false);
     model.obs2.next(false);
     expect.true(hasClass(el, "foo"));

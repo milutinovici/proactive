@@ -29,7 +29,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         removeEmptyChildren(element);
 
         // bind children using parent (not component) scope
-        this.domManager.applyBindingsToDescendants(state.scope, element);
+        this.domManager.applyBindingsToDescendants(element, state.scope);
         while (element.firstChild) {
             children.push(element.removeChild(element.firstChild));
         }
@@ -125,7 +125,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
     }
     protected applyTemplate(parent: HTMLElement, childScope: IScope, component: IComponent, boundChildren: Node[]) {
         const template = component.template.cloneNode(true) as DocumentFragment;
-        this.domManager.applyBindingsToDescendants(childScope, template);
+        this.domManager.applyBindingsToDescendants(template, childScope);
 
         if (boundChildren.length) {
             this.transclude(component.name, template, boundChildren);

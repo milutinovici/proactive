@@ -15,7 +15,7 @@ import { ComponentBinding } from "./bindings/component";
 import { KeyPressBinding } from "./bindings/keypress";
 
 export class ProactiveUI {
-    public readonly bindingProvider: BindingProvider;
+    public readonly directives: BindingProvider;
     public readonly components: ComponentRegistry;
     public readonly domManager: DomManager;
     public readonly engine: HtmlEngine;
@@ -23,8 +23,8 @@ export class ProactiveUI {
     constructor(config: IConfiguration = {}) {
         this.engine = new HtmlEngine(config.document || document);
         this.components = new ComponentRegistry(this.engine);
-        this.bindingProvider = new BindingProvider(this.components);
-        this.domManager = new DomManager(this.bindingProvider);
+        this.directives = new BindingProvider(this.components);
+        this.domManager = new DomManager(this.directives);
         this.registerCoreBindings(this.domManager, this.engine, this.components);
 
     }
@@ -47,7 +47,7 @@ export class ProactiveUI {
     * Removes and cleans up any binding-related state from the specified node and its descendants.
     * @param {Node} rootNode The node to be cleaned
     */
-    public cleanNode(node: Element) {
+    public clean(node: Element) {
         this.domManager.cleanNode(node);
     }
 
@@ -59,7 +59,7 @@ export class ProactiveUI {
         return undefined;
     }
 
-    public dataFor(node: Element): object | undefined {
+    public dataFor(node: Element): IViewModel | undefined {
         const scope = this.domManager.getScope(node);
         if (scope !== undefined) {
             return scope.$data;
@@ -69,19 +69,19 @@ export class ProactiveUI {
 
     private registerCoreBindings(domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {
         // out
-        this.bindingProvider.registerHandler(new TextBinding("text"));
-        this.bindingProvider.registerHandler(new AttrBinding("attr"));
-        this.bindingProvider.registerHandler(new CssBinding("css"));
-        this.bindingProvider.registerHandler(new StyleBinding("style"));
+        this.directives.register(new TextBinding("text"));
+        this.directives.register(new AttrBinding("attr"));
+        this.directives.register(new CssBinding("css"));
+        this.directives.register(new StyleBinding("style"));
         // in
-        this.bindingProvider.registerHandler(new EventBinding("on"));
-        this.bindingProvider.registerHandler(new KeyPressBinding("key"));
+        this.directives.register(new EventBinding("on"));
+        this.directives.register(new KeyPressBinding("key"));
         // two way
-        this.bindingProvider.registerHandler(new ValueBinding("value"));
-
-        this.bindingProvider.registerHandler(new IfBinding("if", domManager, engine));
-        this.bindingProvider.registerHandler(new ForBinding("for", domManager, engine));
-        this.bindingProvider.registerHandler(new ComponentBinding("component", domManager, engine, registry));
+        this.directives.register(new ValueBinding("value"));
+        // structural
+        this.directives.register(new IfBinding("if", domManager, engine));
+        this.directives.register(new ForBinding("for", domManager, engine));
+        this.directives.register(new ComponentBinding("component", domManager, engine, registry));
 
     }
 

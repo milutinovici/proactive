@@ -50,16 +50,16 @@ export class ValueBinding extends BaseHandler<string|number|boolean|string[]> {
         Observable.fromEvent<Event>(el, event)).pipe(filter(evt => evt.target === el));
     }
     private static isCheckbox(element: HTMLElement): element is HTMLInputElement {
-        const tag = element.tagName.toLowerCase();
-        return tag === "input" && element["type"] === "checkbox";
+        const tag = element.tagName;
+        return tag === "INPUT" && element["type"] === "checkbox";
     }
     private static isRadio(element: HTMLElement): element is HTMLInputElement {
-        const tag = element.tagName.toLowerCase();
-        return tag === "input" && element["type"] === "radio";
+        const tag = element.tagName;
+        return tag === "INPUT" && element["type"] === "radio";
     }
     private static isMultiSelect(element: HTMLElement): element is HTMLSelectElement {
-        const tag = element.tagName.toLowerCase();
-        return tag === "select" && element["multiple"];
+        const tag = element.tagName;
+        return tag === "SELECT" && element["multiple"];
     }
     private static setElementValue(el: HTMLElement, value: string|number|boolean) {
         el["value"] = (value === null) || (value === undefined) ? "" : value.toString();

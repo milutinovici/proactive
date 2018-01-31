@@ -37,7 +37,7 @@ it("if: binding to a boolean observable value using static template", expect => 
     prop(false);
     expect.equal(span.parentElement, null);
     prop(true);
-    ui.cleanNode(el);
+    ui.clean(el);
     prop(false);
     expect.equal(span.parentElement, el, "binding should stop updating after getting disposed");
     expect.end();
@@ -52,7 +52,7 @@ it("if: binding to a boolean observable value using dynamic template", expect =>
     expect.equal(el.children[0].textContent, "foo");
 
     // try it again
-    ui.cleanNode(el);
+    ui.clean(el);
     expect.doesNotThrow(() => ui.applyBindings(prop, el));
     expect.equal(el.children.length, 1);
     expect.equal(el.children[0].textContent, "foo");
@@ -74,7 +74,7 @@ it("if: binding to a boolean observable value using dynamic template with event"
     expect.equal(count, 1);
 
     // try it again
-    ui.cleanNode(el);
+    ui.clean(el);
     triggerEvent(<HTMLElement> el.children[0], "click");
     expect.equal(count, 1);
     expect.end();
@@ -88,7 +88,7 @@ it("if: binding after removed element", expect => {
     expect.equal(el.children[0].textContent, "foo");
 
     // try it again
-    ui.cleanNode(el);
+    ui.clean(el);
     expect.equal(el.children[1].textContent, "foo");
     expect.end();
 });
@@ -113,7 +113,7 @@ it("if: cleans up after itself", expect => {
     const child = el.firstChild as Node;
     expect.doesNotThrow(() => ui.applyBindings({ active }, el));
     expect.equal(el.children.length, 0);
-    ui.cleanNode(el);
+    ui.clean(el);
     expect.equal(el.children[0], child);
     expect.end();
 });

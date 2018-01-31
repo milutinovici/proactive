@@ -175,7 +175,7 @@ it("component: Invokes destroy hook", expect => {
     expect.doesNotThrow(() => ui.applyBindings({ }, el));
     expect.false(invoked);
 
-    ui.cleanNode(el);
+    ui.clean(el);
     expect.true(invoked);
 
     expect.end();
@@ -198,7 +198,7 @@ it("component: Unsubscribes a component's viewmodel if has cleanup subscription"
 
     expect.false(unsubscribed);
     expect.doesNotThrow(() => ui.applyBindings({ }, el));
-    ui.cleanNode(el);
+    ui.clean(el);
     expect.true(unsubscribed);
     expect.end();
 });

@@ -1,4 +1,5 @@
-import { IBindingHandler, IBinding } from "./interfaces";
+import { IBindingHandler, IBinding, INodeState } from "./interfaces";
+import { NodeState } from "./nodeState";
 import { Binding } from "./binding";
 import { isElement, tryParse } from "./utils";
 import { ComponentRegistry } from "./componentRegistry";
@@ -14,7 +15,7 @@ export class BindingProvider {
         this.components = components;
         this.handlers = new Map<string, IBindingHandler>();
     }
-    public registerHandler(handler: IBindingHandler) {
+    public register(handler: IBindingHandler) {
         if (!this.handlers.has(handler.name)) {
             this.handlers.set(handler.name, handler);
         } else {
@@ -22,40 +23,35 @@ export class BindingProvider {
         }
     }
 
-    public getBindingsAndProps(element: Node): [IBinding<any>[], object] {
-        if (!isElement(element)) {
-             return [[this.handleBarsToBinding(element)], {}];
+    public createNodeState(node: Node): NodeState | null {
+        const isEl = isElement(node);
+        if (!isEl) {
+            return new NodeState([this.handleBarsToBinding(node)], {});
         }
-        const tag = element.tagName;
-        const bindings: Binding<any>[] = [];
-        let controlsDescendants = 0;
-
-        // check if element is custom element (component)
-        if (this.components.registered(tag)) {
+        const tag = node["tagName"];
+        const isCustomElement = this.components.registered(tag);
+        if (!isCustomElement && !node.hasAttributes()) {
+            return null;
+        }
+        const state = new NodeState([], {});
+        if (isCustomElement) {
             // when a component is referenced as custom-element, apply a virtual 'component' binding
-            bindings.push(new Binding<string>(this.handlers.get("component") as IBindingHandler, `'${tag}'`, []));
-            controlsDescendants += 1;
+            state.bindings.push(new Binding<string>(this.handlers.get("component") as IBindingHandler, `'${tag}'`, []));
+            state.controlsDescendants += 1;
         }
-        const props = {};
-        if (element.hasAttributes()) {
-            for (let i = 0; i < element.attributes.length; i++) {
-                const binding = this.attributeToBindingOrProp(element.attributes[i]);
-                if (!Array.isArray(binding)) {
-                    bindings.push(binding);
-                    if (binding.handler.controlsDescendants) {
-                        controlsDescendants += 1;
-                    }
-                } else {
-                    props[binding[0]] = binding[1];
+        for (let i = 0; i < node.attributes.length; i++) {
+            const binding = this.attributeToBindingOrProp(node.attributes[i]);
+            if (!Array.isArray(binding)) {
+                state.bindings.push(binding);
+                if (binding.handler.controlsDescendants) {
+                    state.controlsDescendants += 1;
                 }
+            } else {
+                state.constantProps[binding[0]] = binding[1];
             }
         }
-        if (controlsDescendants > 1) {
-            throw Error(`bindings are competing for descendants of target element!`);
-        }
-        bindings.sort((a, b) => b.handler.priority - a.handler.priority);
-
-        return [bindings, props];
+        state.bindings.sort((a: IBinding<any>, b: IBinding<any>) => b.handler.priority - a.handler.priority);
+        return state;
     }
 
     private attributeToBindingOrProp(attribute: Attr): Binding<any> | [string, string|boolean|number] {

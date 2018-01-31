@@ -2,16 +2,18 @@ import { BehaviorSubject } from "rxjs";
 import { IScope, INodeState, IViewModel, IBinding } from "./interfaces";
 
 export class NodeState implements INodeState {
-    public readonly scope: IScope;        // scope model
+    public scope: IScope;        // scope model
     public readonly bindings: IBinding<any>[];
     public readonly constantProps: object;
     public disabled: boolean;
+    public controlsDescendants: number;
 
-    constructor(scope: IScope, bindings: IBinding<any>[], constantProps: object) {
-        this.scope = scope;
+    constructor(bindings: IBinding<any>[], constantProps: object, scope?: IScope) {
+        this.scope = scope as IScope;
         this.bindings = bindings;
         this.constantProps = constantProps;
         this.disabled = false;
+        this.controlsDescendants = 0;
     }
     public getBindings<T>(name: string): IBinding<T>[] {
         return this.bindings.filter(x => x.handler.name === name);
