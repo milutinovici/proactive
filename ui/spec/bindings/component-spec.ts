@@ -52,23 +52,6 @@ it("component: Loads a component through an AMD module loader", expect => {
     expect.end();
 });
 
-it("component: Loads a template through an AMD module loader", expect => {
-    const str = `<div x-component="'test-component'"></div>`;
-    const el = <HTMLElement> parse(str)[0];
-
-    let vm = {
-        init: function () {
-            expect.equal(el.innerHTML, "<span>foo</span>");
-            expect.end();
-        },
-    };
-
-    ui.components.register("test-component", "text!src/ui/components/my-select.html");
-
-    expect.doesNotThrow(() => ui.applyBindings(vm, el));
-    expect.end();
-});
-
 it("component: Loads a template from a string", expect => {
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> parse(str)[0];
@@ -81,7 +64,7 @@ it("component: Loads a template from a string", expect => {
     expect.end();
 });
 
-it("component: Loads a template from a node-array", expect => {
+it("component: Loads a template from a fragment", expect => {
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -95,7 +78,7 @@ it("component: Loads a template from a node-array", expect => {
     expect.end();
 });
 
-it("component: Loads a template from a selector", expect => {
+it("component: Loads a template from an id", expect => {
     const template =  parse(`<span style="display:none;" id="template1">bar</span>`)[0];
     document.body.appendChild(template);
     const str = `<div x-component="'test-component'"></div>`;
@@ -153,7 +136,7 @@ it("component: props get passed to view-model constructor", expect => {
     expect.end();
 });
 
-it("component: Invokes preBindingInit", expect => {
+it("component: Invokes created hook", expect => {
     const str = `<test-component id="fixture5" foo="42"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -163,7 +146,7 @@ it("component: Invokes preBindingInit", expect => {
     let vm: any;
 
     vm = {
-        preInit: function (this: any, element: HTMLElement) {  // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
+        created: function (this: any, element: HTMLElement) {  // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
             invoked = true;
             self = this;
         },
@@ -180,7 +163,7 @@ it("component: Invokes preBindingInit", expect => {
     expect.end();
 });
 
-it("component: Invokes postBindingInit", expect => {
+it("component: Invokes destroy hook", expect => {
     const str = `<test-component id="fixture5" foo="42"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -191,7 +174,7 @@ it("component: Invokes postBindingInit", expect => {
     let vm: any;
 
     vm = {
-        postInit: function(this: any, element: HTMLElement) {   // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
+        destroy: function(this: any, element: HTMLElement) {   // don't convert this to a lambda or the test will suddenly fail due to Typescript's this-capturing
             invoked = true;
             self = this;
         },
@@ -203,6 +186,10 @@ it("component: Invokes postBindingInit", expect => {
     });
 
     expect.doesNotThrow(() => ui.applyBindings({ }, el));
+
+    expect.false(invoked);
+
+    ui.cleanNode(el);
 
     expect.true(invoked);
     expect.equal(self, vm);

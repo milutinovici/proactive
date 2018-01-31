@@ -53,12 +53,7 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         binding.cleanup.add(component.subscribe(comp => {
             doCleanup();
             internal = new Subscription();
-            internal.add(() => {
-                this.domManager.cleanDescendants(element);
-                while (element.firstChild) {
-                    element.removeChild(element.firstChild);
-                }
-            });
+
             // isolated nodestate and scope
             const scope = new Scope(comp.viewModel);
 
@@ -80,6 +75,20 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             }
 
             this.applyTemplate(element, scope, comp, children);
+            // created lifecycle hook
+            if (comp.viewModel.created !== undefined) {
+                comp.viewModel.created(element);
+            }
+
+            internal.add(() => {
+                if (comp.viewModel.destroy !== undefined) {
+                    comp.viewModel.destroy(element);
+                }
+                this.domManager.cleanDescendants(element);
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild);
+                }
+            });
         }));
         binding.cleanup.add(doCleanup);
     }
@@ -115,11 +124,6 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
         return undefined;
     }
     protected applyTemplate(parent: HTMLElement, childScope: IScope, component: IComponent, boundChildren: Node[]) {
-        // invoke preBindingInit
-        if (component.viewModel.hasOwnProperty("preInit")) {
-            component.viewModel.preInit(parent, childScope);
-        }
-
         const template = component.template.cloneNode(true) as DocumentFragment;
         this.domManager.applyBindingsToDescendants(childScope, template);
 
@@ -127,10 +131,6 @@ export class ComponentBinding<T> extends BaseHandler<string|object> {
             this.transclude(component.name, template, boundChildren);
         }
         parent.appendChild(template);
-        // invoke postBindingInit
-        if (component.viewModel.hasOwnProperty("postInit")) {
-            component.viewModel.postInit(parent, childScope);
-        }
     }
     private transclude(name: string, boundTemplate: DocumentFragment, boundChildren: Node[]) {
         const slots = Array.from(boundTemplate.querySelectorAll("slot"));

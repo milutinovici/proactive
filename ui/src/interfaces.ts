@@ -60,6 +60,8 @@ export interface IViewModel {
     readonly cleanup?: Subscription;
     readonly value?: Observable<string>;
     readonly emitter?: Observable<CustomEvent>;
+    readonly created?: (el: Element) => void;
+    readonly destroy?: (el: Element) => void;
     [others: string]: any;
 }
 
