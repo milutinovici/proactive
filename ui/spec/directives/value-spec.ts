@@ -9,7 +9,7 @@ it("value: Should treat null values as empty strings", expect => {
     const template = `<input type="text" x-value="myProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
-    ui.render({ myProp: px.value(0) }, el);
+    ui.domManager.applyDirectives({ myProp: px.value(0) }, el);
     expect.equal(el.value, "0");
     expect.end();
 });
@@ -18,7 +18,7 @@ it("value: Should assign an empty string as value if the model value is undefine
     const template = `<input type="text" x-value="undefined" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
-    ui.render({ }, el);
+    ui.domManager.applyDirectives({ }, el);
     expect.equal(el.value, "");
     expect.end();
 });
@@ -28,7 +28,7 @@ it("value: For observable values, should unwrap the value and update on change",
     const el = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value(123);
-    ui.render({ someProp: myobservable }, el);
+    ui.domManager.applyDirectives({ someProp: myobservable }, el);
     expect.equal(el.value, "123");
     myobservable(456);
     expect.equal(el.value, "456");
@@ -40,7 +40,7 @@ it("value: For observable values, should update on change if new value is 'stric
     const el = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value<string | number>("+123");
-    ui.render({ someProp: myobservable }, el);
+    ui.domManager.applyDirectives({ someProp: myobservable }, el);
     expect.equal(el.value, "+123");
     myobservable(123);
     expect.equal(el.value, "123");
@@ -52,7 +52,7 @@ it("value: For writeable observable values, should catch the node's onchange and
     const el = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value(123);
-    ui.render({ someProp: myobservable }, el);
+    ui.domManager.applyDirectives({ someProp: myobservable }, el);
     el.value = "some user-entered value";
     triggerEvent(el, "change");
 
@@ -71,7 +71,7 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
     let vm = { prop: observable };
     let value = "";
     observable.subscribe(x => value = x);
-    ui.render(vm, el);
+    ui.domManager.applyDirectives(vm, el);
     expect.equal(el.value, "zzz");
 
     // Change the input value and trigger change event; verify that the view model wasn't changed
@@ -93,7 +93,7 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
 //     let newSubproperty = px.value<string>();
 //     let model = { myprop: px.value<any>({ subproperty: originalSubproperty }) };
 
-//     ui.render(model, el);
+//     ui.domManager.applyDirectives(model, el);
 //     expect.equal(el.value, "original value");
 
 //     model.myprop({ subproperty: newSubproperty }); // Note that myprop (and hence its subproperty) is changed *after* the directives are applied
@@ -115,7 +115,7 @@ it("value: Should only register one single onchange handler", expect => {
     myobservable.subscribe(value => { notifiedValues.push(value); });
     expect.equal(notifiedValues.length, 1);
 
-    ui.render({ someProp: myobservable }, el);
+    ui.domManager.applyDirectives({ someProp: myobservable }, el);
 
     // Implicitly observe the number of handlers by seeing how many times "myobservable"
     // receives a new value for each onchange on the text box. If there's just one handler,
@@ -134,7 +134,7 @@ it("value: should update non observable values", expect => {
     const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
     const viewModel = { someProp: "ABC" };
-    ui.render(viewModel, el);
+    ui.domManager.applyDirectives(viewModel, el);
 
     el.value = "DEF";
     triggerEvent(el, "change");
@@ -148,7 +148,7 @@ it("value: input values type should be consistent", expect => {
     const number = px.value(0);
     const el = <HTMLInputElement> parse(template)[0];
     const viewModel = { someProp: number };
-    ui.render(viewModel, el);
+    ui.domManager.applyDirectives(viewModel, el);
 
     el.value = "3";
     triggerEvent(el, "change");
@@ -165,7 +165,7 @@ it("value: select multiple can be bound to an array", expect => {
     const selected = px.array<string>([]);
     const el = <HTMLSelectElement> parse(template)[0];
     const viewModel = { selected };
-    ui.render(viewModel, el);
+    ui.domManager.applyDirectives(viewModel, el);
     selected.push("A");
     expect.equal(el.options[0]["selected"], true);
 

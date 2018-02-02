@@ -10,7 +10,7 @@ it("css: bind to a string constant", expect => {
 
     const model = {};
     expect.false(hasClass(el, "foo"));
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.true(hasClass(el, "foo"));
     expect.end();
 });
@@ -22,7 +22,7 @@ it("css: bind to a non-observable model value", expect => {
     const model = { bool: true };
 
     expect.false(hasClass(el, "foo"));
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.true(hasClass(el, "foo"));
     expect.end();
 });
@@ -34,7 +34,7 @@ it("css: bind to a observable model value", expect => {
     const model = { obs: new BehaviorSubject(true) };
 
     expect.false(hasClass(el, "foo"));
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.true(hasClass(el, "foo"));
 
     model.obs.next(false);
@@ -54,7 +54,7 @@ it("css: bind multiple css classes to multiple observable model properties", exp
 
     expect.false(hasClass(el, "foo"));
     expect.false(hasClass(el, "bar"));
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.true(hasClass(el, "foo"));
     expect.false(hasClass(el, "bar"));
 

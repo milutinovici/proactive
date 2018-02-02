@@ -10,7 +10,7 @@ it("text: bind to a string constant", expect => {
     let model = {};
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.equal(el.textContent, "foo");
     expect.end();
 });
@@ -21,7 +21,7 @@ it("text: bind to a numeric constant", expect => {
     let model = {};
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.equal(el.textContent, "42");
     expect.end();
 });
@@ -32,7 +32,7 @@ it("text: bind to a falsy numeric model value", expect => {
     let model = { zero: 0 };
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.equal(el.textContent, "0");
     expect.end();
 });
@@ -43,7 +43,7 @@ it("text: bind to a boolean constant", expect => {
     let model = {};
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.equal(el.textContent, "true");
     expect.end();
 });
@@ -54,7 +54,7 @@ it("text: bind to a non-observable model value", expect => {
     let model = { constantString: "foo" };
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.equal(el.textContent, model.constantString);
     expect.end();
 });
@@ -66,7 +66,7 @@ it("text: bind to a observable model value", expect => {
     let model = { observableString: px.value("foo") };
 
     expect.equal(el.textContent, "invalid");
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.equal(el.textContent, model.observableString());
 
     model.observableString("magic");
@@ -86,7 +86,7 @@ it("text: bind to a observable model value", expect => {
 //     let model = { observableString: px.value("foo") };
 
 //     expect.equal(el.textContent, "invalid");
-//     expect.doesNotThrow(() => ui.render(model, el));
+//     expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
 //     expect.equal(el.textContent, "hello " + model.observableString());
 //     model.observableString("bar");
 //     expect.equal(el.textContent, "hello " + model.observableString());
@@ -99,7 +99,7 @@ it("text: handlebar directive works", expect => {
 
     let model = { observableString: px.value("foo") };
 
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.equal(el.textContent, model.observableString());
 
     model.observableString("magic");

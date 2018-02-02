@@ -37,7 +37,7 @@ it("value: Should be able to control a checkbox's checked state", expect => {
 
     let myobservable = px.value(true);
 
-    ui.render({ someProp: myobservable }, element);
+    ui.domManager.applyDirectives({ someProp: myobservable }, element);
     expect.equal(element.checked, true);
 
     myobservable(false);
@@ -51,7 +51,7 @@ it("value: Should be able to control a radio's checked state", expect => {
 
     let myobservable = px.value("my");
 
-    ui.render({ someProp: myobservable }, element);
+    ui.domManager.applyDirectives({ someProp: myobservable }, element);
     expect.equal(element.checked, true);
 
     myobservable("other");
@@ -64,7 +64,7 @@ it("value: Should update observable properties on the model when the checkbox cl
     const element = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value(false);
-    ui.render({ someProp: myobservable }, element);
+    ui.domManager.applyDirectives({ someProp: myobservable }, element);
 
     triggerEvent(element, "click");
     expect.equal(myobservable(), true);
@@ -76,7 +76,7 @@ it("value: Should update observable properties on the model when the radio's cli
     const element = <HTMLInputElement> parse(template)[0];
 
     let myobservable = px.value("other");
-    ui.render({ someProp: myobservable }, element);
+    ui.domManager.applyDirectives({ someProp: myobservable }, element);
 
     triggerEvent(element, "click");
     expect.equal(myobservable(), "my");
@@ -91,7 +91,7 @@ it("value: Should only notify observable properties on the model once even if th
     let timesNotified = 0;
     myobservable.subscribe(() => { timesNotified++; });
     timesNotified = 0; // ignore initial value notification
-    ui.render({ someProp: myobservable }, element);
+    ui.domManager.applyDirectives({ someProp: myobservable }, element);
 
     // Multiple events only cause one notification...
     triggerEvent(element, "click");
@@ -114,7 +114,7 @@ it("value: Should only notify observable properties on the model once even if th
     let timesNotified = 0;
     myobservable.subscribe(() => { timesNotified++; });
     timesNotified = 0; // ignore initial value notification
-    ui.render({ someProp: myobservable }, element);
+    ui.domManager.applyDirectives({ someProp: myobservable }, element);
 
     // Multiple events only cause one notification...
     triggerEvent(element, "click");
@@ -134,7 +134,7 @@ it("value: should update non observable values", expect => {
     const template = `<input type="checkbox" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
     const viewModel = { someProp: false };
-    ui.render(viewModel, el);
+    ui.domManager.applyDirectives(viewModel, el);
 
     triggerEvent(el, "click");
     expect.equal(viewModel.someProp, true);
@@ -150,7 +150,7 @@ it("value: multiple radios bound to a single value", expect => {
     const obs = px.value(false);
     const el = <HTMLElement> parse(template)[0];
     const viewModel = { someProp: obs };
-    ui.render(viewModel, el);
+    ui.domManager.applyDirectives(viewModel, el);
 
     triggerEvent(el.children[0], "click");
     expect.equal(viewModel.someProp(), "1st");

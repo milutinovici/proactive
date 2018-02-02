@@ -11,7 +11,7 @@ it("for: bind to a standard array", expect => {
 
     let array = [1, 5, 7];
 
-    expect.doesNotThrow(() => ui.render({ array }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ array }, el));
 
     expect.equal(el.children.length, array.length);
     expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), array);
@@ -24,7 +24,7 @@ it("for: bind to a standard array and template accessing index", expect => {
 
     let array = [1, 5, 7];
 
-    expect.doesNotThrow(() => ui.render({ array }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ array }, el));
     expect.equal(el.children.length, array.length);
 
     expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, array.length));
@@ -37,7 +37,7 @@ it("for: bind to a value yielding an array", expect => {
 
     let prop = new BehaviorSubject<number[]>([]);
 
-    expect.doesNotThrow(() => ui.render({ src: prop }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: prop }, el));
     expect.equal(el.children.length, prop.getValue().length);
     expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, prop.getValue().length));
 
@@ -53,7 +53,7 @@ it("for: bind to an observable array containing numbers", expect => {
     const el = <HTMLElement> parse(template)[0];
 
     let array =  new BehaviorSubject<number[]>([1, 5, 7]);
-    expect.doesNotThrow(() => ui.render({ array }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ array }, el));
 
     expect.equal(el.children.length, array.getValue().length);
     expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, array.getValue().length));
@@ -71,7 +71,7 @@ it("for: bind to an observable array containing numbers without initialContents"
     }
 
     expect.equal(array.getValue().length, 10);
-    expect.doesNotThrow(() => ui.render({ src: array }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
 
     expect.equal(el.children.length, array.getValue().length);
     expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, array.getValue().length));
@@ -83,7 +83,7 @@ it("for: bind to an observable array adding/removing", expect => {
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([1, 3, 5]);
-    expect.doesNotThrow(() => ui.render({ src: array }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
 
     array.push(7);
     expect.equal(el.children.length, array.getValue().length);
@@ -109,7 +109,7 @@ it("for: bind to an observable array moving", expect => {
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([1, 3, 5]);
-    expect.doesNotThrow(() => ui.render(array, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(array, el));
 
     array.reverse();
 
@@ -127,7 +127,7 @@ it("for: bind to an observable array containing model", expect => {
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([ { foo: 1 }, { foo: 5 }, { foo: 7 } ]);
-    expect.doesNotThrow(() => ui.render(array, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(array, el));
 
     expect.equal(el.children.length, array.getValue().length);
     expect.isEquivalent(toArray(el.querySelectorAll(".part1"))
@@ -142,7 +142,7 @@ it("for: bind to an observable array of observables", expect => {
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([ { foo: new BehaviorSubject(1) }, { foo: new BehaviorSubject(5) }, { foo: new BehaviorSubject(7) } ]);
-    expect.doesNotThrow(() => ui.render({ src: array }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
 
     array.getValue().forEach((x) => x.foo.next(33));
     expect.isEquivalent(toArray(el.querySelectorAll(".part1"))
@@ -157,7 +157,7 @@ it("for: binds items after for", expect => {
                       </ul>`;
     const el = <HTMLElement> parse(template)[0];
     let array = [1, 2, 3];
-    expect.doesNotThrow(() => ui.render({ src: array }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
 
     expect.isEquivalent(el.children[3].textContent, "hello");
     expect.end();
@@ -172,7 +172,7 @@ it("for: bind to a map", expect => {
     map.set(1, "hello");
     map.set(2, "world");
 
-    expect.doesNotThrow(() => ui.render({ src: map }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: map }, el));
 
     expect.isEquivalent(el.children[0].textContent, "hello");
     expect.isEquivalent(el.children[1].textContent, "world");
@@ -187,7 +187,7 @@ it("for: bind to an object", expect => {
 
     let obj = { hello: 1, world: 2};
 
-    expect.doesNotThrow(() => ui.render({ src: obj }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: obj }, el));
 
     expect.isEquivalent(el.children[0].textContent, "1");
     expect.isEquivalent(el.children[1].textContent, "2");
@@ -199,11 +199,11 @@ it("for: cleans up after iteself", expect => {
     const el = <HTMLElement> parse(template)[0];
     const array = [1, 5, 7];
 
-    expect.doesNotThrow(() => ui.render({ src: array }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
     expect.equal(el.children.length, 3);
     ui.clean(el);
     expect.equal(el.children.length, 1);
-    expect.doesNotThrow(() => ui.render({ src: array }, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
     expect.equal(el.children.length, 3);
     expect.end();
 });

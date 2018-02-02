@@ -3,7 +3,7 @@ import { ComponentRegistry } from "./componentRegistry";
 import { DomManager } from "./domManager";
 import { HtmlEngine } from "./templateEngines";
 import { DirectiveRegistry } from "./directiveRegistry";
-import { IScope, IConfiguration, IViewModel } from "./interfaces";
+import { IScope, IConfiguration, IViewModel, IComponentDescriptor } from "./interfaces";
 
 import { EventDirective } from "./directives/event";
 import { IfDirective } from "./directives/if";
@@ -33,11 +33,13 @@ export class ProactiveUI {
     * @param {Object} model The model to bind to
     * @param {Node} rootNode The node to be bound
     */
-    public render(viewModel: IViewModel, node: Element = document.documentElement) {
-        this.domManager.applyDirectives(viewModel, node);
+    public render(rootComponent: IComponentDescriptor, container: Element = document.body) {
+        container.setAttribute(`${DirectiveRegistry.PREFIX}-component`, "'root-component'");
+        this.components.register("root-component", rootComponent);
+        this.domManager.applyDirectives({}, container);
         if (typeof window !== "undefined") {
             const sub = Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
-                this.domManager.cleanDescendants(node);
+                this.clean(container);
                 sub.unsubscribe();
             });
         }
@@ -54,7 +56,7 @@ export class ProactiveUI {
         return this.domManager.getScope(node);
     }
 
-    public dataFor(node: Element): IViewModel | undefined {
+    public getViewmodel(node: Element): IViewModel | undefined {
         const scope = this.domManager.getScope(node);
         if (scope !== undefined) {
             return scope.$data;

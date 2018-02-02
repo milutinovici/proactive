@@ -11,7 +11,7 @@ it("attr: bind to a string constant", expect => {
 
     const model = {};
     expect.false(hasAttr(el, "id"));
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.true(hasAttr(el, "id", "true"));
     expect.end();
 });
@@ -23,7 +23,7 @@ it("attr: bind to a non-observable model value", expect => {
     const model = { str: "hello" };
 
     expect.false(hasAttr(el, "id"));
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.true(hasAttr(el, "id", "hello"));
     expect.end();
 });
@@ -34,7 +34,7 @@ it("attr: you can use shorthand ':'", expect => {
 
     let model = {};
     expect.false(hasAttr(el, "id"));
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.true(hasAttr(el, "id", "shorthand"));
     expect.end();
 });
@@ -46,7 +46,7 @@ it("attr: bind to a observable model value", expect => {
     const model = { obs: new BehaviorSubject("hello") };
 
     expect.false(hasAttr(el, "id"));
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.true(hasAttr(el, "id", "hello"));
 
     // should reflect value changes
@@ -68,7 +68,7 @@ it("attr: bind multiple attributes to multiple observables", expect => {
 
     expect.false(hasAttr(el, "id"));
     expect.false(hasAttr(el, "name"));
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.true(hasAttr(el, "id", "1"));
     expect.true(hasAttr(el, "name", "hello"));
 

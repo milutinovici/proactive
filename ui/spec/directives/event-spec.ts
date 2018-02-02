@@ -11,7 +11,7 @@ it("event: binds a single event to a handler function", expect => {
 
     const model = new TestVM();
 
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     triggerEvent(el, "click");
 
     expect.equal(model.firstCount, 1, `handler was called`);
@@ -31,7 +31,7 @@ it("event: use shorthand for event directive", expect => {
     const el = <HTMLInputElement> parse(template)[0];
     const model = new TestVM();
 
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     triggerEvent(el, "click");
 
     expect.equal(model.firstCount, 1, `handler was called`);
@@ -52,7 +52,7 @@ it("event: binds multiple events to handler functions", expect => {
 
     const model = new TestVM();
 
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
 
     triggerEvent(el, "click");
     expect.equal(model.firstCount, 1, "click handler was called 1 time");
@@ -90,7 +90,7 @@ it("event: binds multiple events to observers", expect => {
     clickSubject.subscribe(() => clickCallCount++);
     inputSubject.subscribe(() => inputCallCount++);
 
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
 
     triggerEvent(el, "click");
     expect.equal(clickCallCount, 1, "click observer was called 1 time");
@@ -123,7 +123,7 @@ it("event: pass parameters to function", expect => {
         custom: function (f: number, s: number) { first = f; second = s; },
     };
 
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
 
     triggerEvent(el, "click");
     expect.equal(first, 5, "1st parameter is good");
@@ -138,7 +138,7 @@ it("event: binds a single key to a handler function", expect => {
 
     let model = new TestVM();
 
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
     expect.equal(model.firstCount, 0, "call count is initially 0");
 
     triggerEvent(el, "keydown", 13);
@@ -160,7 +160,7 @@ it("event: binds multiple keys to handler functions", expect => {
 
     let model = new TestVM();
 
-    expect.doesNotThrow(() => ui.render(model, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
 
     expect.equal(model.firstCount, 0);
     expect.equal(model.firstCount, 0);
@@ -195,7 +195,7 @@ it("event: event delegation works", expect => {
         select: function(e: Event) { this.selected.next(parseInt(e.target["id"])); },
     };
 
-    expect.doesNotThrow(() => ui.render(viewModel, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(viewModel, el));
     triggerEvent(el.children[0].children[0], "click");
     expect.equal(viewModel.selected.getValue(), 1);
     triggerEvent(el.children[1].children[0], "click");
