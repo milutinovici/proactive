@@ -59,12 +59,13 @@ export class DirectiveRegistry {
         if (attrName[0] === DirectiveRegistry.PREFIX && attrName[1] === "-") {
             const array = attrName.slice(2).split(":");
             const name = array.shift() as string;
+            const parameters = array[0] !== undefined ? array[0].split(".") : [];
             const handler = this.handlers.get(name);
             if (!handler) {
                 exception.next(new Error(`directive handler "${name}" has not been registered.`));
                 return [attrName, attribute.value];
             } else {
-                return new Directive<any>(handler, attribute.value, array);
+                return new Directive<any>(handler, attribute.value, parameters);
             }
         } else if (attrName[0] === DirectiveRegistry.ATTR) {
             const handler = this.handlers.get("attr") as IDirectiveHandler;

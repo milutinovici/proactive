@@ -19,7 +19,7 @@ it("for: bind to a standard array", expect => {
 });
 
 it("for: bind to a standard array and template accessing index", expect => {
-    const template = `<ul><li x-for:item:i="array" x-text="i"></li></ul>`;
+    const template = `<ul><li x-for:item.i="array" x-text="i"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = [1, 5, 7];
@@ -32,7 +32,7 @@ it("for: bind to a standard array and template accessing index", expect => {
 });
 
 it("for: bind to a value yielding an array", expect => {
-    const template = `<ul><li x-for:item:i="src" x-text="i"></li></ul>`;
+    const template = `<ul><li x-for:item.i="src" x-text="i"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let prop = new BehaviorSubject<number[]>([]);
@@ -49,7 +49,7 @@ it("for: bind to a value yielding an array", expect => {
 });
 
 it("for: bind to an observable array containing numbers", expect => {
-    const template = `<ul><li x-for:item:i="array" x-text="i"></li></ul>`;
+    const template = `<ul><li x-for:item.i="array" x-text="i"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array =  new BehaviorSubject<number[]>([1, 5, 7]);

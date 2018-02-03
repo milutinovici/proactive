@@ -133,12 +133,12 @@ it("value: Should only register one single onchange handler", expect => {
 it("value: should update non observable values", expect => {
     const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
-    const viewModel = { someProp: "ABC" };
-    ui.domManager.applyDirectives(viewModel, el);
+    const viewmodel = { someProp: "ABC" };
+    ui.domManager.applyDirectives(viewmodel, el);
 
     el.value = "DEF";
     triggerEvent(el, "change");
-    expect.equal(viewModel.someProp, "DEF");
+    expect.equal(viewmodel.someProp, "DEF");
 
     expect.end();
 });
@@ -147,8 +147,8 @@ it("value: input values type should be consistent", expect => {
     const template = `<input type="number" x-value="someProp" />`;
     const number = px.value(0);
     const el = <HTMLInputElement> parse(template)[0];
-    const viewModel = { someProp: number };
-    ui.domManager.applyDirectives(viewModel, el);
+    const viewmodel = { someProp: number };
+    ui.domManager.applyDirectives(viewmodel, el);
 
     el.value = "3";
     triggerEvent(el, "change");
@@ -164,8 +164,8 @@ it("value: select multiple can be bound to an array", expect => {
                       </select>`;
     const selected = px.array<string>([]);
     const el = <HTMLSelectElement> parse(template)[0];
-    const viewModel = { selected };
-    ui.domManager.applyDirectives(viewModel, el);
+    const viewmodel = { selected };
+    ui.domManager.applyDirectives(viewmodel, el);
     selected.push("A");
     expect.equal(el.options[0]["selected"], true);
 

@@ -55,23 +55,23 @@ export class ComponentDirective<T> extends BaseHandler<string|object> {
             internal = new Subscription();
 
             // isolated nodestate and scope
-            const scope = new Scope(comp.viewModel);
+            const scope = new Scope(comp.viewmodel);
 
             // wire custom events
-            if (comp.viewModel.emitter !== undefined && isObservable(comp.viewModel.emitter)) {
-                internal.add(comp.viewModel.emitter.subscribe(evt => host.dispatchEvent(evt)));
+            if (comp.viewmodel.emitter !== undefined && isObservable(comp.viewmodel.emitter)) {
+                internal.add(comp.viewmodel.emitter.subscribe(evt => host.dispatchEvent(evt)));
             }
             // apply custom component value
-            if (comp.viewModel.value !== undefined && isObservable(comp.viewModel.value)) {
-                internal.add(comp.viewModel.value.subscribe(val => {
+            if (comp.viewmodel.value !== undefined && isObservable(comp.viewmodel.value)) {
+                internal.add(comp.viewmodel.value.subscribe(val => {
                     host["value"] = val;
                     const evt = this.engine.createEvent("change");
                     host.dispatchEvent(evt);
                 }));
             }
             // auto-dispose view-model
-            if (comp.viewModel.cleanup !== undefined) {
-                internal.add(comp.viewModel.cleanup);
+            if (comp.viewmodel.cleanup !== undefined) {
+                internal.add(comp.viewmodel.cleanup);
             }
 
             this.applyTemplate(element, scope, comp, children);
@@ -104,7 +104,7 @@ export class ComponentDirective<T> extends BaseHandler<string|object> {
             }
             return this.registry.load(name).pipe(map(desc => {
                 const vm = this.registry.initialize(name, desc, props, this.getVm(state));
-                return { name: name, viewModel: vm, template: desc.template, created: desc.created, destroy: desc.destroy} as IComponent;
+                return { name: name, viewmodel: vm, template: desc.template, created: desc.created, destroy: desc.destroy} as IComponent;
             }));
         }));
     }

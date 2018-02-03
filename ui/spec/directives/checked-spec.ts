@@ -133,11 +133,11 @@ it("value: Should only notify observable properties on the model once even if th
 it("value: should update non observable values", expect => {
     const template = `<input type="checkbox" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
-    const viewModel = { someProp: false };
-    ui.domManager.applyDirectives(viewModel, el);
+    const viewmodel = { someProp: false };
+    ui.domManager.applyDirectives(viewmodel, el);
 
     triggerEvent(el, "click");
-    expect.equal(viewModel.someProp, true);
+    expect.equal(viewmodel.someProp, true);
 
     expect.end();
 });
@@ -149,12 +149,12 @@ it("value: multiple radios bound to a single value", expect => {
                       </div>`;
     const obs = px.value(false);
     const el = <HTMLElement> parse(template)[0];
-    const viewModel = { someProp: obs };
-    ui.domManager.applyDirectives(viewModel, el);
+    const viewmodel = { someProp: obs };
+    ui.domManager.applyDirectives(viewmodel, el);
 
     triggerEvent(el.children[0], "click");
-    expect.equal(viewModel.someProp(), "1st");
+    expect.equal(viewmodel.someProp(), "1st");
     triggerEvent(el.children[1], "click");
-    expect.equal(viewModel.someProp(), "2nd");
+    expect.equal(viewmodel.someProp(), "2nd");
     expect.end();
 });

@@ -49,8 +49,8 @@ export class ComponentRegistry {
         }
     }
 
-    public initialize<T extends Object>(name: string, descriptor: IComponentDescriptor, props: T, viewModel?: T): IViewModel | undefined {
-        let vm = viewModel || descriptor.viewModel || props; // if no vm defined, props are vm, aka stateless
+    public initialize<T extends Object>(name: string, descriptor: IComponentDescriptor, props: T, viewmodel?: T): IViewModel | undefined {
+        let vm = viewmodel || descriptor.viewmodel || props; // if no vm defined, props are vm, aka stateless
         if (isFunction(vm)) {
             let model: IViewModel | undefined;
             try {

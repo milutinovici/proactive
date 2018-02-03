@@ -129,7 +129,7 @@ it("component: props get passed to view-model constructor", expect => {
     function constr(this: any, props: any) {
         this.foo = props.foo;
     }
-    ui.components.register("test-component", { template: template, viewModel: constr });
+    ui.components.register("test-component", { template: template, viewmodel: constr });
 
     expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
     expect.equal(el.childNodes[0].textContent, "42");
@@ -193,7 +193,7 @@ it("component: Unsubscribes a component's viewmodel if has cleanup subscription"
 
     ui.components.register("test-component", {
         template: template,
-        viewModel: vm,
+        viewmodel: vm,
     });
 
     expect.false(unsubscribed);
@@ -208,18 +208,18 @@ it("component: Components are properly isolated", expect => {
     const el = <HTMLElement> parse(str)[0];
     const template = `<span x-text="bar">invalid</span>`;
     const value = "baz";
-    const viewModel = { foo: 42 };
+    const viewmodel = { foo: 42 };
     ui.components.register("test-component", {
         template: template,
-        viewModel: { bar: value,
+        viewmodel: { bar: value,
             preInit: (element: HTMLElement, scope: IScope) => {
-                expect.notEqual(scope.$data, viewModel, "viewModel of component is not equal to root viewModel");
+                expect.notEqual(scope.$data, viewmodel, "viewmodel of component is not equal to root viewmodel");
                 expect.equal(scope.$data["bar"], value);
             },
         },
     });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(viewModel, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(viewmodel, el));
     expect.equal(el.childNodes[0].childNodes[0].textContent, value);
     expect.end();
 });
@@ -231,7 +231,7 @@ it("component: Components are properly isolated", expect => {
 //     const emitter = new Subject<CustomEvent>();
 //     ui.components.register("test-component", {
 //         template: template,
-//         viewModel: { emitter },
+//         viewmodel: { emitter },
 //     });
 //     let value = "";
 //     const vm = { log: (x: CustomEvent) => value = x.detail };
@@ -275,7 +275,7 @@ it("component: Components support value directive", expect => {
     const template = `<input type="text" x-value="name"/><input type="text" x-value="surname"/>`;
     const name = new BehaviorSubject("Hello");
     const surname = new BehaviorSubject("World");
-    const component = { viewModel: { name, surname, value: name.combineLatest(surname, (n, s) => `${n} ${s}`) }, template: template };
+    const component = { viewmodel: { name, surname, value: name.combineLatest(surname, (n, s) => `${n} ${s}`) }, template: template };
     ui.components.register("test-component", component);
 
     const vm = { obs: new BehaviorSubject("") };
@@ -291,8 +291,8 @@ it("component: Dynamic component", expect => {
 
     const t1 = `<p x-text="id">BAD</p>`;
     const t2 = `<input type="text" x-value="id"/>`;
-    const c1 = { viewModel: { id: "first" }, template: t1 };
-    const c2 = { viewModel: { id: "second" }, template: t2 };
+    const c1 = { viewmodel: { id: "first" }, template: t1 };
+    const c2 = { viewmodel: { id: "second" }, template: t2 };
     ui.components.register("test-one", c1);
     ui.components.register("test-two", c2);
 
@@ -336,7 +336,7 @@ it("component: object passed instead of string", expect => {
 
     const t1 = `<p x-text="greeting"></p>`;
     const c1 = {
-        template: t1, viewModel: function(props: object) {
+        template: t1, viewmodel: function(props: object) {
             // @ts-ignore
             this["greeting"] = props["greeting"];
         },
