@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { IComponentDescriptor, IViewModel } from "./interfaces";
-import { observableRequire, isFunction, isElement } from "./utils";
+import { observableRequire, isFunction } from "./utils";
 import { HtmlEngine } from "./templateEngines";
 import { exception } from "./exceptionHandlers";
 export class ComponentRegistry {
@@ -63,24 +63,34 @@ export class ComponentRegistry {
         return vm;
     }
 
-    private compileTemplate(template: DocumentFragment | string): DocumentFragment {
+    private compileTemplate(template: HTMLTemplateElement | DocumentFragment | string): HTMLTemplateElement {
         if (typeof template === "string") {
             if (template[0] === "#") {
                 const tmp = this.engine.getElementById(template.slice(1, template.length));
-                if (tmp !== null && isElement(tmp) && tmp["content"] !== undefined) { // template
-                    return tmp["content"];
+                if (tmp !== null && this.engine.isTemplate(tmp)) {
+                    return tmp;
                 } else if (tmp !== null) {
-                    return this.engine.nodeListToFragment(tmp.childNodes);
+                    const t = this.engine.createTemplate();
+                    t.content.appendChild(tmp);
+                    return t;
                 } else {
                     throw Error(`No template with id: "${template}" found`);
                 }
             } else {
-                return this.engine.parse(template);
+                const t = this.engine.createTemplate();
+                t.content.appendChild(this.engine.parse(template));
+                return t;
             }
-        } else if (Array.isArray(template)) {
-            return this.engine.nodeListToFragment(template as any);
-        } else if (this.engine.isFragment(template)) {
+        } else if (this.engine.isTemplate(template)) {
             return template;
+        } else if (Array.isArray(template)) {
+            const t = this.engine.createTemplate();
+            t.content.appendChild(this.engine.nodeListToFragment(template as any));
+            return t;
+        } else if (this.engine.isFragment(template)) {
+            const t = this.engine.createTemplate();
+            t.content.appendChild(template);
+            return t;
         } else {
             throw Error("invalid template descriptor");
         }

@@ -27,12 +27,15 @@ export class HtmlEngine {
     public createFragment(): DocumentFragment {
         return this.document.createDocumentFragment();
     }
-    public isFragment(obj: Node) {
-        return obj.nodeType === this.document.DOCUMENT_FRAGMENT_NODE;
+    public isFragment(node: Node): node is DocumentFragment {
+        return node.nodeType === this.document.DOCUMENT_FRAGMENT_NODE;
     }
-    // public isTemplate(obj: Node) {
-    //     return obj.nodeType === this.document.Htmlte;
-    // }
+    public isTemplate(node: Node): node is HTMLTemplateElement {
+        return node["content"] !== undefined;
+    }
+    public createTemplate(): HTMLTemplateElement {
+        return this.document.createElement("template");
+    }
     public createComment(data: string): Comment {
         return this.document.createComment(data);
     }

@@ -124,7 +124,7 @@ export class ComponentDirective<T> extends BaseHandler<string|object> {
         return undefined;
     }
     protected applyTemplate(parent: HTMLElement, childScope: IScope, component: IComponent, boundChildren: Node[]) {
-        const template = component.template.cloneNode(true) as DocumentFragment;
+        const template = component.template.content.cloneNode(true) as DocumentFragment;
         this.domManager.applyDirectivesToDescendants(template, childScope);
 
         if (boundChildren.length) {

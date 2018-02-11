@@ -65,7 +65,7 @@ export interface IViewModel {
 }
 
 export interface IComponentDescriptor {
-    readonly template: DocumentFragment | string;
+    readonly template: HTMLTemplateElement | DocumentFragment | string;
     readonly viewmodel?: IViewModel | (new (props?: Object) => IViewModel);
     readonly created?: (element: HTMLElement, scope?: IScope) => void;
     readonly destroy?: (element: HTMLElement, scope?: IScope) => void;
@@ -73,7 +73,7 @@ export interface IComponentDescriptor {
 
 export interface IComponent {
     readonly name: string;
-    readonly template: DocumentFragment;
+    readonly template: HTMLTemplateElement;
     readonly viewmodel: IViewModel;
     readonly created?: (element: Element, scope?: IScope) => void;
     readonly destroy?: (element: Element, scope?: IScope) => void;

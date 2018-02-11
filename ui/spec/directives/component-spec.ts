@@ -79,7 +79,7 @@ it("component: Loads a template from a fragment", expect => {
 });
 
 it("component: Loads a template from an id", expect => {
-    const template =  parse(`<span style="display:none;" id="template1">bar</span>`)[0];
+    const template = parse(`<template id="template1">bar</template>`)[0];
     document.body.appendChild(template);
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> parse(str)[0];
