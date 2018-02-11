@@ -1,6 +1,6 @@
-import { Observable } from "rxjs";
+import { Observable, Observer, Subscription } from "rxjs";
 import { IComponentDescriptor, IViewModel } from "./interfaces";
-import { observableRequire, isFunction, isTemplate } from "./utils";
+import { isFunction, isTemplate } from "./utils";
 import { HtmlEngine } from "./templateEngines";
 import { exception } from "./exceptionHandlers";
 export class ComponentRegistry {
@@ -39,7 +39,7 @@ export class ComponentRegistry {
         const descriptor = this.components.get(name);
         if (descriptor != null) {
             if (typeof descriptor === "string") {
-                return observableRequire<IComponentDescriptor>(descriptor);
+                return this.import<IComponentDescriptor>(descriptor);
             } else {
                 return Observable.of<IComponentDescriptor>(descriptor);
             }
@@ -96,4 +96,35 @@ export class ComponentRegistry {
         }
     }
 
+    /**
+    * Import a component dynamically
+    * @param {string} module component to load
+    * @return {Observable<any>} An observable that yields a value and completes as soon as the module has been loaded
+    */
+    private import<T>(module: string): Observable<T> {
+        const requireFunc = require || (window != null ? window["require"] : null);
+        if (!isFunction(requireFunc)) {
+            try {
+                return Observable.fromPromise(import(`./${module}`));
+            } catch {
+                throw new Error("there's no AMD-module loader available (Hint: did you forget to include RequireJS in your project?)");
+            }
+        }
+        return Observable.create((observer: Observer<T>) => {
+            try {
+                requireFunc([module], (m: T) => {
+                    observer.next(m);
+                    observer.complete();
+                }, (err: Error) => {
+                        observer.error(err);
+                    });
+            } catch (e) {
+                observer.error(e);
+            }
+
+            return Subscription.EMPTY;
+        });
+    }
 }
+
+declare function require(modules: string[], successCB: (s: any) => any, errCB: (err: Error) => any): void;

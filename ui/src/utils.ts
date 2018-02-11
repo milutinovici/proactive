@@ -1,4 +1,4 @@
-import { Observable, Observer, Symbol, Subscription } from "rxjs";
+import { Observable, Observer, Symbol } from "rxjs";
 
 /**
 * Determines if target is an instance of a Observable
@@ -33,7 +33,7 @@ export function isTemplate(node: Node): node is HTMLTemplateElement {
 }
 
 /**
- * Try
+ * Try to convert a string to a number or a boolean, else return string
  */
 export function tryParse(str: string): number | boolean | string {
     if (isBoolean(str)) {
@@ -58,35 +58,6 @@ export function isBoolean(str: string): boolean {
  */
 export function isFunction(obj: any): obj is Function {
     return typeof obj === "function";
-}
-
-declare function require(modules: string[], successCB: (s: any) => any, errCB: (err: Error) => any): void;
-
-/**
-* Turns an AMD-Style require call into an observable
-* @param {string} Module The module to load
-* @return {Observable<any>} An observable that yields a value and compconstes as soon as the module has been loaded
-*/
-export function observableRequire<T>(module: string): Observable<T> {
-    const requireFunc = require || (window != null ? window["require"] : null);
-
-    if (!isFunction(requireFunc)) {
-        throw Error("there's no AMD-module loader available (Hint: did you forget to include RequireJS in your project?)");
-    }
-    return Observable.create((observer: Observer<T>) => {
-        try {
-            requireFunc([module], (m: T) => {
-                observer.next(m);
-                observer.complete();
-            }, (err: Error) => {
-                    observer.error(err);
-                });
-        } catch (e) {
-            observer.error(e);
-        }
-
-        return Subscription.EMPTY;
-    });
 }
 
 export function isHandlebarExpression(expression: string | null) {
