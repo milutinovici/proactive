@@ -10,10 +10,10 @@ export class EventDirective extends SimpleHandler<Event> {
         this.parametricity = Parametricity.Required;
     }
 
-    public apply(el: Element, observer: Observer<Event>, parameter: string): Subscription {
+    public apply(element: Element, observer: Observer<Event>, parameter: string): Subscription {
         const parameters = parameter.split("-");
         const selector = parameters.slice(1).join("-");
-        let events = Observable.fromEvent<Event>(el, parameters[0]);
+        let events = Observable.fromEvent<Event>(element, parameters[0]);
         if (selector !== "") {
             events = events.pipe(filter(x => (<Element> x.target).matches(selector)));
         }

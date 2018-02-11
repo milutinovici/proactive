@@ -18,17 +18,17 @@ export class ForDirective<T> extends BaseHandler<T[]> {
         this.engine = engine;
     }
 
-    public applyInternal(node: Element, directive: IDirective<T[]>, state: INodeState): void {
+    public applyInternal(element: Element, directive: IDirective<T[]>, state: INodeState): void {
         const observable = directive.evaluate(state.scope, this.dataFlow) as Observable<T[]>;
         const itemName = directive.parameters[0];
         const indexName = directive.parameters[1];
-        const parent = node.parentElement as HTMLElement;
+        const parent = element.parentElement as HTMLElement;
         const placeholder: Comment = this.engine.createComment(`for ${directive.text}`);
         this.domManager.setState(placeholder, state);
         // backup inner HTML
-        parent.insertBefore(placeholder, node);
-        let sibling = node.nextSibling;
-        parent.removeChild(node);
+        parent.insertBefore(placeholder, element);
+        let sibling = element.nextSibling;
+        parent.removeChild(element);
 
         let oldArray: T[] = [];
         // subscribe
@@ -38,7 +38,7 @@ export class ForDirective<T> extends BaseHandler<T[]> {
                 this.removeRows(parent, indexName, changes.deleted, placeholder, array.length);
             }
             if (changes.added.length > 0) {
-                this.addRows(parent, node, state, itemName, indexName, changes.added, placeholder, array.length);
+                this.addRows(parent, element, state, itemName, indexName, changes.added, placeholder, array.length);
             }
             if (changes.moved.length > 0) {
                 this.moveRows(parent, indexName, changes.moved, placeholder, array.length);
@@ -46,7 +46,7 @@ export class ForDirective<T> extends BaseHandler<T[]> {
             oldArray = array;
         }));
         // apply directives after repeated elements
-        if (node.nextSibling === null && sibling !== null) {
+        if (element.nextSibling === null && sibling !== null) {
             while (sibling !== null) {
                 this.domManager.applyDirectivesRecursive(sibling, state.scope);
                 sibling = sibling.nextSibling;
@@ -57,8 +57,8 @@ export class ForDirective<T> extends BaseHandler<T[]> {
             let changes = compareLists(oldArray, []);
             this.removeRows(parent, indexName, changes.deleted, placeholder, 0);
             parent.removeChild(placeholder);
-            this.domManager.cleanNode(node);
-            parent.appendChild(node);
+            this.domManager.cleanNode(element);
+            parent.appendChild(element);
         });
     }
 

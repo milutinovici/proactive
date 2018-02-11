@@ -28,8 +28,8 @@ export class KeyPressDirective extends SimpleHandler<KeyboardEvent> {
         this.parametricity = Parametricity.Required;
     }
 
-    public apply(el: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription {
-            const obs = Observable.fromEvent<KeyboardEvent>(el, "keydown").pipe(
+    public apply(element: Element, observer: Observer<KeyboardEvent>, parameter: string): Subscription {
+            const obs = Observable.fromEvent<KeyboardEvent>(element, "keydown").pipe(
                 filter((x: KeyboardEvent) => !x.repeat), share());
 
             const combinations = this.getKeyCombination(parameter);

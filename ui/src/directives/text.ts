@@ -9,8 +9,8 @@ export class TextDirective extends SimpleHandler<string> {
         this.controlsDescendants = true;
     }
 
-    public apply(el: HTMLInputElement, observable: Observable<string>, parameter?: string): Subscription {
-        const isText = isTextNode(el);
+    public apply(node: Node, observable: Observable<string>, parameter?: string): Subscription {
+        const isText = isTextNode(node);
         const textExpression = isText ? parameter : "";
         const sub = observable.subscribe(value => {
             if ((value === null) || (value === undefined)) {
@@ -19,9 +19,9 @@ export class TextDirective extends SimpleHandler<string> {
                 value = value.join(", ");
             }
             if (isText) {
-                el.nodeValue = value;
+                node.nodeValue = value;
             } else {
-                el.textContent = value;
+                node.textContent = value;
             }
         });
         // if (isText) {

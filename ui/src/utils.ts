@@ -25,8 +25,11 @@ export function isElement(target: Node): target is Element {
 * Determines if Node is an instance of a Element
 * @param {any} target
 */
-export function isTextNode(target: Node): boolean {
+export function isTextNode(target: Node): target is Text {
     return target.nodeType === 3;
+}
+export function isTemplate(node: Node): node is HTMLTemplateElement {
+    return node["content"] !== undefined;
 }
 
 /**

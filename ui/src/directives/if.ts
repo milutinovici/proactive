@@ -19,7 +19,7 @@ export class IfDirective extends BaseHandler<boolean> {
         this.engine = engine;
     }
 
-    public applyInternal(element: HTMLElement, directive: IDirective<boolean>, state: INodeState): void {
+    public applyInternal(element: Element, directive: IDirective<boolean>, state: INodeState): void {
         const observable = directive.evaluate(state.scope, this.dataFlow) as Observable<boolean>;
         const parent = element.parentElement as HTMLElement;
         const placeholder: Comment = this.engine.createComment("if");
@@ -61,7 +61,7 @@ export class IfDirective extends BaseHandler<boolean> {
         const others = state.directives.filter(x => x.handler.name !== "if");
         others.forEach(x => x.cleanup.unsubscribe());
     }
-    private enableOtherDirectives(element: HTMLElement, state: INodeState) {
+    private enableOtherDirectives(element: Element, state: INodeState) {
         const others = state.directives.filter(x => x.handler.name !== "if");
         others.forEach(x => x.activate(element, state));
     }

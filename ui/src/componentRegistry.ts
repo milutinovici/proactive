@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { IComponentDescriptor, IViewModel } from "./interfaces";
-import { observableRequire, isFunction } from "./utils";
+import { observableRequire, isFunction, isTemplate } from "./utils";
 import { HtmlEngine } from "./templateEngines";
 import { exception } from "./exceptionHandlers";
 export class ComponentRegistry {
@@ -67,7 +67,7 @@ export class ComponentRegistry {
         if (typeof template === "string") {
             if (template[0] === "#") {
                 const tmp = this.engine.getElementById(template.slice(1, template.length));
-                if (tmp !== null && this.engine.isTemplate(tmp)) {
+                if (tmp !== null && isTemplate(tmp)) {
                     return tmp;
                 } else if (tmp !== null) {
                     const t = this.engine.createTemplate();
@@ -81,7 +81,7 @@ export class ComponentRegistry {
                 t.content.appendChild(this.engine.parse(template));
                 return t;
             }
-        } else if (this.engine.isTemplate(template)) {
+        } else if (isTemplate(template)) {
             return template;
         } else if (Array.isArray(template)) {
             const t = this.engine.createTemplate();

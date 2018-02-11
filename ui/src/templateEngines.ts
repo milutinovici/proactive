@@ -30,9 +30,6 @@ export class HtmlEngine {
     public isFragment(node: Node): node is DocumentFragment {
         return node.nodeType === this.document.DOCUMENT_FRAGMENT_NODE;
     }
-    public isTemplate(node: Node): node is HTMLTemplateElement {
-        return node["content"] !== undefined;
-    }
     public createTemplate(): HTMLTemplateElement {
         return this.document.createElement("template");
     }
