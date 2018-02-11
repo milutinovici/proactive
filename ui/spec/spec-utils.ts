@@ -10,7 +10,7 @@ export function fragment(template: string): DocumentFragment {
 }
 
 let knownEvents = {};
-let knownEventTypesByEventName = {};
+let knownEventTypesByEventName: Map<string> = {};
 const keyEventTypeName = "KeyboardEvent";
 knownEvents[keyEventTypeName] = ["keyup", "keydown", "keypress"];
 knownEvents["MouseEvents"] = ["click", "dblclick", "mousedown", "mouseup", "mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"];
@@ -28,17 +28,18 @@ Object.keys(knownEvents).forEach(x => {
 function createEvent(category: any): Event {
     return dom.window.document.createEvent(category);
 }
-export function triggerEvent(element: Element, eventType: string, keyCode?: any) {
+
+export function triggerEvent(element: Element, eventType: string, keyCode?: number, modifier= "") {
     if (typeof element.dispatchEvent === "function") {
         let eventCategory = knownEventTypesByEventName[eventType] || "HTMLEvents";
-        let event: any;
+        let event: Event;
 
         if (eventCategory !== "KeyboardEvent") {
             event = createEvent(eventCategory);
-            (<any> event.initEvent)(eventType, true, true, dom.window, 0, 0, 0, 0, 0, false, false, false, false, 0, element);
+            event.initEvent(eventType, true, true);
         } else {
-            let keyEvent = <KeyboardEvent> <any> createEvent(eventCategory);
-            keyEvent.initKeyboardEvent(eventType, true, true, dom.window, "", 0, "", false, "");
+            let keyEvent = createEvent(eventCategory) as KeyboardEvent;
+            keyEvent.initKeyboardEvent(eventType, true, true, dom.window, "", 0, modifier, false, "");
 
             if (keyCode) {
                 Object.defineProperty(keyEvent, "keyCode", {
@@ -76,4 +77,8 @@ export function hasAttr(element: HTMLElement, attr: string, val?: string) {
 }
 export function hasClass(element: HTMLElement, css: string) {
     return element.className.indexOf(css) !== -1;
+}
+
+interface Map<T> {
+    [key: string]: T;
 }

@@ -183,10 +183,30 @@ it("event: binds multiple keys to handler functions", expect => {
     expect.end();
 });
 
+it("event: binds a modified key to a handler function", expect => {
+    const template = `<input type="text" x-key:shift-enter="firstHandler"/>`;
+    const el = <HTMLInputElement> parse(template)[0];
+
+    let model = new TestVM();
+
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
+
+    expect.equal(model.firstCount, 0);
+
+    triggerEvent(el, "keydown", 13, "shift");
+    expect.equal(model.firstCount, 1);
+
+    el.value = "new";
+    triggerEvent(el, "keydown", 13);
+    expect.equal(model.firstCount, 1);
+
+    expect.end();
+});
+
 it("event: event delegation works", expect => {
     const template = `<ul x-on:click.a="select">
                         <li><a id="1">Click to select</a></li>
-                        <li><a id="2">Click to select</a></li>
+                        <li><button id="2">Click to select</button></li>
                       </ul>`;
     const el = <HTMLElement> parse(template)[0];
 
@@ -199,7 +219,7 @@ it("event: event delegation works", expect => {
     triggerEvent(el.children[0].children[0], "click");
     expect.equal(viewmodel.selected.getValue(), 1);
     triggerEvent(el.children[1].children[0], "click");
-    expect.equal(viewmodel.selected.getValue(), 2);
+    expect.equal(viewmodel.selected.getValue(), 1);
     expect.end();
 });
 
