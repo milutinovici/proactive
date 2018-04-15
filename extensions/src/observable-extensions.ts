@@ -2,7 +2,7 @@ import { Observable } from "rxjs";
 import { ObservableState } from "./state";
 import { state } from "./extensions";
 
-declare module "rxjs/Observable" {
+declare module "rxjs/internal/Observable" {
     export interface Observable<T> {
         toState(initial: T): ObservableState<T>;
     }

@@ -1,8 +1,9 @@
-import { Observable, Observer, BehaviorSubject, Symbol, Subscriber, Subject } from "rxjs";
+import { Observer, BehaviorSubject, Subscriber } from "rxjs";
 import { ComputedArray } from "./computed-array";
 
 export class ObservableArray<T> extends ComputedArray<T> implements Observer<T[]> {
-    protected readonly source: BehaviorSubject<T[]>;
+    // @ts-ignore
+    public readonly source: BehaviorSubject<T[]>;
     constructor(initial: T[] = []) {
         super(new BehaviorSubject<T[]>(initial));
     }
@@ -16,7 +17,7 @@ export class ObservableArray<T> extends ComputedArray<T> implements Observer<T[]
     public complete() {
         this.source.complete();
     }
-    public [Symbol.rxSubscriber as symbol]() {
+    public [Symbol["rxSubscriber"]]() {
         return new Subscriber<T[]>(this);
     }
     public getValue(): T[] {
@@ -87,4 +88,3 @@ export class ObservableArray<T> extends ComputedArray<T> implements Observer<T[]
     }
 
 }
-

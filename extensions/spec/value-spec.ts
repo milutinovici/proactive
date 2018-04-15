@@ -1,4 +1,5 @@
 ﻿import * as Rx from "rxjs";
+import { scan, filter } from "rxjs/operators";
 import * as px from "../src/extensions";
 import * as it from "tape";
 
@@ -43,7 +44,7 @@ it("type transition", expect => {
     val(3);
     expect.equal(val(), 3);
 
-    val(Rx.Observable.of(3));
+    val(Rx.of(3));
     expect.equal(typeof val(), "object");
 
     val("foo");
@@ -99,7 +100,7 @@ it("multiple subscribers receive notifications, initial value, then subsequent",
 
 it("to Computed works", expect => {
     const val = px.value<number>(3);
-    const max = val.scan((x, y) => x > y ? x : y, val()).toState(0);
+    const max = val.pipe(scan((x, y) => x > y ? x : y, val())).toState(0);
     expect.equal(max.getValue(), 3);
     val(1);
     expect.equal(max.getValue(), 3);
@@ -112,8 +113,8 @@ it("to Computed works", expect => {
 
 it("computed chaining works", expect => {
     const val = px.value(0);
-    const max = val.scan((x, y) => x > y ? x : y, val()).toState(0);
-    const evenMax = max.filter(x => x % 2 === 0).toState(0);
+    const max = val.pipe(scan((x, y) => x > y ? x : y, val())).toState(0);
+    const evenMax = max.pipe(filter(x => x % 2 === 0)).toState(0);
     val(1);
     expect.equal(evenMax.getValue(), 0);
     val(6);
@@ -125,7 +126,7 @@ it("computed chaining works", expect => {
 it("combine 2 values", expect => {
     const val1 = px.value<number>(4);
     const val2 = px.value<number>(2);
-    const ratio = val1.combineLatest(val2, (p1: number, p2: number) => p1 / p2).toState(0);
+    const ratio = Rx.combineLatest([val1, val2], (p1: number, p2: number) => p1 / p2).toState(0);
     expect.equal(ratio.getValue(), 2);
     expect.end();
 });

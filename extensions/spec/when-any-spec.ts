@@ -4,7 +4,7 @@ import * as it from "tape";
 it("map array of observables", expect => {
     const input = [px.value(1), px.value(2), px.value(3)];
     const origin = px.array(input);
-    const computed = px.whenAny<number>(origin)._map(x => x * x);
+    const computed = px.whenAny<number>(origin).map(x => x * x);
 
     let output: number[] = [];
     computed.subscribe(x => output = x);
@@ -19,7 +19,7 @@ it("map array of observables", expect => {
 it("filter array of observables", expect => {
     const input = [px.value(1), px.value(2), px.value(3)];
     const origin = px.array(input);
-    const computed = px.whenAny<number>(origin)._filter(x => x % 2 === 0);
+    const computed = px.whenAny<number>(origin).filter(x => x % 2 === 0);
 
     let output: number[] = [];
     computed.subscribe(x => output = x);
@@ -34,7 +34,7 @@ it("filter array of observables", expect => {
 it("map & filter array of observables", expect => {
     const input = [px.value(1), px.value(2), px.value(3)];
     const origin = px.array(input);
-    const computed = px.whenAny<number>(origin)._filter(x => x % 2 === 0)._map(x => x * x);
+    const computed = px.whenAny<number>(origin).filter(x => x % 2 === 0).map(x => x * x);
 
     let output: number[] = [];
     computed.subscribe(x => output = x);
@@ -49,7 +49,7 @@ it("map & filter array of observables", expect => {
 it("reduce array of observables", expect => {
     const input = [px.value(1), px.value(2), px.value(3)];
     const origin = px.array(input);
-    const computed = px.whenAny<number>(origin)._reduce((x, y) => x > y ? x : y, 0);
+    const computed = px.whenAny<number>(origin).reduce((x, y) => x > y ? x : y, 0);
 
     let output: number = 0;
     computed.subscribe(x => output = x);

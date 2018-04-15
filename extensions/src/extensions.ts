@@ -12,7 +12,7 @@ export interface Action<T> {
 }
 
 export function state<T>(source: Observable<T>, initial: T): ObservableState<T> & Func<T> {
-    if ("call" in source && "source" in source) {
+    if ("call" in source && "value" in source) {
         return source as any;
     }
     const observable = source instanceof ObservableState ? source : new ObservableState<T>(source, initial);
