@@ -1,7 +1,7 @@
 import * as it from "tape";
-import * as px from "@proactive/extensions";
 import { document, parse } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
+import { BehaviorSubject } from "rxjs";
 const ui = new ProactiveUI({ document });
 
 it("text: bind to a string constant", expect => {
@@ -63,18 +63,18 @@ it("text: bind to a observable model value", expect => {
     const template = `<span x-text="observableString">invalid</span>`;
     const el = <HTMLElement> parse(template)[0];
 
-    let model = { observableString: px.value("foo") };
+    let model = { observableString: new BehaviorSubject("foo") };
 
     expect.equal(el.textContent, "invalid");
     expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
-    expect.equal(el.textContent, model.observableString());
+    expect.equal(el.textContent, model.observableString.getValue());
 
-    model.observableString("magic");
-    expect.equal(el.textContent, model.observableString(), "should reflect value changes");
+    model.observableString.next("magic");
+    expect.equal(el.textContent, model.observableString.getValue(), "should reflect value changes");
 
-    let oldValue = model.observableString();
+    let oldValue = model.observableString.getValue();
     ui.clean(el);
-    model.observableString("nope");
+    model.observableString.next("nope");
     expect.equal(el.textContent, oldValue, "should stop updating after getting disposed");
     expect.end();
 });
@@ -97,16 +97,16 @@ it("text: handlebar directive works", expect => {
     const template = `<div>{{observableString}}</div>"`;
     const el = <HTMLElement> parse(template)[0];
 
-    let model = { observableString: px.value("foo") };
+    let model = { observableString: new BehaviorSubject("foo") };
 
     expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
-    expect.equal(el.textContent, model.observableString());
+    expect.equal(el.textContent, model.observableString.getValue());
 
-    model.observableString("magic");
-    expect.equal(el.textContent, model.observableString(), "should reflect value changes");
+    model.observableString.next("magic");
+    expect.equal(el.textContent, model.observableString.getValue(), "should reflect value changes");
 
     ui.clean(el);
-    model.observableString("nope");
-    expect.equal(el.textContent, "{{observableString}}", "should stop updating after getting disposed");
+    model.observableString.next("nope");
+    expect.equal(el.textContent, "magic", "should stop updating after getting disposed");
     expect.end();
 });

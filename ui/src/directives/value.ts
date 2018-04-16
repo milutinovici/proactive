@@ -1,4 +1,4 @@
-import { Observable } from "rxjs";
+import { Observable, fromEvent, merge } from "rxjs";
 import { map, filter, distinctUntilChanged } from "rxjs/operators";
 import { BaseHandler } from "./baseHandler";
 import { IDirective, INodeState, DataFlow } from "../interfaces";
@@ -19,35 +19,38 @@ export class ValueDirective extends BaseHandler<string|number|boolean|string[]> 
             directive.cleanup.add(observable.subscribe(value => ValueDirective.setChecked(el as HTMLInputElement, value as boolean)));
             if (isObserver(observable)) {
                  const events = ValueDirective.getEvents(el, event, true);
-                 directive.cleanup.add(events.pipe(map(evt => evt.target["checked"]), distinctUntilChanged()).subscribe(observable));
+                 directive.cleanup.add(events.pipe(map(evt => evt.target ? evt.target["checked"] : null), distinctUntilChanged()).subscribe(observable));
             }
         } else if (ValueDirective.isRadio(el)) {
             directive.cleanup.add(observable.subscribe(value => ValueDirective.setRadio(el as HTMLInputElement, value as string|number|boolean)));
             if (isObserver(observable)) {
                  const events = ValueDirective.getEvents(el, event, true);
-                 directive.cleanup.add(events.pipe(map(evt => evt.target["value"]), distinctUntilChanged(), map(tryParse)).subscribe(observable));
+                 directive.cleanup.add(events.pipe(map(evt => evt.target ? evt.target["value"] : null), distinctUntilChanged(), map(tryParse)).subscribe(observable));
             }
         } else if (ValueDirective.isMultiSelect(el)) {
             directive.cleanup.add(observable.subscribe(value => ValueDirective.setMultiSelect(el as HTMLSelectElement, value)));
             if (isObserver(observable)) {
                 const events = ValueDirective.getEvents(el, event, false);
-                directive.cleanup.add(events.pipe(map(evt => (Array.from<HTMLOptionElement>(evt.target["options"]))
-                                                    .filter(o => o.selected)
-                                                    .map(o => tryParse(o.value || o.textContent || ""))))
+                directive.cleanup.add(events.pipe(map(evt => {
+                    const selected = (Array.from<HTMLOptionElement>(evt.target ? evt.target["options"] : []))
+                        .filter(o => o.selected)
+                        .map(o => tryParse(o.value || o.textContent || ""));
+                    return selected;
+                }))
                                                     .subscribe(observable as any));
             }
         } else {
             directive.cleanup.add(observable.subscribe(value => ValueDirective.setElementValue(el, value as string|number|boolean)));
             if (isObserver(observable)) {
                 const events = ValueDirective.getEvents(el, event, false);
-                directive.cleanup.add(events.pipe(map(evt => evt.target["value"] as string), distinctUntilChanged(), map(tryParse)).subscribe(observable));
+                directive.cleanup.add(events.pipe(map(evt => evt.target ? evt.target["value"] : "" as string), distinctUntilChanged(), map(tryParse)).subscribe(observable));
             }
         }
     }
 
     private static getEvents(el: Element, event: string, isCheckboxOrRadio: boolean): Observable<Event> {
-        return (isCheckboxOrRadio ? Observable.merge<Event>(Observable.fromEvent(el, "click"), Observable.fromEvent(el, event)) :
-        Observable.fromEvent<Event>(el, event)).pipe(filter(evt => evt.target === el));
+        return (isCheckboxOrRadio ? merge<Event>(fromEvent(el, "click"), fromEvent(el, event)) :
+        fromEvent<Event>(el, event)).pipe(filter(evt => evt.target === el));
     }
     private static isCheckbox(element: HTMLElement): element is HTMLInputElement {
         const tag = element.tagName;

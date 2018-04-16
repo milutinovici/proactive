@@ -181,7 +181,7 @@ it("for: bind to a map", expect => {
 
 it("for: bind to an object", expect => {
     const template = `<ul>
-                        <li x-for:item="src" x-text="item.value" x-attr-title="item.key"></li>
+                        <li x-for:item="src" x-text="item.value" x-attr:title="item.key"></li>
                       </ul>`;
     const el = <HTMLElement> parse(template)[0];
 

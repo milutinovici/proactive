@@ -1,5 +1,5 @@
 import { exception } from "./exceptionHandlers";
-import { Observable, Observer, Subscriber, Subscription, Symbol } from "rxjs";
+import { Observable, Observer, Subscriber, Subscription, of } from "rxjs";
 import { IScope, IDirective, IDirectiveHandler, DataFlow, INodeState } from "./interfaces";
 import { isObservable, isObserver, isFunction } from "./utils";
 
@@ -75,9 +75,9 @@ export class Directive<T> implements IDirective<T> {
         if (expression != null && isObservable(expression)) {
             return expression;
         } else if (isFunction(expression)) {
-            return Observable.of(expression.bind(scope.$data)());
+            return of(expression.bind(scope.$data)());
         } else {
-            return Observable.of(expression);
+            return of(expression);
         }
     }
     private createBoth(scope: IScope): Observable<T> | Observer<T> {
@@ -85,11 +85,11 @@ export class Directive<T> implements IDirective<T> {
         const isFunc = isFunction(expression);
         const isObs = expression != null && (isObservable(expression) || isObserver(expression));
         if (!isObs && !isFunc) {
-            const obs: any = Observable.of(expression);
+            const obs: any = of(expression);
             obs.next = this.write(scope);
             // obs.error = exception.error;
             obs.complete = () => {};
-            obs[Symbol.rxSubscriber] = () => obs;
+            obs[Symbol.for("rxSubscriber")] = () => obs;
             return obs;
         } else if (isFunc && !isObs) {
             const fn: (t: T) => void = expression.bind(scope.$data);

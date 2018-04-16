@@ -1,4 +1,4 @@
-import { Observable, Observer, Subscription } from "rxjs";
+import { Observer, Subscription, fromEvent } from "rxjs";
 import { filter } from "rxjs/operators";
 import { DataFlow, Parametricity } from "../interfaces";
 import { SimpleHandler } from "./baseHandler";
@@ -10,12 +10,14 @@ export class EventDirective extends SimpleHandler<Event> {
         this.parametricity = Parametricity.Required;
     }
 
-    public apply(element: Element, observer: Observer<Event>, parameter: string): Subscription {
-        const parameters = parameter.split("-");
-        const selector = parameters.slice(1).join("-");
-        let events = Observable.fromEvent<Event>(element, parameters[0]);
+    public apply(element: Element, observer: Observer<Event>, parameters: string[]): Subscription {
+        const selector = parameters.slice(1).join(".");
+        let events = fromEvent<Event>(element, parameters[0]);
         if (selector !== "") {
-            events = events.pipe(filter(x => (<Element> x.target).matches(selector)));
+            events = events.pipe(filter(x => {
+                const el = x.target as Element;
+                return el.matches(selector);
+            }));
         }
         return events.subscribe(observer);
     }

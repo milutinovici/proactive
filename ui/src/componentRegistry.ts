@@ -1,4 +1,5 @@
-import { Observable, Observer, Subscription } from "rxjs";
+import { Observable, Observer, Subscription, from, of, EMPTY } from "rxjs";
+import { map, tap } from "rxjs/operators";
 import { IComponentDescriptor, IViewModel } from "./interfaces";
 import { isFunction, isTemplate } from "./utils";
 import { HtmlEngine } from "./templateEngines";
@@ -23,16 +24,17 @@ export class ComponentRegistry {
         return this.components.has(name.toUpperCase());
     }
 
-    public registered(name: string) {
+    public registered(name: string): boolean {
         return this.components.has(name);
     }
 
     public load(name: string): Observable<IComponentDescriptor> {
         name = name.toUpperCase();
         let result = this.getDescriptor(name);
-        result = result.map(desc => Object.assign({}, desc, { template: this.compileTemplate(desc.template)}) as IComponentDescriptor)
-                       .do((x) => this.components.set(name, x)); // cache descriptor
-        return result;
+        return result.pipe(
+            map(desc => Object.assign({}, desc, { template: this.compileTemplate(desc.template) }) as IComponentDescriptor),
+            tap(x => this.components.set(name, x)) // cache descriptor
+        );
     }
 
     private getDescriptor(name: string): Observable<IComponentDescriptor> {
@@ -41,11 +43,11 @@ export class ComponentRegistry {
             if (typeof descriptor === "string") {
                 return this.import<IComponentDescriptor>(descriptor);
             } else {
-                return Observable.of<IComponentDescriptor>(descriptor);
+                return of<IComponentDescriptor>(descriptor);
             }
         } else {
             exception.next(new Error(`No component with name '${name}' is registered`));
-            return Observable.empty<IComponentDescriptor>();
+            return EMPTY;
         }
     }
 
@@ -105,7 +107,7 @@ export class ComponentRegistry {
         const requireFunc = require || (window != null ? window["require"] : null);
         if (!isFunction(requireFunc)) {
             try {
-                return Observable.fromPromise(import(`./${module}`));
+                return from(import(`./${module}`));
             } catch {
                 throw new Error("there's no AMD-module loader available (Hint: did you forget to include RequireJS in your project?)");
             }

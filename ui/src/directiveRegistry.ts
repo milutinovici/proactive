@@ -24,8 +24,7 @@ export class DirectiveRegistry {
     }
 
     public createNodeState(node: Node): NodeState | null {
-        const isEl = isElement(node);
-        if (!isEl) {
+        if (!isElement(node)) {
             return new NodeState([this.handleBarsToDirective(node)], {});
         }
         const tag = node["tagName"];

@@ -1,7 +1,7 @@
 import * as it from "tape";
 import { document, parse, hasAttr } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { BehaviorSubject } from "rxjs";
 
 const ui = new ProactiveUI({ document });
 

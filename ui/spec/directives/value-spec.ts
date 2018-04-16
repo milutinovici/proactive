@@ -1,5 +1,5 @@
 import * as it from "tape";
-import { Observable } from "rxjs";
+import { Observable, of, fromEvent } from "rxjs";
 import * as px from "@proactive/extensions";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
@@ -67,7 +67,7 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
     const template = `<input type="text" x-value="prop" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
-    let observable = Observable.of("zzz");
+    let observable = of("zzz");
     let vm = { prop: observable };
     let value = "";
     observable.subscribe(x => value = x);
@@ -168,7 +168,6 @@ it("value: select multiple can be bound to an array", expect => {
     ui.domManager.applyDirectives(viewmodel, el);
     selected.push("A");
     expect.equal(el.options[0]["selected"], true);
-
     el.options[1]["selected"] = true;
     triggerEvent(el, "change");
     expect.equal(selected().length, 2);

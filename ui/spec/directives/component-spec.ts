@@ -2,7 +2,7 @@ import * as it from "tape";
 import { IScope } from "../../src/interfaces";
 import { document, parse, fragment } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { BehaviorSubject, combineLatest } from "rxjs";
 
 const ui = new ProactiveUI({ document });
 
@@ -33,7 +33,7 @@ it("component: Loads a component using its name as tag", expect => {
 it("component: Loads a component through an AMD module loader", expect => {
     const str = `<div x-component="'test-component'" foo="42"></div>`;
     const el = <HTMLElement> parse(str)[0];
-    ui.components.register("test-component", "src/ui/components/my-select");
+    ui.components.register("test-component", "./dynamic-component");
 
     document["vmHook"] = (props: any) => {
         expect.isNotEqual(props, undefined);
@@ -275,7 +275,7 @@ it("component: Components support value directive", expect => {
     const template = `<input type="text" x-value="name"/><input type="text" x-value="surname"/>`;
     const name = new BehaviorSubject("Hello");
     const surname = new BehaviorSubject("World");
-    const component = { viewmodel: { name, surname, value: name.combineLatest(surname, (n, s) => `${n} ${s}`) }, template: template };
+    const component = { viewmodel: { name, surname, value: combineLatest(name, surname, (n, s) => `${n} ${s}`) }, template: template };
     ui.components.register("test-component", component);
 
     const vm = { obs: new BehaviorSubject("") };

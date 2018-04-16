@@ -2,6 +2,7 @@ import * as it from "tape";
 import { BehaviorSubject } from "rxjs";
 import { document, parse, hasClass } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
+
 const ui = new ProactiveUI({ document });
 
 it("css: bind to a string constant", expect => {

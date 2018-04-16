@@ -140,7 +140,7 @@ export class ComponentDirective<T> extends BaseHandler<string|object> {
             const defaultSlot = slots.find(x => !x.hasAttribute("name")) || slots[0];
             for (const child of boundChildren) {
                 if (isElement(child) && child.hasAttribute("slot")) {
-                    const attr = child.attributes.getNamedItem("slot");
+                    const attr = child.attributes.getNamedItem("slot") as Attr;
                     const slot = slots.find(st => st.getAttribute("name") === attr.value);
                     if (slot === undefined) {
                         exception.next(new Error(`Component ${name} doesn't have a slot with a name ${attr.value} defined`));

@@ -1,7 +1,7 @@
 import * as it from "tape";
-import * as px from "@proactive/extensions";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
+import { BehaviorSubject } from "rxjs";
 
 const ui = new ProactiveUI({ document });
 
@@ -26,34 +26,34 @@ it("if: bind to a boolean constant (false) using static template", expect => {
 });
 
 it("if: bind to a boolean observable value using static template", expect => {
-    const template = `<div><span x-if="$data">foo</span></div>`;
+    const template = `<div><span x-if="obs">foo</span></div>`;
     const el = <HTMLElement> parse(template)[0];
 
     const span = el.firstElementChild as HTMLElement;
-    const prop = px.value(true);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(prop, el));
+    const prop = new BehaviorSubject(true);
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ obs: prop }, el));
 
     expect.equal(span.parentElement, el);
-    prop(false);
+    prop.next(false);
     expect.equal(span.parentElement, null);
-    prop(true);
+    prop.next(true);
     ui.clean(el);
-    prop(false);
+    prop.next(false);
     expect.equal(span.parentElement, el, "should stop updating after getting disposed");
     expect.end();
 });
 
 it("if: bind to a boolean observable value using dynamic template", expect => {
-    const template = `<div><span x-if="$data" x-text="'foo'">bar</span></div>`;
+    const template = `<div><span x-if="obs" x-text="'foo'">bar</span></div>`;
     const el = <HTMLElement> parse(template)[0];
 
-    let prop = px.value(true);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(prop, el));
+    let prop = new BehaviorSubject(true);
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ obs: prop }, el));
     expect.equal(el.children[0].textContent, "foo");
 
     // try it again
     ui.clean(el);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(prop, el));
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({ obs: prop }, el));
     expect.equal(el.children.length, 1);
     expect.equal(el.children[0].textContent, "foo");
     expect.end();
@@ -65,7 +65,7 @@ it("if: bind to a boolean observable value using dynamic template with event", e
     let count = 0;
     let model = {
         cmd: () => count++,
-        show: px.value(true),
+        show: new BehaviorSubject(true),
     };
 
     expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
@@ -96,11 +96,11 @@ it("if: bind after removed element", expect => {
 it("if: directive toggles other directives on an element", expect => {
     const template = `<div><div x-if="active" x-text="active"></div></div>`;
     const el = <HTMLElement> parse(template)[0];
-    const active = px.value(false);
+    const active = new BehaviorSubject(false);
     const child = el.firstChild as Node;
     expect.doesNotThrow(() => ui.domManager.applyDirectives({ active }, el));
     expect.equal(child.textContent, "");
-    active(true);
+    active.next(true);
     expect.equal(child.textContent, "true");
 
     expect.end();

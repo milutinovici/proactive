@@ -8,7 +8,8 @@ export class CssDirective extends SimpleHandler<boolean> {
         this.parametricity = Parametricity.Required;
     }
 
-    public apply(element: Element, observable: Observable<boolean>, className: string): Subscription {
+    public apply(element: Element, observable: Observable<boolean>, parameters: string[]): Subscription {
+        const className = parameters[0];
         return observable.subscribe(value => {
             if (value) {
                 element.classList.add(className);
@@ -26,7 +27,8 @@ export class AttrDirective extends SimpleHandler<string | number | boolean> {
         this.priority = 5;
     }
 
-    public apply(element: Element, observable: Observable<string|number|boolean>, attributeName: string): Subscription {
+    public apply(element: Element, observable: Observable<string | number | boolean>, parameters: string[]): Subscription {
+        const attributeName = parameters[0];
         return observable.subscribe(value => {
             // To cover cases like "attr: { checked:someProp }", we want to remove the attribute entirely
             // when someProp is a "no value"-like value (strictly null, false, or undefined)
@@ -47,7 +49,8 @@ export class StyleDirective extends SimpleHandler<string | number | boolean> {
         this.parametricity = Parametricity.Required;
     }
 
-    public apply(element: HTMLElement, observable: Observable<string|number|boolean>, styleName: string): Subscription {
+    public apply(element: HTMLElement, observable: Observable<string | number | boolean>, parameters: string[]): Subscription {
+        const styleName = parameters[0];
         return observable.subscribe(value => {
             if (value === null || value === undefined || value === false) {
                 // Empty string removes the value, whereas null/undefined have no effect

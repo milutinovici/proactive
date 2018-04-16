@@ -9,9 +9,9 @@ export class TextDirective extends SimpleHandler<string> {
         this.controlsDescendants = true;
     }
 
-    public apply(node: Node, observable: Observable<string>, parameter?: string): Subscription {
+    public apply(node: Node, observable: Observable<string>, parameters: string[]): Subscription {
         const isText = isTextNode(node);
-        const textExpression = isText ? parameter : "";
+        const textExpression = isText ? parameters[0] : "";
         const sub = observable.subscribe(value => {
             if ((value === null) || (value === undefined)) {
                 value = "";

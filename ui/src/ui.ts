@@ -1,4 +1,4 @@
-import { Observable } from "rxjs";
+import { Observable, fromEvent } from "rxjs";
 import { ComponentRegistry } from "./componentRegistry";
 import { DomManager } from "./domManager";
 import { HtmlEngine } from "./templateEngines";
@@ -38,7 +38,7 @@ export class ProactiveUI {
         this.components.register("root-component", rootComponent);
         this.domManager.applyDirectives({}, container);
         if (typeof window !== "undefined") {
-            const sub = Observable.fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
+            const sub = fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
                 this.clean(container);
                 sub.unsubscribe();
             });

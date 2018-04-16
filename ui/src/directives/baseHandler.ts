@@ -46,7 +46,7 @@ export abstract class SimpleHandler<T> extends BaseHandler<T> {
             exception.next(new Error(`directive "${this.name}" with expression "${directive.text}" on element ${node} must be supplied with an observer or a function`));
             return;
         }
-        directive.cleanup.add(this.apply(node, obs, directive.parameters[0]));
+        directive.cleanup.add(this.apply(node, obs, directive.parameters));
     }
-    public abstract apply(el: Element, observable: Observable<T> | Observer<T>, parameter?: string): Subscription;
+    public abstract apply(el: Element, observable: Observable<T> | Observer<T>, parameters?: string[]): Subscription;
 }

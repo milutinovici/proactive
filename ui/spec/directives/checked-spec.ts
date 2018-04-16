@@ -1,5 +1,5 @@
 import * as it from "tape";
-import { Observable } from "rxjs";
+import { fromEvent } from "rxjs";
 import * as px from "@proactive/extensions";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
@@ -14,7 +14,7 @@ it("value: Triggering a click should toggle a checkbox's checked state before th
     let clickHandlerFireCount = 0;
     let expectedCheckedStateInHandler: boolean;
 
-    Observable.fromEvent(element, "click").subscribe (() => {
+    fromEvent(element, "click").subscribe (() => {
         clickHandlerFireCount++;
         expect.equal(element.checked, expectedCheckedStateInHandler);
     });
