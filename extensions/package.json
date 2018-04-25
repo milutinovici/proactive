@@ -11,7 +11,7 @@
   "author": "Ivan Milutinović",
   "license": "MIT",
   "dependencies": {
-    "rxjs": "^6.0.0-uncanny-rc.7"
+    "rxjs": "^6.0.0"
   },
   "devDependencies": {
     "typescript": "^2.8.1",
