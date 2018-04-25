@@ -6,7 +6,8 @@
     "url": "https://github.com/milutinovici/proactive"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p ./",
+    "test": "node ./lib/spec/spec.js | tap-spec"
   },
   "author": "Ivan Milutinović",
   "license": "MIT",
@@ -15,16 +16,11 @@
   },
   "devDependencies": {
     "@proactive/extensions": "^0.2.0",
-    "typescript": "^2.8.1",
-    "ts-node": "^5.0.1",
+    "typescript": "^2.8.3",
+    "ts-node": "^6.0.0",
     "tape": "^4.9.0",
     "tap-spec": "^4.1.1",
-    "gulp": "^3.9.1",
-    "gulp-typescript": "^4.0.2",
-    "gulp-tape": "^1.0.0",
-    "gulp-sourcemaps": "^2.6.4",
-    "merge2": "^1.2.1",
-    "jsdom": "^11.8.0",
+    "jsdom": "^11.9.0",
     "@types/tape": "^4.2.32",
     "@types/jsdom": "^11.0.4"
   },
