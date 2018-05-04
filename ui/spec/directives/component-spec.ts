@@ -30,26 +30,17 @@ it("component: Loads a component using its name as tag", expect => {
     expect.end();
 });
 
-it("component: Loads a component through an AMD module loader", expect => {
-    const str = `<div x-component="'test-component'" foo="42"></div>`;
+it("component: Loads a component through a dynamic import", expect => {
+    const str = `<test-component foo="42"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
-    ui.components.register("test-component", "./dynamic-component");
+    ui.components.register("test-component", "./dynamic-component.html");
 
-    document["vmHook"] = (props: any) => {
-        expect.isNotEqual(props, undefined);
-        expect.equal(props.foo, 42);
+    expect.doesNotThrow(() => ui.domManager.applyDirectives({}, el));
+    setTimeout(() => {
 
-        // now install new hook
-        document["vmHook"] = () => {
-            delete document["vmHook"];
-
-            expect.equal((<HTMLElement> el.children[0]).childNodes[0].textContent, "bar");
-            expect.end();
-        };
-    };
-
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.end();
+        expect.true(el.children[0] && el.children[0].textContent === "bar");
+        expect.end();
+    }, 200);
 });
 
 it("component: Loads a template from a string", expect => {

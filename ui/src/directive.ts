@@ -67,7 +67,7 @@ export class Directive<T> implements IDirective<T> {
                 return result.next(x);
             }
             return result;
-        }, exception.error);
+        }, exception.next);
         return subscriber;
     }
     private createObservable(scope: IScope): Observable<T> {
