@@ -1,7 +1,7 @@
-import { Observable, Subscription } from "rxjs";
+import { Observable, Subscription, isObservable } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
 import { DomManager } from "../domManager";
-import { isObservable, isElement, removeEmptyChildren } from "../utils";
+import { isElement, removeEmptyChildren } from "../utils";
 import { INodeState, IComponent, IScope, IDirective } from "../interfaces";
 import { Scope } from "../nodeState";
 import { BaseHandler } from "./baseHandler";

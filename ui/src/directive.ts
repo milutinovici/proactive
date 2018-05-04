@@ -1,7 +1,7 @@
 import { exception } from "./exceptionHandlers";
-import { Observable, Observer, Subscriber, Subscription, of } from "rxjs";
+import { Observable, Observer, Subscriber, Subscription, of, isObservable } from "rxjs";
 import { IScope, IDirective, IDirectiveHandler, DataFlow, INodeState } from "./interfaces";
-import { isObservable, isObserver, isFunction } from "./utils";
+import { isObserver, isFunction } from "./utils";
 
 export class Directive<T> implements IDirective<T> {
     private static expressionCache = new Map<string, Function>();
@@ -72,7 +72,7 @@ export class Directive<T> implements IDirective<T> {
     }
     private createObservable(scope: IScope): Observable<T> {
         const expression: any = this.expression(scope);
-        if (expression != null && isObservable(expression)) {
+        if (expression != null && isObservable<T>(expression)) {
             return expression;
         } else if (isFunction(expression)) {
             return of(expression.bind(scope.$data)());

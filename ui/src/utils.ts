@@ -1,14 +1,7 @@
 import { Observable, Observer } from "rxjs";
 
 /**
-* Determines if target is an instance of a Observable
-* @param {any} target
-*/
-export function isObservable<T>(target: T | Observable<T>): target is Observable<T> {
-    return target instanceof Observable || target[Symbol.observable] !== undefined;
-}
-/**
-* Determines if target is an instance of a Observable
+* Determines if target is an instance of a Observer
 * @param {any} target
 */
 export function isObserver<T>(target: T | Observer<T> | Observable<T>): target is Observer<T> {
