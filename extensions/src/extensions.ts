@@ -9,10 +9,11 @@ declare module "rxjs/internal/Observable" {
         toState(initial: T): ObservableState<T>;
     }
 }
-
-Observable.prototype.toState = function<T>(this: Observable<T>, initial: T): ObservableState<T> {
-    return new ObservableState(this, initial);
-};
+Object.defineProperty(Observable.prototype, "toState", {
+    value: function <T>(this: Observable<T>, initial: T): ObservableState<T> {
+        return new ObservableState(this, initial);
+    }
+});
 
 export function whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
     return ComputedArray.whenAny(observables);
