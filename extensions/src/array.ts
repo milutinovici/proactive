@@ -17,7 +17,7 @@ export class ObservableArray<T> extends ComputedArray<T> implements Observer<T[]
     public complete() {
         this.source.complete();
     }
-    public [Symbol["rxSubscriber"]]() {
+    public [Symbol.for("rxSubscriber")]() {
         return new Subscriber<T[]>(this);
     }
     public getValue(): T[] {
