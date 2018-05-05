@@ -1,6 +1,6 @@
 {
   "name": "@proactive/extensions",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Proactive Extensions",
   "repository": {
     "url": "https://github.com/milutinovici/proactive"
@@ -13,7 +13,7 @@
   "author": "Ivan Milutinović",
   "license": "MIT",
   "dependencies": {
-    "rxjs": "^6.0.0"
+    "rxjs": "^6.1.0"
   },
   "devDependencies": {
     "typescript": "^2.8.3",
