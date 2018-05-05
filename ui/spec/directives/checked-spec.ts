@@ -1,6 +1,5 @@
 import * as it from "tape";
-import { fromEvent } from "rxjs";
-import * as px from "@proactive/extensions";
+import { fromEvent, BehaviorSubject } from "rxjs";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
@@ -35,12 +34,12 @@ it("value: Should be able to control a checkbox's checked state", expect => {
     const template = `<input type="checkbox" x-value="someProp" />`;
     const element = <HTMLInputElement> parse(template)[0];
 
-    let myobservable = px.value(true);
+    let myobservable = new BehaviorSubject(true);
 
     ui.domManager.applyDirectives({ someProp: myobservable }, element);
     expect.equal(element.checked, true);
 
-    myobservable(false);
+    myobservable.next(false);
     expect.equal(element.checked, false);
     expect.end();
 });
@@ -49,12 +48,12 @@ it("value: Should be able to control a radio's checked state", expect => {
     const template = `<input type="radio" x-value="someProp" value="my" />`;
     const element = <HTMLInputElement> parse(template)[0];
 
-    let myobservable = px.value("my");
+    let myobservable = new BehaviorSubject("my");
 
     ui.domManager.applyDirectives({ someProp: myobservable }, element);
     expect.equal(element.checked, true);
 
-    myobservable("other");
+    myobservable.next("other");
     expect.equal(element.checked, false);
     expect.end();
 });
@@ -63,11 +62,11 @@ it("value: Should update observable properties on the model when the checkbox cl
     const template = `<input type="checkbox" x-value="someProp" />`;
     const element = <HTMLInputElement> parse(template)[0];
 
-    let myobservable = px.value(false);
+    let myobservable = new BehaviorSubject(false);
     ui.domManager.applyDirectives({ someProp: myobservable }, element);
 
     triggerEvent(element, "click");
-    expect.equal(myobservable(), true);
+    expect.equal(myobservable.getValue(), true);
     expect.end();
 });
 
@@ -75,11 +74,11 @@ it("value: Should update observable properties on the model when the radio's cli
     const template = `<input type="radio" x-value="someProp" value="my"/>`;
     const element = <HTMLInputElement> parse(template)[0];
 
-    let myobservable = px.value("other");
+    let myobservable = new BehaviorSubject("other");
     ui.domManager.applyDirectives({ someProp: myobservable }, element);
 
     triggerEvent(element, "click");
-    expect.equal(myobservable(), "my");
+    expect.equal(myobservable.getValue(), "my");
     expect.end();
 });
 
@@ -87,7 +86,7 @@ it("value: Should only notify observable properties on the model once even if th
     const template = `<input type="checkbox" x-value="someProp" />`;
     const element = <HTMLInputElement> parse(template)[0];
 
-    let myobservable = px.value(false);
+    let myobservable = new BehaviorSubject(false);
     let timesNotified = 0;
     myobservable.subscribe(() => { timesNotified++; });
     timesNotified = 0; // ignore initial value notification
@@ -110,7 +109,7 @@ it("value: Should only notify observable properties on the model once even if th
     const template = `<input type="radio" x-value="someProp" />`;
     const element = <HTMLInputElement> parse(template)[0];
 
-    let myobservable = px.value(false);
+    let myobservable = new BehaviorSubject(false);
     let timesNotified = 0;
     myobservable.subscribe(() => { timesNotified++; });
     timesNotified = 0; // ignore initial value notification
@@ -123,7 +122,7 @@ it("value: Should only notify observable properties on the model once even if th
     expect.equal(timesNotified, 1);
 
     // ... until the checkbox value actually changes
-    myobservable(false);
+    myobservable.next(false);
     triggerEvent(element, "click");
     triggerEvent(element, "change");
     expect.equal(timesNotified, 2);
@@ -147,14 +146,14 @@ it("value: multiple radios bound to a single value", expect => {
                           <input type="radio" name="grp" x-value="someProp" value="1st" />
                           <input type="radio" name="grp" x-value="someProp" value="2nd" />
                       </div>`;
-    const obs = px.value(false);
+    const obs = new BehaviorSubject(false);
     const el = <HTMLElement> parse(template)[0];
     const viewmodel = { someProp: obs };
     ui.domManager.applyDirectives(viewmodel, el);
 
     triggerEvent(el.children[0], "click");
-    expect.equal(viewmodel.someProp(), "1st");
+    expect.equal(viewmodel.someProp.getValue(), "1st");
     triggerEvent(el.children[1], "click");
-    expect.equal(viewmodel.someProp(), "2nd");
+    expect.equal(viewmodel.someProp.getValue(), "2nd");
     expect.end();
 });
