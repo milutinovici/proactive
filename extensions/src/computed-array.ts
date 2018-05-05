@@ -7,7 +7,9 @@ export class ComputedArray<T> extends Observable<T[]> {
         super();
         this.source = source;
     }
-
+    public get length(): Observable<number> {
+        return this.pipe(map(array => array.length));
+    }
     public map<R>(fn: (x: T, ix?: number) => R): ComputedArray<R> {
         const obs = this.pipe(map(array => array.map(fn)));
         return new ComputedArray(obs);

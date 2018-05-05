@@ -1,6 +1,30 @@
 import { ObservableArray } from "../src/extensions";
 import * as it from "tape";
 
+it("should calculate length properly", expect => {
+    const input = ["Foo", "Bar", "Baz", "Bamf"];
+    const origin = new ObservableArray(input);
+    const computed = origin.length;
+
+    let output = 0;
+    computed.subscribe(x => output = x);
+
+    expect.equal(output, 4);
+
+    origin.push("Hello");
+    expect.equal(output, 5);
+
+    origin.pop();
+    expect.equal(output, 4);
+
+    origin.unshift("Goodbye");
+    expect.equal(output, 5);
+
+    origin.clear();
+    expect.equal(output, 0);
+    expect.end();
+});
+
 it("should follow base collection", expect => {
     const input = ["Foo", "Bar", "Baz", "Bamf"];
     const origin = new ObservableArray(input);
