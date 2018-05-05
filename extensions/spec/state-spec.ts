@@ -96,11 +96,3 @@ it("allows connecting an error handler at construction", expect => {
     expect.equal(errorCount, 1);
     expect.end();
 });
-it("calling toComputed 2nd time returns the same object as the 1st time", expect => {
-    const subject = new Subject<number>();
-    const value1 = subject.toState(0);
-    const value2 = value1.toState(0);
-
-    expect.equal(value1, value2);
-    expect.end();
-});

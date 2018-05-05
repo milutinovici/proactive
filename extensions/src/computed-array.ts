@@ -33,7 +33,19 @@ export class ComputedArray<T> extends Observable<T[]> {
         const obs = this.pipe(map(array => array.reduce((cumulus: R[], next: T) => [...cumulus, ...fn(next)], <R[]> [])));
         return new ComputedArray(obs);
     }
-    public static _whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
+    public groupBy<R>(fn: (x: T) => R): Observable<Map<R, T[]>> {
+        return this.pipe(map(array => array.reduce((cumulus: Map<R, T[]>, next: T) => {
+            const key = fn(next);
+            if (cumulus.has(key)) {
+                const group = cumulus.get(key) as T[];
+                group.push(next);
+            } else {
+                cumulus.set(key, [next]);
+            }
+            return cumulus;
+        }, new Map<R, T[]>())));
+    }
+    public static whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
         const obs = observables.pipe(mergeMap(array => combineLatest(array)));
         return new ComputedArray(obs);
     }

@@ -1,9 +1,9 @@
-import * as px from "../src/extensions";
+import { ObservableArray } from "../src/extensions";
 import * as it from "tape";
 
 it("should follow base collection", expect => {
     const input = ["Foo", "Bar", "Baz", "Bamf"];
-    const origin = px.array(input);
+    const origin = new ObservableArray(input);
     const computed = origin.map(x => x.toUpperCase());
 
     let output: string[] = [];
@@ -29,7 +29,7 @@ it("should follow base collection", expect => {
 
 it("should be filtered", expect => {
     const input = ["Foo", "Bar", "Baz", "Bamf"];
-    const origin = px.array(input);
+    const origin = new ObservableArray(input);
     const computed = origin.filter(x => x.toUpperCase().indexOf("F") !== -1);
 
     let output: string[] = [];
@@ -54,7 +54,7 @@ it("should be filtered", expect => {
 
 it("should be sorted", expect => {
     const input = ["Foo", "Bar", "Baz"];
-    const origin = px.array<string>(input);
+    const origin = new ObservableArray(input);
 
     const stringOrderer = (a: any, b: any) => {
         if (a.toString() < b.toString()) { return -1; }
@@ -78,7 +78,7 @@ it("should be sorted", expect => {
 
 it("chaining works", expect => {
     const input = ["Foo", "Bar", "Baz", "Bamf"];
-    const origin = px.array(input);
+    const origin = new ObservableArray(input);
     const computed = origin.map(x => x.toUpperCase()).filter(x => x.indexOf("F") !== -1);
     let output: string[] = [];
     computed.subscribe(x => output = x);
@@ -101,7 +101,7 @@ it("chaining works", expect => {
 
 it("should check if every element satisfies selector", expect => {
     const input = [1, 2, 4, 6];
-    const origin = px.array(input);
+    const origin = new ObservableArray(input);
     const computed = origin.every(x => x % 2 === 0);
     let output: boolean = false;
     computed.subscribe(x => output = x);
@@ -121,7 +121,7 @@ it("should check if every element satisfies selector", expect => {
 });
 it("should check if any element satisfies selector", expect => {
     const input = [2, 3, 5, 7];
-    const origin = px.array(input);
+    const origin = new ObservableArray(input);
     const computed = origin.some(x => x % 2 === 0);
     let output: boolean = false;
     computed.subscribe(x => output = x);
@@ -141,7 +141,7 @@ it("should check if any element satisfies selector", expect => {
 });
 it("should get max element of Array using reduce", expect => {
     const input = [2, 3, 5, 7, 1, 4];
-    const origin = px.array(input);
+    const origin = new ObservableArray(input);
     const computed = origin.reduce((x, y) => x > y ? x : y, 0);
     let output: number = 0;
     computed.subscribe(x => output = x);
@@ -161,7 +161,7 @@ it("should get max element of Array using reduce", expect => {
 });
 it("should flatten elements using flatMap", expect => {
     const input = [[2, 3], [5, 7]];
-    const origin = px.array(input);
+    const origin = new ObservableArray(input);
     const computed = origin.flatMap(x => x);
     let output: number[] = [];
     computed.subscribe(x => output = x);
@@ -177,5 +177,26 @@ it("should flatten elements using flatMap", expect => {
 
     origin.pop();
     expect.isEquivalent(output, [5, 7]);
+    expect.end();
+});
+
+it("should group elements using groupBy", expect => {
+    const input = [2, 3, 5, 7];
+    const origin = new ObservableArray(input);
+    const computed = origin.groupBy(x => x % 2);
+    let output = new Map<number, number[]>();
+    computed.subscribe(x => output = x);
+
+    expect.isEquivalent(output.get(0), [2]);
+    expect.isEquivalent(output.get(1), [3, 5, 7]);
+    origin.push(4);
+    expect.isEquivalent(output.get(0), [2, 4]);
+    expect.isEquivalent(output.get(1), [3, 5, 7]);
+
+    const removed = origin.shift();
+    expect.isEquivalent(removed, 2);
+    expect.isEquivalent(output.get(0), [4]);
+    expect.isEquivalent(output.get(1), [3, 5, 7]);
+
     expect.end();
 });
