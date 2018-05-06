@@ -2,7 +2,7 @@ import { Observable, Subscription, Observer } from "rxjs";
 
 export interface IDirective<T> {
     readonly handler: IDirectiveHandler;
-    readonly text: string;
+    readonly text: string | string[];
     readonly parameters: string[];
     readonly cleanup: Subscription;
     readonly expression: (scope: IScope) => T | null;

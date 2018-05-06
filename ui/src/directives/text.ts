@@ -1,32 +1,40 @@
-import { Observable, Subscription } from "rxjs";
-import { SimpleHandler } from "./baseHandler";
-import { isTextNode } from "../utils";
+import { Observable, combineLatest } from "rxjs";
+import {  BaseHandler } from "./baseHandler";
+import { IDirective, INodeState } from "../interfaces";
 
-export class TextDirective extends SimpleHandler<string> {
+export class TextDirective extends BaseHandler<string> {
     constructor(name: string) {
         super(name);
         this.unique = true;
         this.controlsDescendants = true;
     }
 
-    public apply(node: Node, observable: Observable<string>, parameters: string[]): Subscription {
-        const isText = isTextNode(node);
-        const textExpression = isText ? parameters[0] : "";
-        const sub = observable.subscribe(value => {
-            if ((value === null) || (value === undefined)) {
-                value = "";
-            } else if (Array.isArray(value)) {
-                value = value.join(", ");
-            }
-            if (isText) {
-                node.nodeValue = value;
-            } else {
+    protected applyInternal(node: Element, directive: IDirective<string>, state: INodeState) {
+        const observable = directive.evaluate(state.scope, this.dataFlow) as Observable<string> | Observable<string>[];
+        let subscription;
+        if (Array.isArray(observable)) {
+            subscription = combineLatest(observable).subscribe(values => {
+                const zipped = directive.parameters.map((text, i) => {
+                    let value = values[i];
+                    if ((value === null) || (value === undefined)) {
+                        value = "";
+                    } else if (Array.isArray(value)) {
+                        value = value.join(", ");
+                    }
+                    return text + value;
+                });
+                node.nodeValue = zipped.join("");
+            });
+        } else {
+            subscription = observable.subscribe(value => {
+                if ((value === null) || (value === undefined)) {
+                    value = "";
+                } else if (Array.isArray(value)) {
+                    value = value.join(", ");
+                }
                 node.textContent = value;
-            }
-        });
-        // if (isText) {
-        //     sub.add(() => el.nodeValue = "{{" + textExpression + "}}");
-        // }
-        return sub;
+            });
+        }
+        directive.cleanup.add(subscription);
     }
 }

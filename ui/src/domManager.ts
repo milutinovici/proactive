@@ -1,6 +1,6 @@
 import { Scope } from "./nodeState";
 import { DirectiveRegistry } from "./directiveRegistry";
-import { isElement, isTextNode, isHandlebarExpression } from "./utils";
+import { isElement, isTextNode } from "./utils";
 import { INodeState, IScope, IViewModel } from "./interfaces";
 import { exception } from "./exceptionHandlers";
 
@@ -138,6 +138,13 @@ export class DomManager {
 
     private shouldBind(el: Node): boolean {
         return (isElement(el) && this.ignore.indexOf(el.tagName) === -1) ||
-               (isTextNode(el) && isHandlebarExpression(el.nodeValue));
+               (isTextNode(el) && this.hasHandlebars(el.nodeValue));
+    }
+
+    private hasHandlebars(expression: string | null) {
+        if (expression === null || expression.length < 4 || expression.indexOf("{{") === -1 || expression.indexOf("}}") === -1) {
+            return false;
+        }
+        return true;
     }
 }

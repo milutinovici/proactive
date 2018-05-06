@@ -78,8 +78,11 @@ export class DirectiveRegistry {
     }
 
     private handleBarsToDirective(node: Node): Directive<string> {
+        const ms = new RegExp("{{([\\s\\S]*?)}}");
         const trimmed = (node.nodeValue as string).trim();
-        const expression = trimmed.slice(2, trimmed.length - 2);
-        return new Directive<string>(this.handlers.get("text") as IDirectiveHandler, expression, [expression]);
+        const pieces = trimmed.split(ms);
+        const values = pieces.filter((piece, i) => i % 2 === 1);
+        const texts = pieces.filter((piece, i) => i % 2 === 0);
+        return new Directive<string>(this.handlers.get("text") as IDirectiveHandler, values, texts);
     }
 }

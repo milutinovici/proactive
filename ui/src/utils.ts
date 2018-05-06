@@ -53,17 +53,6 @@ export function isFunction(obj: any): obj is Function {
     return typeof obj === "function";
 }
 
-export function isHandlebarExpression(expression: string | null) {
-    if (expression === null || expression.length < 4) {
-        return false;
-    }
-    const trimmed = expression.trim();
-    const open = "{";
-    const closed = "}";
-    return trimmed[0] === open && trimmed[1] === open &&
-           trimmed[trimmed.length - 1] === closed && trimmed[trimmed.length - 2] === closed;
-}
-
 export function removeEmptyChildren(element: Node) {
     let child = element.firstChild;
     while (child !== null) {

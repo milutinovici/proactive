@@ -110,3 +110,20 @@ it("text: handlebar directive works", expect => {
     expect.equal(el.textContent, "magic", "should stop updating after getting disposed");
     expect.end();
 });
+
+it("text: multiple handlebar directive work", expect => {
+    const template = `<div>{{o1}} {{o2}}</div>"`;
+    const el = <HTMLElement> parse(template)[0];
+
+    let model = { o1: new BehaviorSubject("Hello"), o2: new BehaviorSubject("World") };
+
+    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
+    expect.equal(el.textContent, "Hello World");
+
+    model.o1.next("Greetings");
+    expect.equal(el.textContent, "Greetings World");
+
+    model.o2.next("Universe");
+    expect.equal(el.textContent, "Greetings Universe");
+    expect.end();
+});
