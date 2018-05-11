@@ -1,5 +1,4 @@
 import { Observable } from "rxjs";
-import "./observable-extensions";
 import { ObservableState } from "./state";
 import { ObservableArray } from "./array";
 import { ComputedArray } from "./computed-array";
