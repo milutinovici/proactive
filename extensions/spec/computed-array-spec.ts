@@ -224,3 +224,23 @@ it("should group elements using groupBy", expect => {
 
     expect.end();
 });
+
+it("should filter out duplicate elements using distinct", expect => {
+    const input = [3, 3, 2, 7];
+    const origin = new ObservableArray(input);
+    const computed = origin.distinct(x => x);
+    let output: number[] = [];
+    computed.subscribe(x => output = x);
+
+    expect.isEquivalent(output, [3, 2, 7]);
+    origin.push(4);
+    expect.isEquivalent(output, [3, 2, 7, 4]);
+    origin.push(4);
+    expect.isEquivalent(output, [3, 2, 7, 4]);
+    origin.shift();
+    expect.isEquivalent(output, [3, 2, 7, 4]);
+    origin.shift();
+    expect.isEquivalent(output, [2, 7, 4]);
+
+    expect.end();
+});

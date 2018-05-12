@@ -47,6 +47,13 @@ export class ComputedArray<T> extends Observable<T[]> {
             return cumulus;
         }, new Map<R, T[]>())));
     }
+    public distinct<R>(fn: (x: T) => R) {
+        const obs = this.pipe(map(array => {
+            const mapped = array.map(fn);
+            return array.filter((element, index) => mapped.indexOf(fn(element)) === index);
+        }));
+        return new ComputedArray(obs);
+    }
     public static whenAny<T>(observables: Observable<Observable<T>[]>): ComputedArray<T> {
         const obs = observables.pipe(mergeMap(array => combineLatest(array)));
         return new ComputedArray(obs);
