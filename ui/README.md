@@ -2,24 +2,26 @@
 
 Define a component
 ```typescript
-import { Observable } from "rxjs";
-class MyComponent {
-    greeting: Observable<string>;
+import { Observable, interval } from "rxjs";
+class GreetingComponent {
+    name: string;
+    exclamations: Observable<string>;
     constructor(props) {
-        this.greeting = Observable.interval(500).map(x => props.greeting + Array(x + 1).join("!"));
+        this.name = props.name;
+        this.exclamations = interval(500).pipe(map(x => Array(x + 1).join("!")));
     }
 
 }
-export const template = `<span x-text="greeting"></span>`
+export const template = `<span>Hello, {{name}}. Welcome{{exclamations}}</span>`
 export const viewmodel = MyComponent
 ```
 startup.ts
 ```typescript
 import { ProactiveUI } from "@proactive/ui";
-import * as myComponent from "./mycomponent";
+import * as greeting from "./greeting-component";
 
 const ui = new ProactiveUI();
-ui.components.register("my-component", myComponent);
+ui.components.register("my-greet", greeting);
 ui.render({}, document.body);
 ```
 index.html
@@ -27,7 +29,7 @@ index.html
 <!DOCTYPE html>
 <html lang="en">
     <body>
-        <my-component x-attr:greeting="'Hello world'"></my-component>
+        <my-greet name="John"></my-greet>
         <script src="./startup.js"></script>
     </body>
 </html>
