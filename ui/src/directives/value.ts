@@ -1,10 +1,10 @@
 import { Observable, fromEvent, merge } from "rxjs";
 import { map, filter, distinctUntilChanged } from "rxjs/operators";
-import { BaseHandler } from "./baseHandler";
+import { BaseDirectiveHandler } from "./directiveHandler";
 import { IDirective, INodeState, DataFlow } from "../interfaces";
 import { isObserver, tryParse } from "../utils";
 
-export class ValueDirective extends BaseHandler<string|number|boolean|string[]> {
+export class ValueDirective extends BaseDirectiveHandler<string|number|boolean|string[]> {
     constructor(name: string) {
         super(name);
         this.priority = 30;

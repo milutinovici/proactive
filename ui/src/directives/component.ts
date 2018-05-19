@@ -4,12 +4,12 @@ import { DomManager } from "../domManager";
 import { isElement, removeEmptyChildren } from "../utils";
 import { INodeState, IComponent, IScope, IDirective } from "../interfaces";
 import { Scope } from "../nodeState";
-import { BaseHandler } from "./baseHandler";
+import { BaseDirectiveHandler } from "./directiveHandler";
 import { ComponentRegistry } from "../componentRegistry";
 import { HtmlEngine } from "../templateEngines";
 import { exception } from "../exceptionHandlers";
 
-export class ComponentDirective<T> extends BaseHandler<string|object> {
+export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
     private readonly domManager: DomManager;
     protected readonly registry: ComponentRegistry;
     private readonly engine: HtmlEngine;

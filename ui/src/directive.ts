@@ -1,5 +1,5 @@
 import { exception } from "./exceptionHandlers";
-import { Observable, Observer, Subscriber, Subscription, of, isObservable, combineLatest } from "rxjs";
+import { Observable, Observer, Subscriber, Subscription, of, isObservable } from "rxjs";
 import { IScope, IDirective, IDirectiveHandler, DataFlow, INodeState } from "./interfaces";
 import { isObserver, isFunction } from "./utils";
 

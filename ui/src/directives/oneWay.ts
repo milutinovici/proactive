@@ -1,8 +1,8 @@
 import { Observable, Subscription } from "rxjs";
-import { SimpleHandler } from "./baseHandler";
+import { DirectiveHandler } from "./directiveHandler";
 import { Parametricity } from "../interfaces";
 
-export class CssDirective extends SimpleHandler<boolean> {
+export class CssDirective extends DirectiveHandler<boolean> {
     constructor(name: string) {
         super(name);
         this.parametricity = Parametricity.Required;
@@ -20,7 +20,7 @@ export class CssDirective extends SimpleHandler<boolean> {
     }
 }
 
-export class AttrDirective extends SimpleHandler<string | number | boolean> {
+export class AttrDirective extends DirectiveHandler<string | number | boolean> {
     constructor(name: string) {
         super(name);
         this.parametricity = Parametricity.Required;
@@ -43,7 +43,7 @@ export class AttrDirective extends SimpleHandler<string | number | boolean> {
     }
 }
 
-export class StyleDirective extends SimpleHandler<string | number | boolean> {
+export class StyleDirective extends DirectiveHandler<string | number | boolean> {
     constructor(name: string) {
         super(name);
         this.parametricity = Parametricity.Required;

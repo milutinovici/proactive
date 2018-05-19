@@ -46,7 +46,7 @@ export const compareLists = (function compareArrays() {
     function compareArrays<T>(old: T[] | Map<any, T>, nw: T[] | Map<any, T>, options?: any) {
         // For backward compatibility, if the third arg is actually a bool, interpret
         // it as the old parameter 'dontLimitMoves'. Newer code should use { dontLimitMoves: true }.
-        options = (typeof options === "boolean") ? { "dontLimitMoves": options } : (options || {});
+        options = (typeof options === "boolean") ? { dontLimitMoves : options } : (options || {});
         old = !Array.isArray(old) ? toArray(old) : old;
         nw = !Array.isArray(nw) ? toArray(nw) : nw;
 
@@ -97,14 +97,14 @@ export const compareLists = (function compareArrays() {
             meMinusOne = editDistanceMatrix[smlIndex][bigIndex] - 1;
             if (bigIndex && meMinusOne === editDistanceMatrix[smlIndex][bigIndex - 1]) {
                 notInSml.push(<Delta<T>> {     // added/deleted
-                    "status": statusNotInSml,
-                    "value": bigArray[--bigIndex],
-                    "index": bigIndex });
+                    status: statusNotInSml,
+                    value: bigArray[--bigIndex],
+                    index: bigIndex });
             } else if (smlIndex && meMinusOne === editDistanceMatrix[smlIndex - 1][bigIndex]) {
                 notInBig.push(<Delta<T>> {     // deleted/added
-                    "status": statusNotInBig,
-                    "value": smallArray[--smlIndex],
-                    "index": smlIndex });
+                    status: statusNotInBig,
+                    value: smallArray[--smlIndex],
+                    index: smlIndex });
             } else {
                 --bigIndex;
                 --smlIndex;

@@ -1,12 +1,12 @@
 import { Observable } from "rxjs";
-import { BaseHandler } from "./baseHandler";
+import { BaseDirectiveHandler } from "./directiveHandler";
 import { DomManager } from "../domManager";
 import { NodeState } from "../nodeState";
 import { HtmlEngine } from "../templateEngines";
 import { IDirective, INodeState, Parametricity } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
-export class ForDirective<T> extends BaseHandler<T[]> {
+export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
     private readonly domManager: DomManager;
     private readonly engine: HtmlEngine;
     constructor(name: string, domManager: DomManager, engine: HtmlEngine) {

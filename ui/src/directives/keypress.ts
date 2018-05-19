@@ -1,7 +1,7 @@
-import { Observable, Observer, Subscription, fromEvent } from "rxjs";
+import { Observer, Subscription, fromEvent } from "rxjs";
 import { filter, share } from "rxjs/operators";
 import { DataFlow, Parametricity } from "../interfaces";
-import { SimpleHandler } from "./baseHandler";
+import { DirectiveHandler } from "./directiveHandler";
 
 const keysByCode = {
     8: "backspace",
@@ -21,7 +21,7 @@ const keysByCode = {
     46: "deconste",
 };
 
-export class KeyPressDirective extends SimpleHandler<KeyboardEvent> {
+export class KeyPressDirective extends DirectiveHandler<KeyboardEvent> {
     constructor(name: string) {
         super(name);
         this.dataFlow = DataFlow.In;

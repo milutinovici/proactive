@@ -1,11 +1,11 @@
 import { Observable } from "rxjs";
 import { map, distinctUntilChanged } from "rxjs/operators";
-import { BaseHandler } from "./baseHandler";
+import { BaseDirectiveHandler } from "./directiveHandler";
 import { DomManager } from "../domManager";
 import { HtmlEngine } from "../templateEngines";
 import { IDirective, INodeState, Parametricity } from "../interfaces";
 
-export class IfDirective extends BaseHandler<boolean> {
+export class IfDirective extends BaseDirectiveHandler<boolean> {
     private readonly domManager: DomManager;
     private readonly engine: HtmlEngine;
     protected inverse: boolean = false;

@@ -1,8 +1,8 @@
 import { Observable, combineLatest } from "rxjs";
-import {  BaseHandler } from "./baseHandler";
+import {  BaseDirectiveHandler } from "./directiveHandler";
 import { IDirective, INodeState } from "../interfaces";
 
-export class TextDirective extends BaseHandler<string> {
+export class TextDirective extends BaseDirectiveHandler<string> {
     constructor(name: string) {
         super(name);
         this.unique = true;

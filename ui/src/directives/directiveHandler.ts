@@ -6,7 +6,7 @@ import { isObserver } from "../utils";
  * Base class for directive handlers
  * @class
  */
-export abstract class BaseHandler<T> implements IDirectiveHandler {
+export abstract class BaseDirectiveHandler<T> implements IDirectiveHandler {
     public readonly name: string;
     public priority = 0;
     public dataFlow = DataFlow.Out;
@@ -39,7 +39,7 @@ export abstract class BaseHandler<T> implements IDirectiveHandler {
 * Base class for one-way directive handlers
 * @class
 */
-export abstract class SimpleHandler<T> extends BaseHandler<T> {
+export abstract class DirectiveHandler<T> extends BaseDirectiveHandler<T> {
     public applyInternal(node: Element, directive: IDirective<T>, state: INodeState) {
         const obs = directive.evaluate(state.scope, this.dataFlow);
         if (this.dataFlow === DataFlow.In && !isObserver(obs)) {
@@ -48,5 +48,5 @@ export abstract class SimpleHandler<T> extends BaseHandler<T> {
         }
         directive.cleanup.add(this.apply(node, obs, directive.parameters));
     }
-    public abstract apply(el: Element, observable: Observable<T> | Observer<T>, parameters?: string[]): Subscription;
+    public abstract apply(el: Element, observable: Observable<T> | Observer<T>, parameters: string[]): Subscription;
 }
