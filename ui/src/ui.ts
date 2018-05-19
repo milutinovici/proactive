@@ -1,4 +1,4 @@
-import { Observable, fromEvent } from "rxjs";
+import { fromEvent } from "rxjs";
 import { ComponentRegistry } from "./componentRegistry";
 import { DomManager } from "./domManager";
 import { HtmlEngine } from "./templateEngines";
@@ -13,6 +13,9 @@ import { ForDirective } from "./directives/for";
 import { ValueDirective } from "./directives/value";
 import { ComponentDirective } from "./directives/component";
 import { KeyPressDirective } from "./directives/keypress";
+
+export * from "./interfaces";
+export { DirectiveHandler } from "./directives/directiveHandler";
 
 export class ProactiveUI {
     public readonly directives: DirectiveRegistry;
