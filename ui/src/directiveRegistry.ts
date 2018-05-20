@@ -12,11 +12,11 @@ export class DirectiveRegistry {
     constructor() {
         this.handlers = new Map<string, IDirectiveHandler<any>>();
     }
-    public register(handler: IDirectiveHandler<any>) {
-        if (!this.handlers.has(handler.name)) {
-            this.handlers.set(handler.name, handler);
+    public register(name: string, handler: IDirectiveHandler<any>) {
+        if (!this.handlers.has(name)) {
+            this.handlers.set(name, handler);
         } else {
-            throw new Error(`directive handler with "${handler.name}" name is already registered`);
+            throw new Error(`directive handler with "${name}" name is already registered`);
         }
     }
 

@@ -13,8 +13,8 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
     private readonly domManager: DomManager;
     protected readonly registry: ComponentRegistry;
     private readonly engine: HtmlEngine;
-    constructor(name: string, domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {
-        super(name);
+    constructor(domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {
+        super();
         this.priority = 20;
         this.unique = true;
         this.controlsDescendants = true;

@@ -22,8 +22,8 @@ const keysByCode = {
 };
 
 export class KeyPressDirective extends DirectiveHandler<KeyboardEvent> {
-    constructor(name: string) {
-        super(name);
+    constructor() {
+        super();
         this.dataFlow = DataFlow.In;
         this.parametricity = Parametricity.Required;
     }

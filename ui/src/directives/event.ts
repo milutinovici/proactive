@@ -4,8 +4,8 @@ import { DataFlow, Parametricity } from "../interfaces";
 import { DirectiveHandler } from "./directiveHandler";
 
 export class EventDirective extends DirectiveHandler<Event> {
-    constructor(name: string) {
-        super(name);
+    constructor() {
+        super();
         this.dataFlow = DataFlow.In;
         this.parametricity = Parametricity.Required;
     }

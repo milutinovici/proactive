@@ -77,19 +77,19 @@ export class ProactiveUI {
 
     private registerDirectives(domManager: DomManager, engine: HtmlEngine, registry: ComponentRegistry) {
         // out
-        this.directives.register(new TextDirective("text"));
-        this.directives.register(new AttrDirective("attr"));
-        this.directives.register(new CssDirective("css"));
-        this.directives.register(new StyleDirective("style"));
+        this.directives.register("text", new TextDirective());
+        this.directives.register("attr", new AttrDirective());
+        this.directives.register("css", new CssDirective());
+        this.directives.register("style", new StyleDirective());
         // in
-        this.directives.register(new EventDirective("on"));
-        this.directives.register(new KeyPressDirective("key"));
+        this.directives.register("on", new EventDirective());
+        this.directives.register("key", new KeyPressDirective());
         // two way
-        this.directives.register(new ValueDirective("value"));
+        this.directives.register("value", new ValueDirective());
         // structural
-        this.directives.register(new IfDirective("if", domManager, engine));
-        this.directives.register(new ForDirective("for", domManager, engine));
-        this.directives.register(new ComponentDirective("component", domManager, engine, registry));
+        this.directives.register("if", new IfDirective(domManager, engine));
+        this.directives.register("for", new ForDirective(domManager, engine));
+        this.directives.register("component", new ComponentDirective(domManager, engine, registry));
     }
 
 }

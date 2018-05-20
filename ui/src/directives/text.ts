@@ -3,8 +3,8 @@ import {  BaseDirectiveHandler } from "./directiveHandler";
 import { IDirective, INodeState } from "../interfaces";
 
 export class TextDirective extends BaseDirectiveHandler<string> {
-    constructor(name: string) {
-        super(name);
+    constructor() {
+        super();
         this.unique = true;
         this.controlsDescendants = true;
     }

@@ -5,8 +5,8 @@ import { IDirective, INodeState, DataFlow } from "../interfaces";
 import { isObserver, tryParse } from "../utils";
 
 export class ValueDirective extends BaseDirectiveHandler<string|number|boolean|string[]> {
-    constructor(name: string) {
-        super(name);
+    constructor() {
+        super();
         this.priority = 30;
         this.unique = true;
         this.dataFlow = DataFlow.Out | DataFlow.In;

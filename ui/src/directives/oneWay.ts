@@ -3,8 +3,8 @@ import { DirectiveHandler } from "./directiveHandler";
 import { Parametricity } from "../interfaces";
 
 export class CssDirective extends DirectiveHandler<boolean> {
-    constructor(name: string) {
-        super(name);
+    constructor() {
+        super();
         this.parametricity = Parametricity.Required;
     }
 
@@ -21,8 +21,8 @@ export class CssDirective extends DirectiveHandler<boolean> {
 }
 
 export class AttrDirective extends DirectiveHandler<string | number | boolean> {
-    constructor(name: string) {
-        super(name);
+    constructor() {
+        super();
         this.parametricity = Parametricity.Required;
         this.priority = 5;
     }
@@ -44,8 +44,8 @@ export class AttrDirective extends DirectiveHandler<string | number | boolean> {
 }
 
 export class StyleDirective extends DirectiveHandler<string | number | boolean> {
-    constructor(name: string) {
-        super(name);
+    constructor() {
+        super();
         this.parametricity = Parametricity.Required;
     }
 

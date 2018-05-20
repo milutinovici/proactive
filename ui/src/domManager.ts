@@ -116,7 +116,7 @@ export class DomManager {
                 return true;
             }
             // apply for before anything else, then imediately return
-            if (pair.handler.name === "for") {
+            if (pair.directive.name === "for") {
                 pair.handler.applyDirective(node, pair.directive, state);
                 return true;
             }

@@ -9,8 +9,8 @@ import { compareLists, Delta } from "./compareLists";
 export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
     private readonly domManager: DomManager;
     private readonly engine: HtmlEngine;
-    constructor(name: string, domManager: DomManager, engine: HtmlEngine) {
-        super(name);
+    constructor(domManager: DomManager, engine: HtmlEngine) {
+        super();
         this.priority = 50;
         this.unique = true;
         this.parametricity = Parametricity.Required;
@@ -65,7 +65,7 @@ export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
     private addRows(parent: Element, template: Element, state: INodeState, itemName: string, indexName: string, additions: Delta<T>[], placeholder: Node, newLength: number) {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
         let current = 0;
-        const otherDirectives = state.directives.filter(x => x.handler.name !== "for");
+        const otherDirectives = state.directives.filter(x => x.directive.name !== "for");
 
         while (current <= additions.length) {
             const merger = this.mergeConsecutiveRows(additions, template, current);

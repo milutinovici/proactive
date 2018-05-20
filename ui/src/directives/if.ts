@@ -9,8 +9,8 @@ export class IfDirective extends BaseDirectiveHandler<boolean> {
     private readonly domManager: DomManager;
     private readonly engine: HtmlEngine;
     protected inverse: boolean = false;
-    constructor(name: string, domManager: DomManager, engine: HtmlEngine) {
-        super(name);
+    constructor(domManager: DomManager, engine: HtmlEngine) {
+        super();
         this.priority = 40;
         this.parametricity = Parametricity.Forbidden;
         this.unique = true;
@@ -58,14 +58,14 @@ export class IfDirective extends BaseDirectiveHandler<boolean> {
         });
     }
     private disableOtherDirectives(state: INodeState) {
-        const others = state.directives.filter(x => x.handler.name !== "if");
+        const others = state.directives.filter(x => x.directive.name !== "if");
         others.forEach(x => {
             x.directive.cleanup.unsubscribe();
             x.directive["activated"] -= 1;
         });
     }
     private enableOtherDirectives(element: Element, state: INodeState) {
-        const others = state.directives.filter(x => x.handler.name !== "if");
+        const others = state.directives.filter(x => x.directive.name !== "if");
         others.forEach(x => x.handler.applyDirective(element, x.directive, state));
     }
 }

@@ -16,7 +16,7 @@ export class NodeState implements INodeState {
         this.controlsDescendants = 0;
     }
     public getDirectives<T>(name: string): IPair<T>[] {
-        return this.directives.filter(x => x.handler.name === name);
+        return this.directives.filter(x => x.directive.name === name);
     }
 }
 

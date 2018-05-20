@@ -1,6 +1,7 @@
 import { Observable, Subscription, Observer } from "rxjs";
 
 export interface IDirective<T> {
+    readonly name: string;
     readonly text: string | string[];
     readonly parameters: string[];
     readonly cleanup: Subscription;
@@ -17,7 +18,6 @@ export enum DataFlow { Out = 1, In = 2 }
 // Defines whether the directive accepts parameters
 export enum Parametricity { Required, Forbidden, Optional }
 export interface IDirectiveHandler<T> {
-        readonly name: string;
         /**
         * When there are multiple directives defined on a single DOM element,
         * sometimes it is necessary to specify the order in which the directives are applied.
