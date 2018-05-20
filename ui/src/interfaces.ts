@@ -5,7 +5,7 @@ export interface IDirective<T> {
     readonly parameters: string[];
     readonly cleanup: Subscription;
     evaluate(dataFlow: DataFlow): Observable<T> | Observer<T>;
-    expression(): T;
+    value(): T;
     clone(scope: IScope): IDirective<T>;
 }
 export interface IPair<T> {

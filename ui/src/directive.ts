@@ -34,7 +34,7 @@ export class Directive<T> implements IDirective<T> {
         }
     }
     // this can possibly have side-effects
-    public expression(): T {
+    public value(): T {
         if (Array.isArray(this.text)) {
             return this.text.map(txt => this.createObservable(Evaluator.read(this.scope, txt))) as any;
         } else {
@@ -44,7 +44,7 @@ export class Directive<T> implements IDirective<T> {
 
     private createObserver(): Observer<T> {
         const subscriber = new Subscriber<T>(x => {
-            const result: any = this.expression();
+            const result: any = this.value();
             if (isFunction(result)) {
                 return result.bind(this.scope.$data)(x);
             } else if (result != null && isObserver(result)) {
@@ -54,7 +54,7 @@ export class Directive<T> implements IDirective<T> {
         }, exception.next);
         return subscriber;
     }
-    private createObservable(expression: any = this.expression()): Observable<T> {
+    private createObservable(expression: any = this.value()): Observable<T> {
         if (expression != null && (isObservable<T>(expression) || (Array.isArray(expression) && Array.isArray(this.text)))) {
             return expression as any;
         } else if (isFunction(expression)) {
@@ -64,7 +64,7 @@ export class Directive<T> implements IDirective<T> {
         }
     }
     private createBoth(): Observable<T> | Observer<T> {
-        const expression: any = this.expression();
+        const expression: any = this.value();
         const isFunc = isFunction(expression);
         const isObs = expression != null && (isObservable(expression) || isObserver(expression));
         if (!isObs && !isFunc && !Array.isArray(this.text)) {

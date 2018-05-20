@@ -111,7 +111,7 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
     private getProps(element: Element, state: INodeState): T {
         const props = {} as T;
         const attrDirectives = state.getDirectives<any>("attr");
-        attrDirectives.forEach(x => props[x.directive.parameters[0] as string] = x.directive.expression());
+        attrDirectives.forEach(x => props[x.directive.parameters[0] as string] = x.directive.value());
         Object.assign(props, state.constantProps);
         return props;
     }
@@ -119,7 +119,7 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
     private getVm(state: INodeState): T | undefined {
         const vm = state.getDirectives<T>("attr").filter(x => x.directive.parameters[0] === "vm")[0];
         if (vm !== undefined) {
-            return vm.directive.expression();
+            return vm.directive.value();
         }
         return undefined;
     }
