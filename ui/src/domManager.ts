@@ -15,15 +15,14 @@ export class DomManager {
         this.directiveRegistry = directiveRegistry;
     }
 
-    public applyDirectives(model: IViewModel, rootNode: Element): void {
-        if (rootNode === undefined || !isElement(rootNode)) {
+    public applyDirectives(model: IViewModel, node: Element): void {
+        if (node === undefined || !isElement(node)) {
             throw Error("first parameter should be your model, second parameter should be a DOM node!");
         }
-        // create or update node state for root node
+        // create scope for root node
         const scope = new Scope(model);
 
-        // calculate resulting scope and apply directives
-        this.applyDirectivesRecursive(rootNode, scope);
+        this.applyDirectivesRecursive(node, scope);
     }
 
     public applyDirectivesToDescendants(node: Node, scope: IScope): void {
@@ -34,11 +33,11 @@ export class DomManager {
         }
     }
 
-    public cleanNode(rootNode: Node): void {
-        if (!isElement(rootNode) && !isTextNode(rootNode)) {
+    public cleanNode(node: Node): void {
+        if (!isElement(node) && !isTextNode(node)) {
             return;
         }
-        this.cleanNodeRecursive(rootNode);
+        this.cleanNodeRecursive(node);
     }
 
     public cleanDescendants(node: Node): void {
@@ -87,7 +86,7 @@ export class DomManager {
         // clear parent after childs
         this.clear(node);
     }
-    private clear(node: Node) {
+    private clear(node: Node): void {
         const state = this.nodeStateManager.get(node);
 
         if (state != null) {

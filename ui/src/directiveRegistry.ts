@@ -10,9 +10,7 @@ export class DirectiveRegistry {
     public static readonly ATTR = ":";
     public static readonly ON = "@";
     private readonly handlers: Map<string, IDirectiveHandler<any>>;
-    private readonly components: ComponentRegistry;
-    constructor(components: ComponentRegistry) {
-        this.components = components;
+    constructor() {
         this.handlers = new Map<string, IDirectiveHandler<any>>();
     }
     public register(handler: IDirectiveHandler<any>) {
@@ -28,7 +26,7 @@ export class DirectiveRegistry {
             return new NodeState([{ directive: this.handleBarsToDirective(node, scope), handler: this.handlers.get("text") as any }], {}, scope);
         }
         const tag = node["tagName"];
-        const isCustomElement = this.components.registered(tag);
+        const isCustomElement = tag.indexOf("-") !== -1;
         if (!isCustomElement && !node.hasAttributes()) {
             return null;
         }

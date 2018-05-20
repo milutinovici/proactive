@@ -24,9 +24,10 @@ export class ProactiveUI {
     public readonly engine: HtmlEngine;
 
     constructor(config: IConfiguration = {}) {
+        this.directives = new DirectiveRegistry();
         this.engine = new HtmlEngine(config.document || document);
         this.components = new ComponentRegistry(this.engine);
-        this.directives = new DirectiveRegistry(this.components);
+
         this.domManager = new DomManager(this.directives);
         this.registerDirectives(this.domManager, this.engine, this.components);
     }

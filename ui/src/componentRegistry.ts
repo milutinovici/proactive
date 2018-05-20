@@ -21,10 +21,6 @@ export class ComponentRegistry {
     }
 
     public isRegistered(name: string): boolean {
-        return this.components.has(name.toUpperCase());
-    }
-
-    public registered(name: string): boolean {
         return this.components.has(name);
     }
 
@@ -102,5 +98,3 @@ export class ComponentRegistry {
     }
 
 }
-
-declare function require(modules: string[], successCB: (s: any) => any, errCB: (err: Error) => any): void;
