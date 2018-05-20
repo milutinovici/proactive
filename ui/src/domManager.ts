@@ -92,7 +92,10 @@ export class DomManager {
 
         if (state != null) {
             if (state.directives != null) {
-                state.directives.forEach(x => x.directive.cleanup.unsubscribe());
+                state.directives.forEach(x => {
+                    x.directive.cleanup.unsubscribe();
+                    x.directive["activated"] = - 1;
+                });
             }
             // delete state itself
             this.nodeStateManager.delete(node);
