@@ -3,9 +3,9 @@ import { Observable, Subscription, Observer } from "rxjs";
 export interface IDirective<T> {
     readonly text: string | string[];
     readonly parameters: string[];
-    readonly value: T;
     readonly cleanup: Subscription;
     evaluate(dataFlow: DataFlow): Observable<T> | Observer<T>;
+    expression(): T;
     clone(scope: IScope): IDirective<T>;
 }
 export interface IPair<T> {

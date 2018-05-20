@@ -2,14 +2,12 @@ import { exception } from "./exceptionHandlers";
 import { Observable, Observer, Subscriber, Subscription, of, isObservable } from "rxjs";
 import { IScope, IDirective, DataFlow } from "./interfaces";
 import { isObserver, isFunction } from "./utils";
+import { Evaluator } from "./evaluator";
 
 export class Directive<T> implements IDirective<T> {
-    private static expressionCache = new Map<string, Function>();
-    private static writeCache = new Map<string, Function>();
     public readonly scope: IScope;
     public readonly name: string;
     public readonly text: string | string[];
-    public readonly value: T;
     public readonly parameters: string[];
     public readonly cleanup: Subscription;
     private activated: number = 0;
@@ -19,7 +17,6 @@ export class Directive<T> implements IDirective<T> {
         this.scope = scope;
         this.text = text;
         this.parameters = parameters;
-        this.value = this.expression();
         this.cleanup = new Subscription();
     }
 
@@ -36,30 +33,15 @@ export class Directive<T> implements IDirective<T> {
             return this.createBoth();
         }
     }
-
-    private expression(): T {
+    // this can possibly have side-effects
+    public expression(): T {
         if (Array.isArray(this.text)) {
-            return this.text.map(txt => this.createObservable(this.singleExpression(txt))) as any;
+            return this.text.map(txt => this.createObservable(Evaluator.read(this.scope, txt))) as any;
         } else {
-            return this.singleExpression(this.text);
+            return Evaluator.read(this.scope, this.text);
         }
     };
-    private singleExpression(text: string): T {
-        try {
-            const fn = Directive.expressionCache.get(text);
-            if (fn !== undefined) {
-                return fn(this.scope);
-            } else {
-                const readBody = text ? `with($scope){with($data||{}){return ${text};}}` : "return null;";
-                let read = new Function("$scope", readBody) as (scope: IScope) => T;
-                Directive.expressionCache.set(text, read);
-                return read(this.scope);
-            }
-        } catch (e) {
-            exception.next(new Error(`directive ${this.name}="${text}" failed. ${e.message}`));
-            return null as any;
-        }
-    }
+
     private createObserver(): Observer<T> {
         const subscriber = new Subscriber<T>(x => {
             const result: any = this.expression();
@@ -87,7 +69,7 @@ export class Directive<T> implements IDirective<T> {
         const isObs = expression != null && (isObservable(expression) || isObserver(expression));
         if (!isObs && !isFunc && !Array.isArray(this.text)) {
             const obs: any = of(expression);
-            obs.next = this.write(this.text);
+            obs.next = Evaluator.write(this.scope, this.text);
             // obs.error = exception.error;
             obs.complete = () => {};
             obs[Symbol.for("rxSubscriber")] = () => obs;
@@ -97,37 +79,5 @@ export class Directive<T> implements IDirective<T> {
             return new Subscriber<T>(fn, exception.error);
         }
         return expression;
-    }
-    private write(text: string): (value: T) => void {
-        try {
-            const fn = Directive.writeCache.get(text);
-            if (fn !== undefined) {
-                return fn(this.scope);
-            } else if (this.canWrite(text)) {
-                const writeBody = `with($scope){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
-                const write = new Function("$scope", writeBody);
-                Directive.writeCache.set(text, write);
-                return write(this.scope) as (value: T) => void;
-            } else {
-            return (value: T) => {};
-          }
-        } catch (e) {
-            exception.next(new Error(`directive ${this.name}="${this.text}" failed. ${e.message}`));
-            return (value: T) => {};
-        }
-    }
-
-    private canWrite(expression: string): boolean {
-        const javaScriptReservedWords = ["true", "false", "null", "undefined"];
-
-        // Matches something that can be assigned to--either an isolated identifier or something ending with a property accessor
-        // This is designed to be simple and avoid false negatives, but could produce false positives (e.g., a+b.c).
-        // This also will not properly handle nested brackets (e.g., obj1[obj2['prop']]; see #911).
-        const javaScriptAssignmentTarget = /^(?:[$_a-z][$\w]*|(.+)(\.\s*[$_a-z][$\w]*|\[.+\]))$/i;
-        if (javaScriptReservedWords.indexOf(expression) >= 0) {
-            return false;
-        }
-        const match = expression.match(javaScriptAssignmentTarget);
-        return match !== null;
     }
 }
