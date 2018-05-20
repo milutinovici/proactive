@@ -2,7 +2,6 @@ import { IDirectiveHandler, IScope } from "./interfaces";
 import { NodeState } from "./nodeState";
 import { Directive } from "./directive";
 import { isElement, tryParse } from "./utils";
-import { ComponentRegistry } from "./componentRegistry";
 import { exception } from "./exceptionHandlers";
 
 export class DirectiveRegistry {

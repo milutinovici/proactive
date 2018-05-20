@@ -9,6 +9,7 @@ export class Directive<T> implements IDirective<T> {
     public readonly scope: IScope;
     public readonly name: string;
     public readonly text: string | string[];
+    public readonly value: T;
     public readonly parameters: string[];
     public readonly cleanup: Subscription;
     private activated: number = 0;
@@ -18,12 +19,14 @@ export class Directive<T> implements IDirective<T> {
         this.scope = scope;
         this.text = text;
         this.parameters = parameters;
+        this.value = this.expression();
         this.cleanup = new Subscription();
     }
 
     public clone(scope: IScope): Directive<T> {
         return new Directive<T>(scope, this.name, this.text, this.parameters);
     }
+
     public evaluate(dataFlow: DataFlow): Observable<T> | Observer<T> {
         if (dataFlow === DataFlow.Out) {
             return this.createObservable();
@@ -34,27 +37,27 @@ export class Directive<T> implements IDirective<T> {
         }
     }
 
-    public expression(): T | null {
+    private expression(): T {
         if (Array.isArray(this.text)) {
             return this.text.map(txt => this.createObservable(this.singleExpression(txt))) as any;
         } else {
             return this.singleExpression(this.text);
         }
     };
-    private singleExpression(text: string): T | null {
+    private singleExpression(text: string): T {
         try {
             const fn = Directive.expressionCache.get(text);
             if (fn !== undefined) {
                 return fn(this.scope);
             } else {
                 const readBody = text ? `with($scope){with($data||{}){return ${text};}}` : "return null;";
-                let read = new Function("$scope", readBody) as (scope: IScope) => T | null;
+                let read = new Function("$scope", readBody) as (scope: IScope) => T;
                 Directive.expressionCache.set(text, read);
                 return read(this.scope);
             }
         } catch (e) {
             exception.next(new Error(`directive ${this.name}="${text}" failed. ${e.message}`));
-            return null;
+            return null as any;
         }
     }
     private createObserver(): Observer<T> {
