@@ -33,13 +33,13 @@ export class ProactiveUI {
     }
 
     /**
-    * Applies directives to the specified node and all of its children using the specified data scope.
-    * @param {Object} model The model to bind to
-    * @param {Node} rootNode The node to be bound
+    * Renders supplied component, within the specified container
+    * @param {IComponentDescriptor} component The component to be rendered
+    * @param {Element} container The container of the component
     */
-    public render(rootComponent: IComponentDescriptor, container: Element = document.body) {
+    public render(component: IComponentDescriptor, container: Element = document.body) {
         container.setAttribute(`${DirectiveRegistry.PREFIX}-component`, "'root-component'");
-        this.components.register("root-component", rootComponent);
+        this.components.register("root-component", component);
         this.domManager.applyDirectives({}, container);
         if (typeof window !== "undefined") {
             const sub = fromEvent<BeforeUnloadEvent>(window, "beforeunload").subscribe(() => {
@@ -50,16 +50,23 @@ export class ProactiveUI {
     }
     /**
     * Removes and cleans up any proactive related state from the specified node and its descendants.
-    * @param {Node} rootNode The node to be cleaned
+    * @param {Node} node The node to be cleaned
     */
     public clean(node: Element) {
         this.domManager.cleanNode(node);
     }
-
+    /**
+    * Gets the scope of the supplied node. 
+    * Scope contains viewmodel, and also new variables introduced in templates.
+    * @param {Node} node The node
+    */
     public getScope(node: Element): IScope | undefined {
         return this.domManager.getScope(node);
     }
-
+    /**
+    * Gets the viewmodel of the component which defined supplied node. 
+    * @param {Node} node The node
+    */
     public getViewmodel(node: Element): IViewModel | undefined {
         const scope = this.domManager.getScope(node);
         if (scope !== undefined) {
