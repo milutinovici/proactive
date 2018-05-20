@@ -1,21 +1,22 @@
 import { Observable, Subscription, Observer } from "rxjs";
 
 export interface IDirective<T> {
-    readonly handler: IDirectiveHandler;
     readonly text: string | string[];
     readonly parameters: string[];
     readonly cleanup: Subscription;
     readonly expression: (scope: IScope) => T | null;
     evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T>;
-    activate(node: Node, state: INodeState): void;
-    deactivate(): void;
-    clone(): IDirective<T>;
+    clone(scope: IScope): IDirective<T>;
+}
+export interface IPair<T> {
+    directive: IDirective<T>;
+    handler: IDirectiveHandler<T>;
 }
 // Data flow of the directive, can be In, Out (unidirectional), or both (bidirectional)
 export enum DataFlow { Out = 1, In = 2 }
 // Defines whether the directive accepts parameters
 export enum Parametricity { Required, Forbidden, Optional }
-export interface IDirectiveHandler {
+export interface IDirectiveHandler<T> {
         readonly name: string;
         /**
         * When there are multiple directives defined on a single DOM element,
@@ -40,7 +41,7 @@ export interface IDirectiveHandler {
         * @param {IDirective} directive The directive to be applied
         * @param {INodeState} state State of the target element
         **/
-        applyDirective(node: Node, directive: IDirective<any>, state: INodeState): void;
+        applyDirective(node: Node, directive: IDirective<T>, state: INodeState): void;
 }
 // Scope of the view
 export interface IScope {
@@ -49,12 +50,12 @@ export interface IScope {
 }
 // Node metadata
 export interface INodeState {
-    readonly directives: IDirective<any>[];
+    readonly directives: IPair<any>[];
     readonly constantProps: object;
     readonly controlsDescendants: number;
     readonly scope: IScope;
     disabled: boolean;
-    getDirectives<T>(name: string): IDirective<T>[];
+    getDirectives<T>(name: string): IPair<T>[];
 }
 // Component viewmodel
 export interface IViewModel {

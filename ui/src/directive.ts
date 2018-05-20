@@ -1,36 +1,28 @@
 import { exception } from "./exceptionHandlers";
 import { Observable, Observer, Subscriber, Subscription, of, isObservable } from "rxjs";
-import { IScope, IDirective, IDirectiveHandler, DataFlow, INodeState } from "./interfaces";
+import { IScope, IDirective, DataFlow } from "./interfaces";
 import { isObserver, isFunction } from "./utils";
 
 export class Directive<T> implements IDirective<T> {
     private static expressionCache = new Map<string, Function>();
     private static writeCache = new Map<string, Function>();
-    public readonly handler: IDirectiveHandler;
+    public readonly scope: IScope;
+    public readonly name: string;
     public readonly text: string | string[];
     public readonly parameters: string[];
     public readonly cleanup: Subscription;
-    private activated: number;
+    private activated: number = 0;
 
-    constructor(handler: IDirectiveHandler, text: string | string[], parameters: string[]) {
-        this.handler = handler;
+    constructor(scope: IScope, name: string, text: string | string[], parameters: string[]) {
+        this.name = name;
+        this.scope = scope;
         this.text = text;
         this.parameters = parameters;
         this.cleanup = new Subscription();
-        this.activated = 0;
     }
-    public activate(node: Node, state: INodeState) {
-        if (this.activated === 0) {
-            this.handler.applyDirective(node, this, state);
-            this.activated += 1;
-        }
-    }
-    public deactivate() {
-        this.cleanup.unsubscribe();
-        this.activated -= 1;
-    }
-    public clone(): Directive<T> {
-        return new Directive<T>(this.handler, this.text, this.parameters);
+
+    public clone(scope: IScope): Directive<T> {
+        return new Directive<T>(scope, this.name, this.text, this.parameters);
     }
     public evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T> {
         if (dataFlow === DataFlow.Out) {
@@ -61,7 +53,7 @@ export class Directive<T> implements IDirective<T> {
                 return read(scope);
             }
         } catch (e) {
-            exception.next(new Error(`directive ${this.handler.name}="${text}" failed. ${e.message}`));
+            exception.next(new Error(`directive ${this.name}="${text}" failed. ${e.message}`));
             return null;
         }
     }
@@ -117,7 +109,7 @@ export class Directive<T> implements IDirective<T> {
             return (value: T) => {};
           }
         } catch (e) {
-            exception.next(new Error(`directive ${this.handler.name}="${this.text}" failed. ${e.message}`));
+            exception.next(new Error(`directive ${this.name}="${this.text}" failed. ${e.message}`));
             return (value: T) => {};
         }
     }

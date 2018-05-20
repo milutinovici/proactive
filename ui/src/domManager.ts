@@ -92,7 +92,7 @@ export class DomManager {
 
         if (state != null) {
             if (state.directives != null) {
-                state.directives.forEach(x => x.deactivate());
+                state.directives.forEach(x => x.directive.cleanup.unsubscribe());
             }
             // delete state itself
             this.nodeStateManager.delete(node);
@@ -108,24 +108,24 @@ export class DomManager {
         }
 
         // apply all directives
-        for (const directive of state.directives) {
+        for (const pair of state.directives) {
             // if directive disables other directive when false 
             if (state.disabled === true) {
                 return true;
             }
             // apply for before anything else, then imediately return
-            if (directive.handler.name === "for") {
-                directive.activate(node, state);
+            if (pair.handler.name === "for") {
+                pair.handler.applyDirective(node, pair.directive, state);
                 return true;
             }
-            directive.activate(node, state);
+            pair.handler.applyDirective(node, pair.directive, state);
         }
 
         return state.controlsDescendants > 0;
     }
 
     private createState(node: Node, scope: IScope): INodeState | null {
-        const state = this.directiveRegistry.createNodeState(node);
+        const state = this.directiveRegistry.createNodeState(node, scope);
         if (state === null) {
             return null;
         } else if (state.controlsDescendants > 1) {

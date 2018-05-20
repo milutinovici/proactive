@@ -3,7 +3,7 @@ import { BaseDirectiveHandler } from "./directiveHandler";
 import { DomManager } from "../domManager";
 import { NodeState } from "../nodeState";
 import { HtmlEngine } from "../templateEngines";
-import { IDirective, INodeState, Parametricity } from "../interfaces";
+import { IDirective, INodeState, Parametricity, IPair } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
 
 export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
@@ -73,9 +73,9 @@ export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
             parent.insertBefore(merger.fragment, before);
 
             for (let i = current; i < merger.stopped; i++) {
-                let childState = indexName ?
-                                 new NodeState(otherDirectives.map(x => x.clone()), state.constantProps, state.scope.extend(itemName, additions[i].value, indexName, additions[i].index)) :
-                                 new NodeState(otherDirectives.map(x => x.clone()), state.constantProps, state.scope.extend(itemName, additions[i].value));
+                const childScope = indexName ? state.scope.extend(itemName, additions[i].value, indexName, additions[i].index)
+                                             : state.scope.extend(itemName, additions[i].value);
+                let childState = new NodeState(otherDirectives.map(x => <IPair<T>> { handler: x.handler, directive: x.directive.clone(childScope) }), state.constantProps, childScope);
 
                 this.domManager.setState(parent.childNodes[i + start + additions[current].index], childState);
                 this.domManager.applyDirectivesRecursive(parent.childNodes[i + start + additions[current].index], childState.scope);

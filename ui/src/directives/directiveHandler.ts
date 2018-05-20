@@ -6,7 +6,7 @@ import { isObserver } from "../utils";
  * Base class for directive handlers
  * @class
  */
-export abstract class BaseDirectiveHandler<T> implements IDirectiveHandler {
+export abstract class BaseDirectiveHandler<T> implements IDirectiveHandler<T> {
     public readonly name: string;
     public priority = 0;
     public dataFlow = DataFlow.Out;
@@ -19,6 +19,9 @@ export abstract class BaseDirectiveHandler<T> implements IDirectiveHandler {
     }
 
     public applyDirective(node: Element, directive: IDirective<T>, state: INodeState) {
+        if (directive["activated"] > 0) {
+            return;
+        }
         if (this.unique && state.getDirectives(this.name).length > 1) {
             exception.next(new Error(`more than 1 ${this.name} directive on element ${node}`));
             return;
@@ -31,6 +34,7 @@ export abstract class BaseDirectiveHandler<T> implements IDirectiveHandler {
             return;
         }
         this.applyInternal(node, directive, state);
+        directive["activated"] += 1;
     }
     protected abstract applyInternal(node: Element, directive: IDirective<T>, state: INodeState): void;
 }

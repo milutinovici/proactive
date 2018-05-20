@@ -111,15 +111,15 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
     private getProps(element: Element, state: INodeState): T {
         const props = {} as T;
         const attrDirectives = state.getDirectives<any>("attr");
-        attrDirectives.forEach(x => props[x.parameters[0] as string] = x.expression(state.scope));
+        attrDirectives.forEach(x => props[x.directive.parameters[0] as string] = x.directive.expression(state.scope));
         Object.assign(props, state.constantProps);
         return props;
     }
     // for recursive components
     private getVm(state: INodeState): T | undefined {
-        const vm = state.getDirectives<T>("attr").filter(x => x.parameters[0] === "vm")[0];
+        const vm = state.getDirectives<T>("attr").filter(x => x.directive.parameters[0] === "vm")[0];
         if (vm !== undefined) {
-            return vm.expression(state.scope) as T;
+            return vm.directive.expression(state.scope) as T;
         }
         return undefined;
     }

@@ -59,10 +59,10 @@ export class IfDirective extends BaseDirectiveHandler<boolean> {
     }
     private disableOtherDirectives(state: INodeState) {
         const others = state.directives.filter(x => x.handler.name !== "if");
-        others.forEach(x => x.cleanup.unsubscribe());
+        others.forEach(x => x.directive.cleanup.unsubscribe());
     }
     private enableOtherDirectives(element: Element, state: INodeState) {
         const others = state.directives.filter(x => x.handler.name !== "if");
-        others.forEach(x => x.activate(element, state));
+        others.forEach(x => x.handler.applyDirective(element, x.directive, state));
     }
 }

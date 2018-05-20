@@ -1,21 +1,21 @@
 import { BehaviorSubject } from "rxjs";
-import { IScope, INodeState, IViewModel, IDirective } from "./interfaces";
+import { IScope, INodeState, IViewModel, IPair } from "./interfaces";
 
 export class NodeState implements INodeState {
     public scope: IScope;        // scope model
-    public readonly directives: IDirective<any>[];
+    public readonly directives: IPair<any>[];
     public readonly constantProps: object;
     public disabled: boolean;
     public controlsDescendants: number;
 
-    constructor(directives: IDirective<any>[], constantProps: object, scope?: IScope) {
+    constructor(directives: IPair<any>[], constantProps: object, scope: IScope) {
         this.scope = scope as IScope;
         this.directives = directives;
         this.constantProps = constantProps;
         this.disabled = false;
         this.controlsDescendants = 0;
     }
-    public getDirectives<T>(name: string): IDirective<T>[] {
+    public getDirectives<T>(name: string): IPair<T>[] {
         return this.directives.filter(x => x.handler.name === name);
     }
 }
