@@ -45,7 +45,7 @@ export abstract class BaseDirectiveHandler<T> implements IDirectiveHandler<T> {
 */
 export abstract class DirectiveHandler<T> extends BaseDirectiveHandler<T> {
     public applyInternal(node: Element, directive: IDirective<T>, state: INodeState) {
-        const obs = directive.evaluate(state.scope, this.dataFlow);
+        const obs = directive.evaluate(this.dataFlow);
         if (this.dataFlow === DataFlow.In && !isObserver(obs)) {
             exception.next(new Error(`directive "${this.name}" with expression "${directive.text}" on element ${node} must be supplied with an observer or a function`));
             return;

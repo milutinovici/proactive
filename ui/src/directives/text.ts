@@ -10,7 +10,7 @@ export class TextDirective extends BaseDirectiveHandler<string> {
     }
 
     protected applyInternal(node: Element, directive: IDirective<string>, state: INodeState) {
-        const observable = directive.evaluate(state.scope, this.dataFlow) as Observable<string> | Observable<string>[];
+        const observable = directive.evaluate(this.dataFlow) as Observable<string> | Observable<string>[];
         let subscription;
         if (Array.isArray(observable)) {
             subscription = combineLatest(observable).subscribe(values => {

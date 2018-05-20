@@ -93,7 +93,7 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
         directive.cleanup.add(doCleanup);
     }
     private getComponent(element: Element, directive: IDirective<string|object>, state: INodeState): Observable<IComponent> {
-        const config = directive.evaluate(state.scope, this.dataFlow) as Observable<string | object>;
+        const config = directive.evaluate(this.dataFlow) as Observable<string | object>;
         const props = this.getProps(element, state);
         return config.pipe(mergeMap(cfg => {
             const isObj = typeof (cfg) !== "string";
@@ -111,7 +111,7 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
     private getProps(element: Element, state: INodeState): T {
         const props = {} as T;
         const attrDirectives = state.getDirectives<any>("attr");
-        attrDirectives.forEach(x => props[x.directive.parameters[0] as string] = x.directive.expression(state.scope));
+        attrDirectives.forEach(x => props[x.directive.parameters[0] as string] = x.directive.expression());
         Object.assign(props, state.constantProps);
         return props;
     }
@@ -119,7 +119,7 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
     private getVm(state: INodeState): T | undefined {
         const vm = state.getDirectives<T>("attr").filter(x => x.directive.parameters[0] === "vm")[0];
         if (vm !== undefined) {
-            return vm.directive.expression(state.scope) as T;
+            return vm.directive.expression() as T;
         }
         return undefined;
     }

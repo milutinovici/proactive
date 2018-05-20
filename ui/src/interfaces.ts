@@ -4,8 +4,8 @@ export interface IDirective<T> {
     readonly text: string | string[];
     readonly parameters: string[];
     readonly cleanup: Subscription;
-    readonly expression: (scope: IScope) => T | null;
-    evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T>;
+    readonly expression: () => T | null;
+    evaluate(dataFlow: DataFlow): Observable<T> | Observer<T>;
     clone(scope: IScope): IDirective<T>;
 }
 export interface IPair<T> {

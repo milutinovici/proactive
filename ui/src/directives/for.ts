@@ -19,7 +19,7 @@ export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
     }
 
     public applyInternal(element: Element, directive: IDirective<T[]>, state: INodeState): void {
-        const observable = directive.evaluate(state.scope, this.dataFlow) as Observable<T[]>;
+        const observable = directive.evaluate(this.dataFlow) as Observable<T[]>;
         const itemName = directive.parameters[0];
         const indexName = directive.parameters[1];
         const parent = element.parentElement as HTMLElement;

@@ -20,7 +20,7 @@ export class IfDirective extends BaseDirectiveHandler<boolean> {
     }
 
     public applyInternal(element: Element, directive: IDirective<boolean>, state: INodeState): void {
-        const observable = directive.evaluate(state.scope, this.dataFlow) as Observable<boolean>;
+        const observable = directive.evaluate(this.dataFlow) as Observable<boolean>;
         const parent = element.parentElement as HTMLElement;
         const placeholder: Comment = this.engine.createComment("if");
         parent.insertBefore(placeholder, element);

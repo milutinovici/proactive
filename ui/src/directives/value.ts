@@ -13,7 +13,7 @@ export class ValueDirective extends BaseDirectiveHandler<string|number|boolean|s
     }
 
     public applyInternal(el: HTMLElement, directive: IDirective<string | number | boolean | string[]>, state: INodeState): void {
-        const observable = directive.evaluate(state.scope, this.dataFlow) as Observable<string | number | boolean | string[]>;
+        const observable = directive.evaluate(this.dataFlow) as Observable<string | number | boolean | string[]>;
         const event = directive.parameters[0] || "change";
         if (ValueDirective.isCheckbox(el)) {
             directive.cleanup.add(observable.subscribe(value => ValueDirective.setChecked(el as HTMLInputElement, value as boolean)));

@@ -24,44 +24,44 @@ export class Directive<T> implements IDirective<T> {
     public clone(scope: IScope): Directive<T> {
         return new Directive<T>(scope, this.name, this.text, this.parameters);
     }
-    public evaluate(scope: IScope, dataFlow: DataFlow): Observable<T> | Observer<T> {
+    public evaluate(dataFlow: DataFlow): Observable<T> | Observer<T> {
         if (dataFlow === DataFlow.Out) {
-            return this.createObservable(scope);
+            return this.createObservable();
         } else if (dataFlow === DataFlow.In) {
-            return this.createObserver(scope);
+            return this.createObserver();
         } else { // twoWay
-            return this.createBoth(scope);
+            return this.createBoth();
         }
     }
 
-    public expression(scope: IScope): T | null {
+    public expression(): T | null {
         if (Array.isArray(this.text)) {
-            return this.text.map(txt => this.createObservable(scope, this.singleExpression(scope, txt))) as any;
+            return this.text.map(txt => this.createObservable(this.singleExpression(txt))) as any;
         } else {
-            return this.singleExpression(scope, this.text);
+            return this.singleExpression(this.text);
         }
     };
-    private singleExpression(scope: IScope, text: string): T | null {
+    private singleExpression(text: string): T | null {
         try {
             const fn = Directive.expressionCache.get(text);
             if (fn !== undefined) {
-                return fn(scope);
+                return fn(this.scope);
             } else {
                 const readBody = text ? `with($scope){with($data||{}){return ${text};}}` : "return null;";
                 let read = new Function("$scope", readBody) as (scope: IScope) => T | null;
                 Directive.expressionCache.set(text, read);
-                return read(scope);
+                return read(this.scope);
             }
         } catch (e) {
             exception.next(new Error(`directive ${this.name}="${text}" failed. ${e.message}`));
             return null;
         }
     }
-    private createObserver(scope: IScope): Observer<T> {
+    private createObserver(): Observer<T> {
         const subscriber = new Subscriber<T>(x => {
-            const result: any = this.expression(scope);
+            const result: any = this.expression();
             if (isFunction(result)) {
-                return result.bind(scope.$data)(x);
+                return result.bind(this.scope.$data)(x);
             } else if (result != null && isObserver(result)) {
                 return result.next(x);
             }
@@ -69,42 +69,42 @@ export class Directive<T> implements IDirective<T> {
         }, exception.next);
         return subscriber;
     }
-    private createObservable(scope: IScope, expression: any = this.expression(scope)): Observable<T> {
+    private createObservable(expression: any = this.expression()): Observable<T> {
         if (expression != null && (isObservable<T>(expression) || (Array.isArray(expression) && Array.isArray(this.text)))) {
             return expression as any;
         } else if (isFunction(expression)) {
-            return of(expression.bind(scope.$data)());
+            return of(expression.bind(this.scope.$data)());
         } else {
             return of(expression);
         }
     }
-    private createBoth(scope: IScope): Observable<T> | Observer<T> {
-        const expression: any = this.expression(scope);
+    private createBoth(): Observable<T> | Observer<T> {
+        const expression: any = this.expression();
         const isFunc = isFunction(expression);
         const isObs = expression != null && (isObservable(expression) || isObserver(expression));
         if (!isObs && !isFunc && !Array.isArray(this.text)) {
             const obs: any = of(expression);
-            obs.next = this.write(scope, this.text);
+            obs.next = this.write(this.text);
             // obs.error = exception.error;
             obs.complete = () => {};
             obs[Symbol.for("rxSubscriber")] = () => obs;
             return obs;
         } else if (isFunc && !isObs) {
-            const fn: (t: T) => void = expression.bind(scope.$data);
+            const fn: (t: T) => void = expression.bind(this.scope.$data);
             return new Subscriber<T>(fn, exception.error);
         }
         return expression;
     }
-    private write(scope: IScope, text: string): (value: T) => void {
+    private write(text: string): (value: T) => void {
         try {
             const fn = Directive.writeCache.get(text);
             if (fn !== undefined) {
-                return fn(scope);
+                return fn(this.scope);
             } else if (this.canWrite(text)) {
                 const writeBody = `with($scope){with($data||{}){return function(_z){ ${this.text} = _z;}}}`;
                 const write = new Function("$scope", writeBody);
                 Directive.writeCache.set(text, write);
-                return write(scope) as (value: T) => void;
+                return write(this.scope) as (value: T) => void;
             } else {
             return (value: T) => {};
           }
