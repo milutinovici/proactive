@@ -5,6 +5,7 @@ import { NodeState } from "../nodeState";
 import { HtmlEngine } from "../templateEngines";
 import { IDirective, INodeState, Parametricity, IPair } from "../interfaces";
 import { compareLists, Delta } from "./compareLists";
+import { exception } from "../exceptionHandlers";
 
 export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
     private readonly domManager: DomManager;
@@ -22,7 +23,11 @@ export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
         const observable = directive.evaluate(this.dataFlow) as Observable<T[]>;
         const itemName = directive.parameters[0];
         const indexName = directive.parameters[1];
-        const parent = element.parentElement as HTMLElement;
+        if (element.parentElement === null) {
+            exception.next(new Error(`${directive.name} directive on top level element ${element}`));
+            return;
+        }
+        const parent = element.parentElement;
         const placeholder: Comment = this.engine.createComment(`for ${directive.text}`);
         this.domManager.setState(placeholder, state);
         // backup inner HTML
