@@ -5,7 +5,7 @@ import { BehaviorSubject } from "rxjs";
 it("map array of observables", expect => {
     const input = [new BehaviorSubject(1), new BehaviorSubject(2), new BehaviorSubject(3)];
     const origin = new ObservableArray(input);
-    const computed = whenAny<number>(origin).map(x => x * x);
+    const computed = origin.whenAny(x => x).map(x => x * x);
 
     let output: number[] = [];
     computed.subscribe(x => output = x);
@@ -20,7 +20,7 @@ it("map array of observables", expect => {
 it("filter array of observables", expect => {
     const input = [new BehaviorSubject(1), new BehaviorSubject(2), new BehaviorSubject(3)];
     const origin = new ObservableArray(input);
-    const computed = whenAny<number>(origin).filter(x => x % 2 === 0);
+    const computed = origin.whenAny(x => x).filter(x => x % 2 === 0);
 
     let output: number[] = [];
     computed.subscribe(x => output = x);
@@ -35,7 +35,7 @@ it("filter array of observables", expect => {
 it("map & filter array of observables", expect => {
     const input = [new BehaviorSubject(1), new BehaviorSubject(2), new BehaviorSubject(3)];
     const origin = new ObservableArray(input);
-    const computed = whenAny<number>(origin).filter(x => x % 2 === 0).map(x => x * x);
+    const computed = origin.whenAny(x => x).filter(x => x % 2 === 0).map(x => x * x);
 
     let output: number[] = [];
     computed.subscribe(x => output = x);
@@ -50,7 +50,7 @@ it("map & filter array of observables", expect => {
 it("reduce array of observables", expect => {
     const input = [new BehaviorSubject(1), new BehaviorSubject(2), new BehaviorSubject(3)];
     const origin = new ObservableArray(input);
-    const computed = whenAny<number>(origin).reduce((x, y) => x > y ? x : y, 0);
+    const computed = origin.whenAny(x => x).reduce((x, y) => x > y ? x : y, 0);
 
     let output: number = 0;
     computed.subscribe(x => output = x);
