@@ -1,5 +1,7 @@
 import { ObservableArray } from "../src/extensions";
 import * as it from "tape";
+import { BehaviorSubject } from "rxjs";
+import { map } from "rxjs/operators";
 
 it("should calculate length properly", expect => {
     const input = ["Foo", "Bar", "Baz", "Bamf"];
@@ -123,7 +125,7 @@ it("chaining works", expect => {
     expect.end();
 });
 
-it("should check if every element satisfies selector", expect => {
+it("should check if every element satisfies callback fn", expect => {
     const input = [1, 2, 4, 6];
     const origin = new ObservableArray(input);
     const computed = origin.every(x => x % 2 === 0);
@@ -143,7 +145,7 @@ it("should check if every element satisfies selector", expect => {
     expect.false(output);
     expect.end();
 });
-it("should check if any element satisfies selector", expect => {
+it("should check if any element satisfies callback fn", expect => {
     const input = [2, 3, 5, 7];
     const origin = new ObservableArray(input);
     const computed = origin.some(x => x % 2 === 0);
@@ -242,5 +244,33 @@ it("should filter out duplicate elements using distinct", expect => {
     origin.shift();
     expect.isEquivalent(output, [2, 7, 4]);
 
+    expect.end();
+});
+
+it("should filter higher order observables", expect => {
+    const input = [new BehaviorSubject(3), new BehaviorSubject(4), new BehaviorSubject(5), new BehaviorSubject(6)];
+    const origin = new ObservableArray(input);
+    const computed = origin.filterx(number$ => number$.pipe(map(n => n % 2 === 0)));
+    let output: BehaviorSubject<number>[] = [];
+    computed.subscribe(x => output = x);
+
+    expect.equal(output.length, 2);
+    expect.isEquivalent(output[0], input[1]);
+
+    input[0].next(2);
+
+    expect.equal(output.length, 3);
+    expect.isEquivalent(output[0], input[0]);
+
+    const o$ = new BehaviorSubject(8);
+    origin.unshift(o$);
+
+    expect.equal(output.length, 4);
+    expect.isEquivalent(output[0], o$);
+
+    o$.next(9);
+
+    expect.equal(output.length, 3);
+    expect.isEquivalent(output[0], input[0]);
     expect.end();
 });

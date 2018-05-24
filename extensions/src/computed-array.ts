@@ -62,4 +62,12 @@ export class ComputedArray<T> extends Observable<T[]> {
         const obs = observables.pipe(mergeMap(array => combineLatest(array)));
         return new ComputedArray(obs);
     }
+
+    public filterx(fn: (x: T, ix?: number) => Observable<boolean>): ComputedArray<T> {
+        const obs = this.pipe(mergeMap(array =>
+            combineLatest(array.map(fn)).pipe(map((results) =>
+                array.filter((element, i) => results[i])))
+        ));
+        return new ComputedArray(obs);
+    }
 }
