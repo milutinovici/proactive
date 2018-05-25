@@ -1,6 +1,6 @@
 {
   "name": "@proactive/ui",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Proactive UI",
   "repository": {
     "url": "https://github.com/milutinovici/proactive"
@@ -15,7 +15,7 @@
     "rxjs": "^6.2.0"
   },
   "devDependencies": {
-    "@proactive/extensions": "^0.4.0",
+    "@proactive/extensions": "^0.5.0",
     "typescript": "^2.8.3",
     "ts-node": "^6.0.5",
     "tape": "^4.9.0",
