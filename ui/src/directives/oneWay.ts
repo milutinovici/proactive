@@ -1,6 +1,6 @@
 import { Observable, Subscription } from "rxjs";
 import { DirectiveHandler } from "./directiveHandler";
-import { Parametricity } from "../interfaces";
+import { Parametricity, IKeyValue } from "../interfaces";
 
 export class CssDirective extends DirectiveHandler<boolean> {
     constructor() {
@@ -56,8 +56,8 @@ export class StyleDirective extends DirectiveHandler<string | number | boolean> 
                 // Empty string removes the value, whereas null/undefined have no effect
                 value = "";
             }
-
-            element.style[styleName] = value;
+            const style = element.style as IKeyValue;
+            style[styleName] = value;
         });
     }
 }

@@ -14,9 +14,9 @@ export interface IPair<T> {
     handler: IDirectiveHandler<T>;
 }
 // Data flow of the directive, can be In, Out (unidirectional), or both (bidirectional)
-export enum DataFlow { Out = 1, In = 2 }
+export const enum DataFlow { Out = 1, In = 2 }
 // Defines whether the directive accepts parameters
-export enum Parametricity { Required, Forbidden, Optional }
+export const enum Parametricity { Required, Forbidden, Optional }
 export interface IDirectiveHandler<T> {
         /**
         * When there are multiple directives defined on a single DOM element,
@@ -43,15 +43,18 @@ export interface IDirectiveHandler<T> {
         **/
         applyDirective(node: Node, directive: IDirective<T>, state: INodeState): void;
 }
+export interface IKeyValue {
+    [key: string]: any;
+}
 // Scope of the view
-export interface IScope {
+export interface IScope extends IKeyValue {
     readonly $data: IViewModel;
     extend(name: string, model: IViewModel, indexName?: string, index?: number): IScope;
 }
 // Node metadata
 export interface INodeState {
     readonly directives: IPair<any>[];
-    readonly constantProps: object;
+    readonly constantProps: IKeyValue;
     readonly controlsDescendants: number;
     readonly scope: IScope;
     disabled: boolean;

@@ -212,7 +212,7 @@ it("event: event delegation works", expect => {
 
     const viewmodel = {
         selected: new BehaviorSubject(0),
-        select: function(e: Event) { this.selected.next(parseInt(e.target ? e.target["id"] : "")); },
+        select: function(e: Event) { this.selected.next(parseInt(e.target ? (<Element> (e.target)).id : "")); },
     };
 
     expect.doesNotThrow(() => ui.domManager.applyDirectives(viewmodel, el));

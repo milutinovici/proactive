@@ -12,7 +12,7 @@ export class ValueDirective extends BaseDirectiveHandler<string|number|boolean|s
         this.dataFlow = DataFlow.Out | DataFlow.In;
     }
 
-    public applyInternal(el: HTMLElement, directive: IDirective<string | number | boolean | string[]>, state: INodeState): void {
+    public applyInternal(el: HTMLInputElement, directive: IDirective<string | number | boolean | string[]>, state: INodeState): void {
         const observable = directive.evaluate(this.dataFlow) as Observable<string | number | boolean | string[]>;
         const event = directive.parameters[0] || "change";
         if (ValueDirective.isCheckbox(el)) {
@@ -52,15 +52,15 @@ export class ValueDirective extends BaseDirectiveHandler<string|number|boolean|s
         return (isCheckboxOrRadio ? merge<Event>(fromEvent(el, "click"), fromEvent(el, event)) :
         fromEvent<Event>(el, event)).pipe(filter(evt => evt.target === el));
     }
-    private static isCheckbox(element: HTMLElement): element is HTMLInputElement {
+    private static isCheckbox(element: HTMLInputElement): element is HTMLInputElement {
         const tag = element.tagName;
-        return tag === "INPUT" && element["type"] === "checkbox";
+        return tag === "INPUT" && element.type === "checkbox";
     }
-    private static isRadio(element: HTMLElement): element is HTMLInputElement {
+    private static isRadio(element: HTMLInputElement): element is HTMLInputElement {
         const tag = element.tagName;
-        return tag === "INPUT" && element["type"] === "radio";
+        return tag === "INPUT" && element.type === "radio";
     }
-    private static isMultiSelect(element: HTMLElement): element is HTMLSelectElement {
+    private static isMultiSelect(element: HTMLSelectElement): element is HTMLSelectElement {
         const tag = element.tagName;
         return tag === "SELECT" && element["multiple"];
     }

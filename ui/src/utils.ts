@@ -5,7 +5,8 @@ import { Observable, Observer } from "rxjs";
 * @param {any} target
 */
 export function isObserver<T>(target: T | Observer<T> | Observable<T>): target is Observer<T> {
-    return target[Symbol.for("rxSubscriber")] !== undefined;
+    const trg = target as any;
+    return trg[Symbol.for("rxSubscriber")] !== undefined;
 }
 /**
 * Determines if Node is an instance of a Element
@@ -22,7 +23,7 @@ export function isTextNode(target: Node): target is Text {
     return target.nodeType === 3;
 }
 export function isTemplate(node: Node): node is HTMLTemplateElement {
-    return node["content"] !== undefined;
+    return "content" in node;
 }
 
 /**

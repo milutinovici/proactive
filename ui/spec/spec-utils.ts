@@ -9,7 +9,7 @@ export function fragment(template: string): DocumentFragment {
     return JSDOM.fragment(template);
 }
 
-let knownEvents = {};
+let knownEvents = {} as any;
 let knownEventTypesByEventName: Map<string> = {};
 const keyEventTypeName = "KeyboardEvent";
 knownEvents[keyEventTypeName] = ["keyup", "keydown", "keypress"];

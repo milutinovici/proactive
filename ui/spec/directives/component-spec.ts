@@ -290,12 +290,14 @@ it("component: Dynamic component", expect => {
     const vm = { name: new BehaviorSubject("test-one") };
     expect.doesNotThrow(() => ui.domManager.applyDirectives(vm, el));
 
-    expect.equal(el.children[0].tagName, "P", "1st template inserted");
-    expect.equal(el.children[0].textContent, "first", "1st template correctly bound");
+    const p = el.children[0] as HTMLParagraphElement;
+    expect.equal(p.tagName, "P", "1st template inserted");
+    expect.equal(p.textContent, "first", "1st template correctly bound");
     vm.name.next("test-two");
 
-    expect.equal(el.children[0].tagName, "INPUT", "2nd template inserted");
-    expect.equal(el.children[0]["value"], "second", "2nd template correctly bound");
+    const input = el.children[0] as HTMLInputElement;
+    expect.equal(input.tagName, "INPUT", "2nd template inserted");
+    expect.equal(input.value, "second", "2nd template correctly bound");
 
     expect.end();
 });

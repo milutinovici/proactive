@@ -2,14 +2,14 @@ import { Observable, Subscription, isObservable } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
 import { DomManager } from "../domManager";
 import { isElement, removeEmptyChildren } from "../utils";
-import { INodeState, IComponent, IScope, IDirective } from "../interfaces";
+import { INodeState, IComponent, IScope, IDirective, IKeyValue } from "../interfaces";
 import { Scope } from "../nodeState";
 import { BaseDirectiveHandler } from "./directiveHandler";
 import { ComponentRegistry } from "../componentRegistry";
 import { HtmlEngine } from "../templateEngines";
 import { exception } from "../exceptionHandlers";
 
-export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
+export class ComponentDirective<T> extends BaseDirectiveHandler<string|IKeyValue> {
     private readonly domManager: DomManager;
     protected readonly registry: ComponentRegistry;
     private readonly engine: HtmlEngine;
@@ -23,7 +23,7 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
         this.engine = engine;
     }
 
-    public applyInternal(element: HTMLElement, directive: IDirective<string | object>, state: INodeState, shadowDom = false): void {
+    public applyInternal(element: HTMLElement, directive: IDirective<string | IKeyValue>, state: INodeState, shadowDom = false): void {
         // remove children for transclusion
         const children: Node[] = [];
         removeEmptyChildren(element);
@@ -92,15 +92,17 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
         }));
         directive.cleanup.add(doCleanup);
     }
-    private getComponent(element: Element, directive: IDirective<string|object>, state: INodeState): Observable<IComponent> {
-        const config = directive.evaluate(this.dataFlow) as Observable<string | object>;
+    private getComponent(element: Element, directive: IDirective<string|IKeyValue>, state: INodeState): Observable<IComponent> {
+        const config = directive.evaluate(this.dataFlow) as Observable<string | IKeyValue>;
         const props = this.getProps(element, state);
         return config.pipe(mergeMap(cfg => {
-            const isObj = typeof (cfg) !== "string";
-            const name = isObj  ? cfg["name"] : cfg;
-            if (isObj) {
+            let name: string;
+            if (typeof (cfg) !== "string") {
+                name = cfg.name;
                 // object is useful for routes
                 Object.assign(props, cfg);
+            } else {
+                name = cfg;
             }
             return this.registry.load(name).pipe(map(desc => {
                 const vm = this.registry.initialize(name, desc, props, this.getVm(state));
@@ -109,7 +111,7 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|object> {
         }));
     }
     private getProps(element: Element, state: INodeState): T {
-        const props = {} as T;
+        const props = {} as any;
         const attrDirectives = state.getDirectives<any>("attr");
         attrDirectives.forEach(x => props[x.directive.parameters[0] as string] = x.directive.value());
         Object.assign(props, state.constantProps);

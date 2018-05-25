@@ -1,14 +1,14 @@
 import { BehaviorSubject } from "rxjs";
-import { IScope, INodeState, IViewModel, IPair } from "./interfaces";
+import { IScope, INodeState, IViewModel, IPair, IKeyValue } from "./interfaces";
 
 export class NodeState implements INodeState {
     public scope: IScope;        // scope model
     public readonly directives: IPair<any>[];
-    public readonly constantProps: object;
+    public readonly constantProps: IKeyValue;
     public disabled: boolean;
     public controlsDescendants: number;
 
-    constructor(directives: IPair<any>[], constantProps: object, scope: IScope) {
+    constructor(directives: IPair<any>[], constantProps: IKeyValue, scope: IScope) {
         this.scope = scope as IScope;
         this.directives = directives;
         this.constantProps = constantProps;
@@ -28,7 +28,7 @@ export class Scope implements IScope {
     }
 
     public extend(name: string, model: IViewModel, indexName?: string, index?: number): IScope {
-        const childScope = Object.assign(new Scope(this.$data), this);
+        const childScope = Object.assign(new Scope(this.$data), this) as IScope;
         childScope[name] = model;
         if (indexName !== undefined && index !== undefined) {
             childScope[indexName] = new BehaviorSubject<number>(index);
