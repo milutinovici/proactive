@@ -1,5 +1,5 @@
 import { Observable, combineLatest } from "rxjs";
-import { map, mergeMap } from "rxjs/operators";
+import { map, mergeMap, startWith } from "rxjs/operators";
 
 export class ComputedArray<T> extends Observable<T[]> {
 
@@ -66,7 +66,7 @@ export class ComputedArray<T> extends Observable<T[]> {
     public filterx(fn: (x: T, ix?: number) => Observable<boolean>): ComputedArray<T> {
         const obs = this.pipe(mergeMap(array =>
             combineLatest(array.map(fn)).pipe(map((results) =>
-                array.filter((element, i) => results[i])))
+                array.filter((element, i) => results[i])), startWith([] as T[]))
         ));
         return new ComputedArray(obs);
     }
