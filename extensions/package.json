@@ -13,7 +13,7 @@
   "author": "Ivan Milutinović",
   "license": "MIT",
   "dependencies": {
-    "rxjs": "^6.1.0"
+    "rxjs": "^6.2.0"
   },
   "devDependencies": {
     "typescript": "^2.8.3",

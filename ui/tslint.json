@@ -2,9 +2,7 @@
   "extends": "tslint:latest",
   "rules": {
     "ordered-imports": false,
-    "max-line-length": [
-      140
-    ],
+    "max-line-length": true,
     "no-string-literal": false,
     "radix": false,
     "jsdoc-format": false,
@@ -15,11 +13,13 @@
       false
     ],
     "object-literal-sort-keys": false,
+    "object-literal-shorthand": false,
     "variable-name": [
       false
     ],
     "forin": false,
     "no-bitwise": false,
-    "no-empty": false
+    "no-empty": false,
+    "only-arrow-functions": false
   }
 }
