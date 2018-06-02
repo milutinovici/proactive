@@ -32,7 +32,7 @@ export function isTemplate(node: Node): node is HTMLTemplateElement {
 export function tryParse(str: string): number | boolean | string {
     if (isBoolean(str)) {
         return str === "true";
-    } else if (str !== "" && !isNaN(str as any)) {
+    } else if (str.trim() !== "" && !isNaN(str as any)) {
         return parseFloat(str);
     }
     return str;
