@@ -18,7 +18,7 @@ const keysByCode = {
     39: "right",
     40: "down",
     45: "insert",
-    46: "deconste",
+    46: "delete",
 };
 
 export class KeyPressDirective extends DirectiveHandler<KeyboardEvent> {
