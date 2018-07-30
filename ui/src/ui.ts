@@ -4,7 +4,6 @@ import { DomManager } from "./domManager";
 import { HtmlEngine } from "./templateEngines";
 import { DirectiveRegistry } from "./directiveRegistry";
 import { IScope, IConfiguration, IViewModel, IComponentDescriptor } from "./interfaces";
-
 import { EventDirective } from "./directives/event";
 import { IfDirective } from "./directives/if";
 import { TextDirective } from "./directives/text";

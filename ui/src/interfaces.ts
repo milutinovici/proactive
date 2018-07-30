@@ -1,6 +1,6 @@
 import { Observable, Subscription, Observer } from "rxjs";
 
-export interface IDirective<T> {
+export interface IDirective<T = unknown> {
     readonly name: string;
     readonly text: string | string[];
     readonly parameters: string[];
@@ -9,7 +9,7 @@ export interface IDirective<T> {
     value(): T;
     clone(scope: IScope): IDirective<T>;
 }
-export interface IPair<T> {
+export interface IPair<T = unknown> {
     directive: IDirective<T>;
     handler: IDirectiveHandler<T>;
 }
@@ -17,7 +17,7 @@ export interface IPair<T> {
 export const enum DataFlow { Out = 1, In = 2 }
 // Defines whether the directive accepts parameters
 export const enum Parametricity { Required, Forbidden, Optional }
-export interface IDirectiveHandler<T> {
+export interface IDirectiveHandler<T = unknown> {
         /**
         * When there are multiple directives defined on a single DOM element,
         * sometimes it is necessary to specify the order in which the directives are applied.
@@ -44,16 +44,17 @@ export interface IDirectiveHandler<T> {
         applyDirective(node: Node, directive: IDirective<T>, state: INodeState): void;
 }
 export interface IKeyValue {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 // Scope of the view
 export interface IScope extends IKeyValue {
     readonly $data: IViewModel;
+    [others: string]: any;
     extend(name: string, model: IViewModel, indexName?: string, index?: number): IScope;
 }
 // Node metadata
 export interface INodeState {
-    readonly directives: IPair<any>[];
+    readonly directives: IPair[];
     readonly constantProps: IKeyValue;
     readonly controlsDescendants: number;
     readonly scope: IScope;
@@ -65,7 +66,7 @@ export interface IViewModel {
     readonly cleanup?: Subscription;
     readonly value?: Observable<string>;
     readonly emitter?: Observable<CustomEvent>;
-    [others: string]: any;
+    [others: string]: unknown;
 }
 
 export interface IComponentDescriptor {

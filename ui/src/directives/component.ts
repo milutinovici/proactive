@@ -98,7 +98,7 @@ export class ComponentDirective<T> extends BaseDirectiveHandler<string|IKeyValue
         return config.pipe(mergeMap(cfg => {
             let name: string;
             if (typeof (cfg) !== "string") {
-                name = cfg.name;
+                name = cfg.name as string;
                 // object is useful for routes
                 Object.assign(props, cfg);
             } else {

@@ -3,12 +3,12 @@ import { IScope, INodeState, IViewModel, IPair, IKeyValue } from "./interfaces";
 
 export class NodeState implements INodeState {
     public scope: IScope;        // scope model
-    public readonly directives: IPair<any>[];
+    public readonly directives: IPair[];
     public readonly constantProps: IKeyValue;
     public disabled: boolean;
     public controlsDescendants: number;
 
-    constructor(directives: IPair<any>[], constantProps: IKeyValue, scope: IScope) {
+    constructor(directives: IPair[], constantProps: IKeyValue, scope: IScope) {
         this.scope = scope as IScope;
         this.directives = directives;
         this.constantProps = constantProps;
@@ -16,13 +16,13 @@ export class NodeState implements INodeState {
         this.controlsDescendants = 0;
     }
     public getDirectives<T>(name: string): IPair<T>[] {
-        return this.directives.filter(x => x.directive.name === name);
+        return this.directives.filter(x => x.directive.name === name) as IPair<T>[];
     }
 }
 
 export class Scope implements IScope {
     public readonly $data: IViewModel;
-
+    readonly [others: string]: unknown;
     constructor(model: IViewModel) {
         this.$data = model;
     }

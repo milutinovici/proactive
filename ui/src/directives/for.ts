@@ -80,7 +80,7 @@ export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
             for (let i = current; i < merger.stopped; i++) {
                 const childScope = indexName ? state.scope.extend(itemName, additions[i].value, indexName, additions[i].index)
                                              : state.scope.extend(itemName, additions[i].value);
-                let childState = new NodeState(otherDirectives.map(x => <IPair<T>> { handler: x.handler, directive: x.directive.clone(childScope) }), state.constantProps, childScope);
+                let childState = new NodeState(otherDirectives.map(x => <IPair> { handler: x.handler, directive: x.directive.clone(childScope) }), state.constantProps, childScope);
 
                 this.domManager.setState(parent.childNodes[i + start + additions[current].index], childState);
                 this.domManager.applyDirectivesRecursive(parent.childNodes[i + start + additions[current].index], childState.scope);

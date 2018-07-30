@@ -4,7 +4,7 @@ import { IScope, IDirective, DataFlow } from "./interfaces";
 import { isObserver, isFunction } from "./utils";
 import { Evaluator } from "./evaluator";
 
-export class Directive<T> implements IDirective<T> {
+export class Directive<T = unknown> implements IDirective<T> {
     public readonly scope: IScope;
     public readonly name: string;
     public readonly text: string | string[];
@@ -44,7 +44,7 @@ export class Directive<T> implements IDirective<T> {
 
     private createObserver(): Observer<T> {
         const subscriber = new Subscriber<T>(x => {
-            const result: any = this.value();
+            const result: unknown = this.value();
             if (isFunction(result)) {
                 return result.bind(this.scope.$data)(x);
             } else if (result != null && isObserver(result)) {
@@ -54,13 +54,13 @@ export class Directive<T> implements IDirective<T> {
         }, exception.next);
         return subscriber;
     }
-    private createObservable(expression: any = this.value()): Observable<T> {
+    private createObservable(expression: unknown = this.value()): Observable<T> {
         if (expression != null && (isObservable<T>(expression) || (Array.isArray(expression) && Array.isArray(this.text)))) {
-            return expression as any;
+            return expression as Observable<T>;
         } else if (isFunction(expression)) {
             return of(expression.bind(this.scope.$data)());
         } else {
-            return of(expression);
+            return of(expression) as Observable<T>;
         }
     }
     private createBoth(): Observable<T> | Observer<T> {
