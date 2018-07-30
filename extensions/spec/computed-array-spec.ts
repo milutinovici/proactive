@@ -82,9 +82,9 @@ it("should be sorted", expect => {
     const input = ["Foo", "Bar", "Baz"];
     const origin = new ObservableArray(input);
 
-    const stringOrderer = (a: any, b: any) => {
-        if (a.toString() < b.toString()) { return -1; }
-        if (a.toString() > b.toString()) { return 1; }
+    const stringOrderer = (a: string, b: string) => {
+        if (a < b) { return -1; }
+        if (a > b) { return 1; }
         return 0;
     };
 

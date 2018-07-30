@@ -13,12 +13,12 @@
   "author": "Ivan Milutinović",
   "license": "MIT",
   "dependencies": {
-    "rxjs": "^6.2.0"
+    "rxjs": "^6.2.2"
   },
   "devDependencies": {
-    "typescript": "^2.8.3",
-    "tape": "^4.9.0",
-    "tap-spec": "^4.1.1",
+    "typescript": "^3.0.1",
+    "tape": "^4.9.1",
+    "tap-spec": "^5.0.0",
     "benchmark": "^2.1.4",
     "@types/tape": "^4.2.32",
     "@types/benchmark": "^1.0.31"
