@@ -1,39 +1,35 @@
 ﻿import { Subject, of, NEVER } from "rxjs";
 import { startWith } from "rxjs/operators";
-import * as it from "tape";
+import it from "ava";
 import "../src/extensions";
 
-it("source observable prefixed with startWith overrides initialValue", expect => {
+it("source observable prefixed with startWith overrides initialValue", async t => {
     const obs = NEVER.pipe(startWith(13));
     const value = obs.toState(0);
-    expect.equal(value.getValue(), 13);
-    expect.end();
+    t.is(value.getValue(), 13);
 });
 
-it("returns the last value of the underlying observable upon creation", expect => {
+it("returns the last value of the underlying observable upon creation", async t => {
     const obs = of(3);
     const value = obs.toState(3);
-    expect.equal(value.getValue(), 3);
-    expect.end();
+    t.is(value.getValue(), 3);
 });
 
-it("returns the last value of the underlying observable", expect => {
+it("returns the last value of the underlying observable", async t => {
     const subject = new Subject<number>();
     const value = subject.toState(0);
     subject.next(3);
-    expect.equal(value.getValue(), 3);
-    expect.end();
+    t.is(value.getValue(), 3);
 });
 
-it("toString is equal to current value toString", expect => {
+it("toString is equal to current value toString", async t => {
     const subject = new Subject<number>();
     const value = subject.toState(0);
     subject.next(3);
-    expect.equal(value.toString(), value.getValue().toString());
-    expect.end();
+    t.is(value.toString(), value.getValue().toString());
 });
 
-it("adding data to the underlying observable results in change notifications on the value", expect => {
+it("adding data to the underlying observable results in change notifications on the value", async t => {
     const subject = new Subject<number>();
     const value = subject.toState(0);
     let changedFired = false;
@@ -41,11 +37,10 @@ it("adding data to the underlying observable results in change notifications on 
     value.subscribe(() => changedFired = true);
     subject.next(10);
 
-    expect.true(changedFired);
-    expect.end();
+    t.true(changedFired);
 });
 
-it("multiple subscribers receive notifications", expect => {
+it("multiple subscribers receive notifications", async t => {
     const subject = new Subject<number>();
     const value = subject.toState(0);
     let changedFiredCount = 0;
@@ -58,11 +53,10 @@ it("multiple subscribers receive notifications", expect => {
 
     subject.next(10);
 
-    expect.equal(changedFiredCount, 2);
-    expect.end();
+    t.is(changedFiredCount, 2);
 });
 
-it("notifications for changes in absence of any subscribers do not get buffered", expect => {
+it("notifications for changes in absence of any subscribers do not get buffered", async t => {
     const subject = new Subject<number>();
     const value = subject.toState(0);
     let changedFired = false;
@@ -70,11 +64,10 @@ it("notifications for changes in absence of any subscribers do not get buffered"
     subject.next(10);
     value.subscribe(() => changedFired = true);
 
-    expect.false(changedFired);
-    expect.end();
+    t.false(changedFired);
 });
 
-it("captures errors in the observable source", expect => {
+it("captures errors in the observable source", async t => {
     const subject = new Subject<number>();
     const value = subject.toState(0);
     let errorCount = 0;
@@ -82,17 +75,15 @@ it("captures errors in the observable source", expect => {
     value.subscribe(() => {}, () => errorCount++);
     subject.error("error");
 
-    expect.equal(errorCount, 1);
-    expect.end();
+    t.is(errorCount, 1);
 });
 
-it("allows connecting an error handler at construction", expect => {
+it("allows connecting an error handler at construction", async t => {
     const subject = new Subject<number>();
     let errorCount = 0;
     subject.toState(0).subscribe(() => {}, () => errorCount++);
 
     subject.error("error");
 
-    expect.equal(errorCount, 1);
-    expect.end();
+    t.is(errorCount, 1);
 });

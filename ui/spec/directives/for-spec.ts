@@ -1,66 +1,66 @@
-import * as it from "tape";
+import it from "ava";
 import { BehaviorSubject } from "rxjs";
 import { ObservableArray } from "@proactive/extensions";
 import { document, parse, toArray, range } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 const ui = new ProactiveUI({ document });
 
-it("for: bind to a standard array", expect => {
+it("for: bind to a standard array", async t => {
     const template = `<ul><li x-for:number="array" x-text="number"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = [1, 5, 7];
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ array }, el));
+    t.notThrows(() => ui.domManager.applyDirectives({ array }, el));
 
-    expect.equal(el.children.length, array.length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), array);
-    expect.end();
+    t.is(el.children.length, array.length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), array);
+    
 });
 
-it("for: bind to a standard array and template accessing index", expect => {
+it("for: bind to a standard array and template accessing index", async t => {
     const template = `<ul><li x-for:item.i="array" x-text="i"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = [1, 5, 7];
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ array }, el));
-    expect.equal(el.children.length, array.length);
+    t.notThrows(() => ui.domManager.applyDirectives({ array }, el));
+    t.is(el.children.length, array.length);
 
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, array.length));
-    expect.end();
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, array.length));
+    
 });
 
-it("for: bind to a value yielding an array", expect => {
+it("for: bind to a value yielding an array", async t => {
     const template = `<ul><li x-for:item.i="src" x-text="i"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let prop = new BehaviorSubject<number[]>([]);
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: prop }, el));
-    expect.equal(el.children.length, prop.getValue().length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, prop.getValue().length));
+    t.notThrows(() => ui.domManager.applyDirectives({ src: prop }, el));
+    t.is(el.children.length, prop.getValue().length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, prop.getValue().length));
 
     let array = [1, 5, 7];
     prop.next(array);
-    expect.equal(el.children.length, prop.getValue().length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, prop.getValue().length));
-    expect.end();
+    t.is(el.children.length, prop.getValue().length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, prop.getValue().length));
+    
 });
 
-it("for: bind to an observable array containing numbers", expect => {
+it("for: bind to an observable array containing numbers", async t => {
     const template = `<ul><li x-for:item.i="array" x-text="i"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array =  new BehaviorSubject<number[]>([1, 5, 7]);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ array }, el));
+    t.notThrows(() => ui.domManager.applyDirectives({ array }, el));
 
-    expect.equal(el.children.length, array.getValue().length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, array.getValue().length));
-    expect.end();
+    t.is(el.children.length, array.getValue().length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, array.getValue().length));
+    
 });
 
-it("for: bind to an observable array containing numbers without initialContents", expect => {
+it("for: bind to an observable array containing numbers without initialContents", async t => {
     const template = `<ul><li x-for:value="src" x-text="value"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
@@ -70,100 +70,100 @@ it("for: bind to an observable array containing numbers without initialContents"
         array.push(i);
     }
 
-    expect.equal(array.getValue().length, 10);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
+    t.is(array.getValue().length, 10);
+    t.notThrows(() => ui.domManager.applyDirectives({ src: array }, el));
 
-    expect.equal(el.children.length, array.getValue().length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, array.getValue().length));
-    expect.end();
+    t.is(el.children.length, array.getValue().length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), range(0, array.getValue().length));
+    
 });
 
-it("for: bind to an observable array adding/removing", expect => {
+it("for: bind to an observable array adding/removing", async t => {
     const template = `<ul><li x-for:value="src" x-text="value"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([1, 3, 5]);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
+    t.notThrows(() => ui.domManager.applyDirectives({ src: array }, el));
 
     array.push(7);
-    expect.equal(el.children.length, array.getValue().length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
+    t.is(el.children.length, array.getValue().length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
 
     array.pop();
-    expect.equal(el.children.length, array.getValue().length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
+    t.is(el.children.length, array.getValue().length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
 
     array.shift();
-    expect.equal(el.children.length, array.getValue().length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
+    t.is(el.children.length, array.getValue().length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
 
     array.unshift(9);
-    expect.equal(el.children.length, array.getValue().length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
+    t.is(el.children.length, array.getValue().length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
 
-    expect.end();
+    
 });
 
-it("for: bind to an observable array moving", expect => {
+it("for: bind to an observable array moving", async t => {
     const template = `<ul><li x-for:item="$data" x-text="item"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([1, 3, 5]);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(array, el));
+    t.notThrows(() => ui.domManager.applyDirectives(array, el));
 
     array.reverse();
 
-    expect.equal(el.children.length, array.getValue().length);
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
+    t.is(el.children.length, array.getValue().length);
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
     array.reverse();
-    expect.isEquivalent(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
-    expect.end();
+    t.deepEqual(toArray(el.children).map(node => parseInt(node.textContent || "")), array.getValue());
+    
 });
 
-it("for: bind to an observable array containing model", expect => {
+it("for: bind to an observable array containing model", async t => {
     const template = `<ul><li x-for:item="$data">
                         <span class="part1" x-text="item.foo"></span>
                       </li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([ { foo: 1 }, { foo: 5 }, { foo: 7 } ]);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(array, el));
+    t.notThrows(() => ui.domManager.applyDirectives(array, el));
 
-    expect.equal(el.children.length, array.getValue().length);
-    expect.isEquivalent(toArray(el.querySelectorAll(".part1"))
+    t.is(el.children.length, array.getValue().length);
+    t.deepEqual(toArray(el.querySelectorAll(".part1"))
         .map(node => parseInt(node.textContent || "")), array.getValue().map(x => x.foo));
-    expect.end();
+    
 });
 
-it("for: bind to an observable array of observables", expect => {
+it("for: bind to an observable array of observables", async t => {
     const template = `<ul><li x-for:item="src">
                         <span class="part1" x-text="item.foo"></span>
                       </li></ul>`;
     const el = <HTMLElement> parse(template)[0];
 
     let array = new ObservableArray([ { foo: new BehaviorSubject(1) }, { foo: new BehaviorSubject(5) }, { foo: new BehaviorSubject(7) } ]);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
+    t.notThrows(() => ui.domManager.applyDirectives({ src: array }, el));
 
     array.getValue().forEach((x) => x.foo.next(33));
-    expect.isEquivalent(toArray(el.querySelectorAll(".part1"))
+    t.deepEqual(toArray(el.querySelectorAll(".part1"))
         .map(node => parseInt(node.textContent || "")), array.getValue().map(x => x.foo.getValue()));
-    expect.end();
+    
 });
 
-it("for: binds items after for", expect => {
+it("for: binds items after for", async t => {
     const template = `<ul>
                         <li x-for:item="src" x-text="item"></li>
                         <li x-text="'hello'">BAD</li>
                       </ul>`;
     const el = <HTMLElement> parse(template)[0];
     let array = [1, 2, 3];
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
+    t.notThrows(() => ui.domManager.applyDirectives({ src: array }, el));
 
-    expect.isEquivalent(el.children[3].textContent, "hello");
-    expect.end();
+    t.deepEqual(el.children[3].textContent, "hello");
+    
 });
 
-it("for: bind to a map", expect => {
+it("for: bind to a map", async t => {
     const template = `<ul>
                         <li x-for:item="src" x-text="item.value"></li>
                       </ul>`;
@@ -172,14 +172,14 @@ it("for: bind to a map", expect => {
     map.set(1, "hello");
     map.set(2, "world");
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: map }, el));
+    t.notThrows(() => ui.domManager.applyDirectives({ src: map }, el));
 
-    expect.isEquivalent(el.children[0].textContent, "hello");
-    expect.isEquivalent(el.children[1].textContent, "world");
-    expect.end();
+    t.deepEqual(el.children[0].textContent, "hello");
+    t.deepEqual(el.children[1].textContent, "world");
+    
 });
 
-it("for: bind to an object", expect => {
+it("for: bind to an object", async t => {
     const template = `<ul>
                         <li x-for:item="src" x-text="item.value" x-attr:title="item.key"></li>
                       </ul>`;
@@ -187,23 +187,23 @@ it("for: bind to an object", expect => {
 
     let obj = { hello: 1, world: 2};
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: obj }, el));
+    t.notThrows(() => ui.domManager.applyDirectives({ src: obj }, el));
 
-    expect.isEquivalent(el.children[0].textContent, "1");
-    expect.isEquivalent(el.children[1].textContent, "2");
-    expect.end();
+    t.deepEqual(el.children[0].textContent, "1");
+    t.deepEqual(el.children[1].textContent, "2");
+    
 });
 
-it("for: cleans up after iteself", expect => {
+it("for: cleans up after iteself", async t => {
     const template = `<ul><li x-for:item="src" x-text="item"></li></ul>`;
     const el = <HTMLElement> parse(template)[0];
     const array = [1, 5, 7];
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
-    expect.equal(el.children.length, 3);
+    t.notThrows(() => ui.domManager.applyDirectives({ src: array }, el));
+    t.is(el.children.length, 3);
     ui.clean(el);
-    expect.equal(el.children.length, 1);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ src: array }, el));
-    expect.equal(el.children.length, 3);
-    expect.end();
+    t.is(el.children.length, 1);
+    t.notThrows(() => ui.domManager.applyDirectives({ src: array }, el));
+    t.is(el.children.length, 3);
+    
 });

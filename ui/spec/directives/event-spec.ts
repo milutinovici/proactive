@@ -1,78 +1,78 @@
-import * as it from "tape";
+import it from "ava";
 import { BehaviorSubject, Subject, Subscriber } from "rxjs";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 
 const ui = new ProactiveUI({ document });
 
-it("event: binds a single event to a handler function", expect => {
+it("event: binds a single event to a handler function", async t => {
     const template = `<button x-on:click="firstHandler">Click me</button>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     const model = new TestVM();
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
     triggerEvent(el, "click");
 
-    expect.equal(model.firstCount, 1, `handler was called`);
-    expect.equal(model.firstName, "click", "click event was triggered");
+    t.is(model.firstCount, 1, `handler was called`);
+    t.is(model.firstName, "click", "click event was triggered");
 
     ui.clean(el);
 
     // should no longer fire
     triggerEvent(el, "click");
 
-    expect.equal(model.firstCount, 1, "handler is not called after clean operation");
-    expect.end();
+    t.is(model.firstCount, 1, "handler is not called after clean operation");
+    
 });
 
-it("event: use shorthand for event directive", expect => {
+it("event: use shorthand for event directive", async t => {
     const template = `<button @click="firstHandler">Click me</button>`;
     const el = <HTMLInputElement> parse(template)[0];
     const model = new TestVM();
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
     triggerEvent(el, "click");
 
-    expect.equal(model.firstCount, 1, `handler was called`);
-    expect.equal(model.firstName, "click", "click event was triggered");
+    t.is(model.firstCount, 1, `handler was called`);
+    t.is(model.firstName, "click", "click event was triggered");
 
     ui.clean(el);
 
     // should no longer fire
     triggerEvent(el, "click");
 
-    expect.equal(model.firstCount, 1, "handler is not called after clean operation");
-    expect.end();
+    t.is(model.firstCount, 1, "handler is not called after clean operation");
+    
 });
 
-it("event: binds multiple events to handler functions", expect => {
+it("event: binds multiple events to handler functions", async t => {
     const template = `<input type="text" x-on:click="firstHandler" x-on:input="secondHandler" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
     const model = new TestVM();
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
 
     triggerEvent(el, "click");
-    expect.equal(model.firstCount, 1, "click handler was called 1 time");
+    t.is(model.firstCount, 1, "click handler was called 1 time");
 
     el.value = "new";
     triggerEvent(el, "input");
-    expect.equal(model.secondCount, 1, "input handler was called 1 time");
+    t.is(model.secondCount, 1, "input handler was called 1 time");
 
     ui.clean(el);
 
     triggerEvent(el, "click");
-    expect.equal(model.firstCount, 1, "handler is not called after clean operation");
+    t.is(model.firstCount, 1, "handler is not called after clean operation");
 
     el.value = "old";
     triggerEvent(el, "input");
-    expect.equal(model.secondCount, 1, "handler is not called after clean operation");
-    expect.end();
+    t.is(model.secondCount, 1, "handler is not called after clean operation");
+    
 });
 
-it("event: binds multiple events to observers", expect => {
+it("event: binds multiple events to observers", async t => {
     const template = `<input type="text" x-on:click="clickObserver" x-on:input="inputObserver" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
@@ -90,14 +90,14 @@ it("event: binds multiple events to observers", expect => {
     clickSubject.subscribe(() => clickCallCount++);
     inputSubject.subscribe(() => inputCallCount++);
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
 
     triggerEvent(el, "click");
-    expect.equal(clickCallCount, 1, "click observer was called 1 time");
+    t.is(clickCallCount, 1, "click observer was called 1 time");
 
     el.value = "new";
     triggerEvent(el, "input");
-    expect.equal(inputCallCount, 1, "input observer was called 1 time");
+    t.is(inputCallCount, 1, "input observer was called 1 time");
 
     ui.clean(el);
     clickCallCount = 0;
@@ -105,15 +105,15 @@ it("event: binds multiple events to observers", expect => {
 
     // should no longer fire
     triggerEvent(el, "click");
-    expect.equal(clickCallCount, 0);
+    t.is(clickCallCount, 0);
 
     el.value = "old";
     triggerEvent(el, "input");
-    expect.equal(inputCallCount, 0);
-    expect.end();
+    t.is(inputCallCount, 0);
+    
 });
 
-it("event: pass parameters to function", expect => {
+it("event: pass parameters to function", async t => {
     const template = `<input type="text" x-on:click="custom(5, 2)" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
@@ -123,87 +123,87 @@ it("event: pass parameters to function", expect => {
         custom: function (f: number, s: number) { first = f; second = s; },
     };
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
 
     triggerEvent(el, "click");
-    expect.equal(first, 5, "1st parameter is good");
-    expect.equal(second, 2, "2nd parameter is good");
+    t.is(first, 5, "1st parameter is good");
+    t.is(second, 2, "2nd parameter is good");
 
-    expect.end();
+    
 });
 
-it("event: binds a single key to a handler function", expect => {
+it("event: binds a single key to a handler function", async t => {
     const template = `<input x-key:enter="firstHandler"/>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let model = new TestVM();
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
-    expect.equal(model.firstCount, 0, "call count is initially 0");
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
+    t.is(model.firstCount, 0, "call count is initially 0");
 
     triggerEvent(el, "keydown", 13);
-    expect.equal(model.firstCount, 1,  "call count is 1 after pressing enter");
+    t.is(model.firstCount, 1,  "call count is 1 after pressing enter");
 
     triggerEvent(el, "keydown", 14);
-    expect.equal(model.firstCount, 1, "call count is still 1 after pressing another key");
+    t.is(model.firstCount, 1, "call count is still 1 after pressing another key");
 
     ui.clean(el);
 
     triggerEvent(el, "click");
-    expect.equal(model.firstCount, 1, "not called, after clean operation");
-    expect.end();
+    t.is(model.firstCount, 1, "not called, after clean operation");
+    
 });
 
-it("event: binds multiple keys to handler functions", expect => {
+it("event: binds multiple keys to handler functions", async t => {
     const template = `<input type="text" x-key:tab="firstHandler" x-key:enter="secondHandler"/>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let model = new TestVM();
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
 
-    expect.equal(model.firstCount, 0);
-    expect.equal(model.firstCount, 0);
+    t.is(model.firstCount, 0);
+    t.is(model.firstCount, 0);
 
     triggerEvent(el, "keydown", 9);
-    expect.equal(model.firstCount, 1);
+    t.is(model.firstCount, 1);
 
     el.value = "new";
     triggerEvent(el, "keydown", 13);
-    expect.equal(model.secondCount, 1);
+    t.is(model.secondCount, 1);
 
     ui.clean(el);
 
     triggerEvent(el, "keydown", 9);
-    expect.equal(model.firstCount, 1, "should no longer fire");
+    t.is(model.firstCount, 1, "should no longer fire");
 
     el.value = "old";
     triggerEvent(el, "keydown", 13);
-    expect.equal(model.secondCount, 1, "should no longer fire");
-    expect.end();
+    t.is(model.secondCount, 1, "should no longer fire");
+    
 });
 
-it("event: binds a modified key to a handler function", expect => {
+it("event: binds a modified key to a handler function", async t => {
     const template = `<input type="text" x-key:shift-enter="firstHandler"/>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let model = new TestVM();
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
 
-    expect.equal(model.firstCount, 0);
+    t.is(model.firstCount, 0);
 
     triggerEvent(el, "keydown", 13, "shift");
-    expect.equal(model.firstCount, 1);
+    t.is(model.firstCount, 1);
 
     el.value = "new";
     triggerEvent(el, "keydown", 13);
-    expect.equal(model.firstCount, 1);
+    t.is(model.firstCount, 1);
 
-    expect.end();
+    
 });
 
-it("event: event delegation works", expect => {
+it("event: event delegation works", async t => {
     const template = `<ul x-on:click.a="select">
                         <li><a id="1">Click to select</a></li>
                         <li><button id="2">Click to select</button></li>
@@ -215,12 +215,12 @@ it("event: event delegation works", expect => {
         select: function(e: Event) { this.selected.next(parseInt(e.target ? (<Element> (e.target)).id : "")); },
     };
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(viewmodel, el));
+    t.notThrows(() => ui.domManager.applyDirectives(viewmodel, el));
     triggerEvent(el.children[0].children[0], "click");
-    expect.equal(viewmodel.selected.getValue(), 1);
+    t.is(viewmodel.selected.getValue(), 1);
     triggerEvent(el.children[1].children[0], "click");
-    expect.equal(viewmodel.selected.getValue(), 1);
-    expect.end();
+    t.is(viewmodel.selected.getValue(), 1);
+    
 });
 
 class TestVM {

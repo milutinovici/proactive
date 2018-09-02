@@ -1,53 +1,53 @@
-import * as it from "tape";
+import it from "ava";
 import { BehaviorSubject, of } from "rxjs";
 import { ObservableArray } from "@proactive/extensions";
 import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 const ui = new ProactiveUI({ document });
 
-it("value: Should treat null values as empty strings", expect => {
+it("value: Should treat null values as empty strings", async t => {
     const template = `<input type="text" x-value="myProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
     ui.domManager.applyDirectives({ myProp: new BehaviorSubject(0) }, el);
-    expect.equal(el.value, "0");
-    expect.end();
+    t.is(el.value, "0");
+    
 });
 
-it("value: Should assign an empty string as value if the model value is undefined", expect => {
+it("value: Should assign an empty string as value if the model value is undefined", async t => {
     const template = `<input type="text" x-value="undefined" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
     ui.domManager.applyDirectives({ }, el);
-    expect.equal(el.value, "");
-    expect.end();
+    t.is(el.value, "");
+    
 });
 
-it("value: For observable values, should unwrap the value and update on change", expect => {
+it("value: For observable values, should unwrap the value and update on change", async t => {
     const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let myobservable = new BehaviorSubject(123);
     ui.domManager.applyDirectives({ someProp: myobservable }, el);
-    expect.equal(el.value, "123");
+    t.is(el.value, "123");
     myobservable.next(456);
-    expect.equal(el.value, "456");
-    expect.end();
+    t.is(el.value, "456");
+    
 });
 
-it("value: For observable values, should update on change if new value is 'strictly' different from previous value", expect => {
+it("value: For observable values, should update on change if new value is 'strictly' different from previous value", async t => {
     const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let myobservable = new BehaviorSubject<string | number>("+123");
     ui.domManager.applyDirectives({ someProp: myobservable }, el);
-    expect.equal(el.value, "+123");
+    t.is(el.value, "+123");
     myobservable.next(123);
-    expect.equal(el.value, "123");
-    expect.end();
+    t.is(el.value, "123");
+    
 });
 
-it("value: For writeable observable values, should catch the node's onchange and write values back to the observable", expect => {
+it("value: For writeable observable values, should catch the node's onchange and write values back to the observable", async t => {
     const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
@@ -57,13 +57,13 @@ it("value: For writeable observable values, should catch the node's onchange and
     triggerEvent(el, "change");
 
     myobservable.subscribe(x => {
-        expect.equal(x, "some user-entered value");
-        expect.end();
+        t.is(x.toString(), "some user-entered value");
+        
     });
 
 });
 
-it("value: Should ignore node changes when bound to a read-only observable", expect => {
+it("value: Should ignore node changes when bound to a read-only observable", async t => {
     const template = `<input type="text" x-value="prop" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
@@ -72,18 +72,18 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
     let value = "";
     observable.subscribe(x => value = x);
     ui.domManager.applyDirectives(vm, el);
-    expect.equal(el.value, "zzz");
+    t.is(el.value, "zzz");
 
     // Change the input value and trigger change event; verify that the view model wasn't changed
     el.value = "yyy";
     triggerEvent(el, "change");
-    expect.equal(vm.prop, observable);
+    t.is(vm.prop, observable);
     observable.subscribe(x => value = x);
-    expect.equal(value, "zzz");
-    expect.end();
+    t.is(value, "zzz");
+    
 });
 
-// it("value: Should be able to write to observable subproperties of an observable, even after the parent observable has changed", expect => {
+// it("value: Should be able to write to observable subproperties of an observable, even after the parent observable has changed", async t => {
 //     // This spec represents https://github.com/SteveSanderson/knockout/issues#issue/13
 //     // Set up a text box whose value is linked to the subproperty of the observable's current value
 //     const template = `<input type="text" x-value="myprop.subproperty" />`;
@@ -94,26 +94,26 @@ it("value: Should ignore node changes when bound to a read-only observable", exp
 //     let model = { myprop: new BehaviorSubject<any>({ subproperty: originalSubproperty }) };
 
 //     ui.domManager.applyDirectives(model, el);
-//     expect.equal(el.value, "original value");
+//     t.is(el.value, "original value");
 
 //     model.myprop({ subproperty: newSubproperty }); // Note that myprop (and hence its subproperty) is changed *after* the directives are applied
 //     el.value = "Some new value";
 //     triggerEvent(el, "change");
 
 //     // Verify that the change was written to the *new* subproperty, not the one referenced when the directives were first established
-//     expect.equal(newSubproperty(), "Some new value");
-//     expect.equal(originalSubproperty(), "original value");
-//     expect.end();
+//     t.is(newSubproperty(), "Some new value");
+//     t.is(originalSubproperty(), "original value");
+//     
 // });
 
-it("value: Should only register one single onchange handler", expect => {
+it("value: Should only register one single onchange handler", async t => {
     const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let notifiedValues: number[] = [];
     let myobservable = new BehaviorSubject(123);
     myobservable.subscribe(value => { notifiedValues.push(value); });
-    expect.equal(notifiedValues.length, 1);
+    t.is(notifiedValues.length, 1);
 
     ui.domManager.applyDirectives({ someProp: myobservable }, el);
 
@@ -122,15 +122,15 @@ it("value: Should only register one single onchange handler", expect => {
     // we'll see one new value per onchange event. More handlers cause more notifications.
     el.value = "ABC";
     triggerEvent(el, "change");
-    expect.equal(notifiedValues.length, 2);
+    t.is(notifiedValues.length, 2);
 
     el.value = "DEF";
     triggerEvent(el, "change");
-    expect.equal(notifiedValues.length, 3);
-    expect.end();
+    t.is(notifiedValues.length, 3);
+    
 });
 
-it("value: should update non observable values", expect => {
+it("value: should update non observable values", async t => {
     const template = `<input type="text" x-value="someProp" />`;
     const el = <HTMLInputElement> parse(template)[0];
     const viewmodel = { someProp: "ABC" };
@@ -138,12 +138,12 @@ it("value: should update non observable values", expect => {
 
     el.value = "DEF";
     triggerEvent(el, "change");
-    expect.equal(viewmodel.someProp, "DEF");
+    t.is(viewmodel.someProp, "DEF");
 
-    expect.end();
+    
 });
 
-it("value: input values type should be consistent", expect => {
+it("value: input values type should be consistent", async t => {
     const template = `<input type="number" x-value="someProp" />`;
     const number = new BehaviorSubject(0);
     const el = <HTMLInputElement> parse(template)[0];
@@ -152,12 +152,12 @@ it("value: input values type should be consistent", expect => {
 
     el.value = "3";
     triggerEvent(el, "change");
-    expect.equal(4, 1 + number.getValue());
+    t.is(4, 1 + number.getValue());
 
-    expect.end();
+    
 });
 
-it("value: select multiple can be bound to an array", expect => {
+it("value: select multiple can be bound to an array", async t => {
     const template = `<select multiple x-value="selected">
                         <option value="A">A</option>
                         <option value="B">B</option>
@@ -167,10 +167,10 @@ it("value: select multiple can be bound to an array", expect => {
     const viewmodel = { selected };
     ui.domManager.applyDirectives(viewmodel, el);
     selected.push("A");
-    expect.equal(el.options[0]["selected"], true, "Dataflow.Out");
+    t.is(el.options[0]["selected"], true, "Dataflow.Out");
     el.options[1]["selected"] = true;
     triggerEvent(el, "change");
-    expect.equal(selected.getValue().length, 2, "Dataflow.In");
+    t.is(selected.getValue().length, 2, "Dataflow.In");
 
-    expect.end();
+    
 });

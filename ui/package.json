@@ -1,35 +1,48 @@
 {
-  "name": "@proactive/ui",
-  "version": "0.4.0",
-  "description": "Proactive UI",
-  "repository": {
-    "url": "https://github.com/milutinovici/proactive"
-  },
-  "scripts": {
-    "build": "tsc -p ./",
-    "test": "node ./lib/spec/spec.js | tap-spec"
-  },
-  "author": "Ivan Milutinović",
-  "license": "MIT",
-  "dependencies": {
-    "rxjs": "^6.2.2"
-  },
-  "devDependencies": {
-    "@proactive/extensions": "^0.5.0",
-    "typescript": "^3.0.1",
-    "ts-node": "^7.0.0",
-    "tape": "^4.9.1",
-    "tap-spec": "^5.0.0",
-    "jsdom": "^11.12.0",
-    "@types/tape": "^4.2.32",
-    "@types/jsdom": "^11.0.6"
-  },
-  "main": "lib/src/ui.js",
-  "types": "lib/src/ui.d.ts",
-  "directories": {
-    "lib": "lib/src"
-  },
-  "files": [
-    "lib/src"
-  ]
+    "name": "@proactive/ui",
+    "version": "0.4.0",
+    "description": "Proactive UI",
+    "repository": {
+        "url": "https://github.com/milutinovici/proactive"
+    },
+    "scripts": {
+        "build": "tsc -p ./",
+        "test": "ava"
+    },
+    "author": "Ivan Milutinović",
+    "license": "MIT",
+    "dependencies": {
+        "rxjs": "^6.3.1"
+    },
+    "devDependencies": {
+        "@proactive/extensions": "^0.5.0",
+        "typescript": "^3.0.1",
+        "ts-node": "7.0.1",
+        "ava": "^1.0.0-beta.8",
+        "jsdom": "^12.0.0",
+        "@types/jsdom": "^11.0.6"
+    },
+    "main": "lib/src/ui.js",
+    "types": "lib/src/ui.d.ts",
+    "directories": {
+        "lib": "lib/src"
+    },
+    "files": [
+        "lib/src"
+    ],
+    "ava": {
+        "compileEnhancements": false,
+        "extensions": [
+            "ts"
+        ],
+        "require": [
+            "ts-node/register"
+        ],
+        "files": [
+			"spec/**/*.ts"
+		],
+		"sources": [
+			"src/**/*.ts"
+		]
+    }
 }

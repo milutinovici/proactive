@@ -1,34 +1,48 @@
 {
-  "name": "@proactive/extensions",
-  "version": "0.5.0",
-  "description": "Proactive Extensions",
-  "repository": {
-    "url": "https://github.com/milutinovici/proactive"
-  },
-  "scripts": {
-    "build": "tsc -p ./",
-    "test": "node ./lib/spec/spec.js | tap-spec",
-    "benchmark": "node ./lib/perf/test.js"
-  },
-  "author": "Ivan Milutinović",
-  "license": "MIT",
-  "dependencies": {
-    "rxjs": "^6.2.2"
-  },
-  "devDependencies": {
-    "typescript": "^3.0.1",
-    "tape": "^4.9.1",
-    "tap-spec": "^5.0.0",
-    "benchmark": "^2.1.4",
-    "@types/tape": "^4.2.32",
-    "@types/benchmark": "^1.0.31"
-  },
-  "main": "lib/src/extensions.js",
-  "types": "lib/src/extensions.d.ts",
-  "directories": {
-    "lib": "lib/src"
-  },
-  "files": [
-    "lib/src"
-  ]
+    "name": "@proactive/extensions",
+    "version": "0.5.0",
+    "description": "Proactive Extensions",
+    "repository": {
+        "url": "https://github.com/milutinovici/proactive"
+    },
+    "scripts": {
+        "build": "tsc -p ./",
+        "test": "ava",
+        "benchmark": "node ./lib/perf/test.js"
+    },
+    "author": "Ivan Milutinović",
+    "license": "MIT",
+    "dependencies": {
+        "rxjs": "^6.3.1"
+    },
+    "devDependencies": {
+        "typescript": "^3.0.1",
+        "ava": "^1.0.0-beta.8",
+        "benchmark": "^2.1.4",
+        "ts-node": "^7.0.1",
+        "@types/benchmark": "^1.0.31"
+    },
+    "main": "lib/src/extensions.js",
+    "types": "lib/src/extensions.d.ts",
+    "directories": {
+        "lib": "lib/src"
+    },
+    "files": [
+        "lib/src"
+    ],
+    "ava": {
+        "compileEnhancements": false,
+        "extensions": [
+            "ts"
+        ],
+        "require": [
+            "ts-node/register"
+        ],
+        "files": [
+			"spec/**/*.ts"
+		],
+		"sources": [
+			"src/**/*.ts"
+		]
+    }
 }

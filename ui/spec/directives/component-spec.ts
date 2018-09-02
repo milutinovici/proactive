@@ -1,4 +1,4 @@
-import * as it from "tape";
+import it from "ava";
 import { IScope } from "../../src/interfaces";
 import { document, parse, fragment } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
@@ -6,56 +6,56 @@ import { BehaviorSubject, combineLatest } from "rxjs";
 
 const ui = new ProactiveUI({ document });
 
-it("component: Loads a component using simple string options", expect => {
+it("component: Loads a component using simple string options", async t => {
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> parse(str)[0];
 
     const template = "<span>foo</span>";
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.equal(el.innerHTML, template);
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.is(el.innerHTML, template);
+    
 });
 
-it("component: Loads a component using its name as tag", expect => {
+it("component: Loads a component using its name as tag", async t => {
     const str = `<test-component></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
     const template = `<span>foo</span>`;
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.equal(el.innerHTML, template);
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.is(el.innerHTML, template);
+    
 });
 
-it("component: Loads a component through a dynamic import", expect => {
+it("component: Loads a component through a dynamic import", async t => {
     const str = `<test-component foo="42"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
     ui.components.register("test-component", "./dynamic-component.html");
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({}, el));
+    t.notThrows(() => ui.domManager.applyDirectives({}, el));
     setTimeout(() => {
 
-        expect.true(el.children[0] && el.children[0].textContent === "bar");
-        expect.end();
+        t.true(el.children[0] && el.children[0].textContent === "bar");
+        
     }, 200);
 });
 
-it("component: Loads a template from a string", expect => {
+it("component: Loads a template from a string", async t => {
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> parse(str)[0];
 
     const template = "<span>foo</span>";
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.equal(el.innerHTML, template);
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.is(el.innerHTML, template);
+    
 });
 
-it("component: Loads a template from a fragment", expect => {
+it("component: Loads a template from a fragment", async t => {
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -64,12 +64,12 @@ it("component: Loads a template from a fragment", expect => {
         template: fragment(template),
     });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.equal(el.innerHTML, template);
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.is(el.innerHTML, template);
+    
 });
 
-it("component: Loads a template from an id", expect => {
+it("component: Loads a template from an id", async t => {
     const template = parse(`<template id="template1">bar</template>`)[0];
     document.body.appendChild(template);
     const str = `<div x-component="'test-component'"></div>`;
@@ -77,12 +77,12 @@ it("component: Loads a template from an id", expect => {
 
     ui.components.register("test-component", { template: "#template1" });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.equal(el.innerHTML, "bar");
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.is(el.innerHTML, "bar");
+    
 });
 
-it("component: Stateless component with a constant prop", expect => {
+it("component: Stateless component with a constant prop", async t => {
     const str = `<test-component name="John"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -90,12 +90,12 @@ it("component: Stateless component with a constant prop", expect => {
 
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.equal(el.children[1].textContent, "John");
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.is(el.children[1].textContent, "John");
+    
 });
 
-it("component: Stateless component with an observable prop", expect => {
+it("component: Stateless component with an observable prop", async t => {
     const str = `<test-component x-attr:name="foo"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -103,14 +103,14 @@ it("component: Stateless component with an observable prop", expect => {
 
     ui.components.register("test-component", { template: template });
     const vm = { foo: new BehaviorSubject("John") };
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(vm, el));
-    expect.equal(el.children[1].textContent, "John");
+    t.notThrows(() => ui.domManager.applyDirectives(vm, el));
+    t.is(el.children[1].textContent, "John");
     vm.foo.next("Jim");
-    expect.equal(el.children[1].textContent, "Jim");
-    expect.end();
+    t.is(el.children[1].textContent, "Jim");
+    
 });
 
-it("component: props get passed to view-model constructor", expect => {
+it("component: props get passed to view-model constructor", async t => {
     const str = `<div x-component="'test-component'" foo="42"></div>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -122,12 +122,12 @@ it("component: props get passed to view-model constructor", expect => {
     }
     ui.components.register("test-component", { template: template, viewmodel: constr });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.equal(el.childNodes[0].textContent, "42");
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.is(el.childNodes[0].textContent, "42");
+    
 });
 
-it("component: Invokes created hook", expect => {
+it("component: Invokes created hook", async t => {
     const str = `<test-component id="fixture5" foo="42"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -142,12 +142,12 @@ it("component: Invokes created hook", expect => {
         created: created,
     });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.true(invoked);
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.true(invoked);
+    
 });
 
-it("component: Invokes destroy hook", expect => {
+it("component: Invokes destroy hook", async t => {
     const str = `<test-component id="fixture5" foo="42"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -163,16 +163,16 @@ it("component: Invokes destroy hook", expect => {
         destroy,
     });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.false(invoked);
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.false(invoked);
 
     ui.clean(el);
-    expect.true(invoked);
+    t.true(invoked);
 
-    expect.end();
+    
 });
 
-it("component: Unsubscribes a component's viewmodel if has cleanup subscription", expect => {
+it("component: Unsubscribes a component's viewmodel if has cleanup subscription", async t => {
     const str = `<div x-component="'test-component'"></div>`;
     const el = <HTMLElement> parse(str)[0];
     const template = "<span>foo</span>";
@@ -187,14 +187,14 @@ it("component: Unsubscribes a component's viewmodel if has cleanup subscription"
         viewmodel: vm,
     });
 
-    expect.false(unsubscribed);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
+    t.false(unsubscribed);
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
     ui.clean(el);
-    expect.true(unsubscribed);
-    expect.end();
+    t.true(unsubscribed);
+    
 });
 
-it("component: Components are properly isolated", expect => {
+it("component: Components are properly isolated", async t => {
     const str = `<div><test-component></test-component></div>`;
     const el = <HTMLElement> parse(str)[0];
     const template = `<span x-text="bar">invalid</span>`;
@@ -204,18 +204,18 @@ it("component: Components are properly isolated", expect => {
         template: template,
         viewmodel: { bar: value,
             preInit: (element: HTMLElement, scope: IScope) => {
-                expect.notEqual(scope.$data, viewmodel, "viewmodel of component is not equal to root viewmodel");
-                expect.equal(scope.$data["bar"], value);
+                t.not(scope.$data, viewmodel, "viewmodel of component is not equal to root viewmodel");
+                t.is(scope.$data["bar"], value);
             },
         },
     });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(viewmodel, el));
-    expect.equal(el.childNodes[0].childNodes[0].textContent, value);
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives(viewmodel, el));
+    t.is(el.childNodes[0].childNodes[0].textContent, value);
+    
 });
 // doesn't work in jsdom
-// it("component: Components emit custom events", expect => {
+// it("component: Components emit custom events", async t => {
 //     const str = `<test-component x-on-pulse="log"></test-component>`;
 //     const el = <HTMLElement> parse(str)[0];
 //     const template = `<span>pulse</span>`;
@@ -227,25 +227,25 @@ it("component: Components are properly isolated", expect => {
 //     let value = "";
 //     const vm = { log: (x: CustomEvent) => value = x.detail };
 
-//     expect.doesNotThrow(() => ui.domManager.applyDirectives(vm, el));
+//     t.notThrows(() => ui.domManager.applyDirectives(vm, el));
 //     emitter.next(new CustomEvent("pulse", { detail: "myPulse" }));
-//     expect.equal(value, "myPulse");
-//     expect.end();
+//     t.is(value, "myPulse");
+//     
 // });
 
-it("component: Components support basic transclusion", expect => {
+it("component: Components support basic transclusion", async t => {
     const str = `<test-component>Hello</test-component>`;
     const el = <HTMLElement> parse(str)[0];
     const template = `<p></p><slot>Oh noo!!!</slot><br/>`;
 
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ }, el));
-    expect.equal(el.childNodes[1].textContent, "Hello");
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({ }, el));
+    t.is(el.childNodes[1].textContent, "Hello");
+    
 });
 
-it("component: Components support named transclusion", expect => {
+it("component: Components support named transclusion", async t => {
     const str = `<test-component><h1 slot="header">Hello</h1></test-component>`;
     const el = <HTMLElement> parse(str)[0];
     const template = `<header><slot name="header"></slot></header>
@@ -254,12 +254,12 @@ it("component: Components support named transclusion", expect => {
 
     ui.components.register("test-component", { template: template });
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({}, el));
-    expect.equal(el.childNodes[0].childNodes[0].textContent, "Hello");
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives({}, el));
+    t.is(el.childNodes[0].childNodes[0].textContent, "Hello");
+    
 });
 
-it("component: Components support value directive", expect => {
+it("component: Components support value directive", async t => {
     const str = `<test-component x-value="obs"></test-component>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -271,12 +271,12 @@ it("component: Components support value directive", expect => {
 
     const vm = { obs: new BehaviorSubject("") };
 
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(vm, el));
-    expect.equal("Hello World", vm.obs.getValue());
-    expect.end();
+    t.notThrows(() => ui.domManager.applyDirectives(vm, el));
+    t.is("Hello World", vm.obs.getValue());
+    
 });
 
-it("component: Dynamic component", expect => {
+it("component: Dynamic component", async t => {
     const str = `<div x-component="name"></div>`;
     const el = <HTMLElement> parse(str)[0];
 
@@ -288,21 +288,21 @@ it("component: Dynamic component", expect => {
     ui.components.register("test-two", c2);
 
     const vm = { name: new BehaviorSubject("test-one") };
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(vm, el));
+    t.notThrows(() => ui.domManager.applyDirectives(vm, el));
 
     const p = el.children[0] as HTMLParagraphElement;
-    expect.equal(p.tagName, "P", "1st template inserted");
-    expect.equal(p.textContent, "first", "1st template correctly bound");
+    t.is(p.tagName, "P", "1st template inserted");
+    t.is(p.textContent, "first", "1st template correctly bound");
     vm.name.next("test-two");
 
     const input = el.children[0] as HTMLInputElement;
-    expect.equal(input.tagName, "INPUT", "2nd template inserted");
-    expect.equal(input.value, "second", "2nd template correctly bound");
+    t.is(input.tagName, "INPUT", "2nd template inserted");
+    t.is(input.value, "second", "2nd template correctly bound");
 
-    expect.end();
+    
 });
 
-it("component: Recursive component", expect => {
+it("component: Recursive component", async t => {
     const str = `<tree-comp x-attr:vm="$data"></tree-comp>`;
     const el = parse(str)[0] as HTMLElement;
 
@@ -316,14 +316,14 @@ it("component: Recursive component", expect => {
     const c1 = { template: t1 };
 
     ui.components.register("tree-comp", c1);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ hello: "my", baby: { hello: "my", honey: "!!!" } }, el));
+    t.notThrows(() => ui.domManager.applyDirectives({ hello: "my", baby: { hello: "my", honey: "!!!" } }, el));
 
-    expect.equal(el.children[0].children[1].children[1].children[0].children[1].children[1].textContent, "!!!");
+    t.is(el.children[0].children[1].children[1].children[0].children[1].children[1].textContent, "!!!");
 
-    expect.end();
+    
 });
 
-it("component: object passed instead of string", expect => {
+it("component: object passed instead of string", async t => {
     const str = `<div x-component="obj"></div>`;
     const el = parse(str)[0] as HTMLElement;
 
@@ -336,9 +336,9 @@ it("component: object passed instead of string", expect => {
     };
 
     ui.components.register("obj-comp", c1);
-    expect.doesNotThrow(() => ui.domManager.applyDirectives({ obj: { name: "obj-comp",  greeting: "hello" } }, el));
+    t.notThrows(() => ui.domManager.applyDirectives({ obj: { name: "obj-comp",  greeting: "hello" } }, el));
 
-    expect.equal(el.children[0].textContent, "hello");
+    t.is(el.children[0].textContent, "hello");
 
-    expect.end();
+    
 });

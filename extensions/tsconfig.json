@@ -1,24 +1,26 @@
 {
-  "compilerOptions": {
-    "removeComments": false,
-    "preserveConstEnums": true,
-    "inlineSourceMap": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "target": "es2015",
-    "module": "commonjs",
-    "declaration": true,
-    "moduleResolution": "node",
-    "strict": true,
-    "outDir": "./lib",
-    "skipLibCheck": true,
-    "lib": ["es2015", "dom"]
-  },
-  "formatCodeOptions": {
-    "indentSize": 2,
-    "tabSize": 2
-  },
-   "exclude": [
-       "node_modules",
-       "lib"
-   ]
+    "compilerOptions": {
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "inlineSourceMap": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "target": "es2015",
+        "module": "commonjs",
+        "declaration": true,
+        "moduleResolution": "node",
+        "strict": true,
+        "outDir": "./lib",
+        "skipLibCheck": true,
+        "lib": ["es2015", "dom"],
+        "pretty": true,
+        "composite": true
+    },
+        "formatCodeOptions": {
+        "indentSize": 2,
+        "tabSize": 2
+    },
+    "exclude": [
+        "node_modules",
+        "lib"
+    ]
 }

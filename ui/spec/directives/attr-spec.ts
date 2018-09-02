@@ -1,88 +1,88 @@
-import * as it from "tape";
+import it from "ava";
 import { document, parse, hasAttr } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
 import { BehaviorSubject } from "rxjs";
 
 const ui = new ProactiveUI({ document });
 
-it("attr: bind to a string constant", expect => {
+it("attr: bind to a string constant", async t => {
     const template = `<div x-attr:id="true">empty</div>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     const model = {};
-    expect.false(hasAttr(el, "id"));
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
-    expect.true(hasAttr(el, "id", "true"));
-    expect.end();
+    t.false(hasAttr(el, "id"));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
+    t.true(hasAttr(el, "id", "true"));
+    
 });
 
-it("attr: bind to a non-observable model value", expect => {
+it("attr: bind to a non-observable model value", async t => {
     const template = `<div x-attr:id="str">empty</div>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     const model = { str: "hello" };
 
-    expect.false(hasAttr(el, "id"));
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
-    expect.true(hasAttr(el, "id", "hello"));
-    expect.end();
+    t.false(hasAttr(el, "id"));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
+    t.true(hasAttr(el, "id", "hello"));
+    
 });
 
-it("attr: you can use shorthand ':'", expect => {
+it("attr: you can use shorthand ':'", async t => {
     const template = `<div :id="'shorthand'">empty</div>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     let model = {};
-    expect.false(hasAttr(el, "id"));
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
-    expect.true(hasAttr(el, "id", "shorthand"));
-    expect.end();
+    t.false(hasAttr(el, "id"));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
+    t.true(hasAttr(el, "id", "shorthand"));
+    
 });
 
-it("attr: bind to a observable model value", expect => {
+it("attr: bind to a observable model value", async t => {
     const template = `<div :id="obs">empty</div>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     const model = { obs: new BehaviorSubject("hello") };
 
-    expect.false(hasAttr(el, "id"));
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
-    expect.true(hasAttr(el, "id", "hello"));
+    t.false(hasAttr(el, "id"));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
+    t.true(hasAttr(el, "id", "hello"));
 
     // should reflect value changes
     model.obs.next("my");
-    expect.true(hasAttr(el, "id", "my"));
+    t.true(hasAttr(el, "id", "my"));
 
     // directive should stop updating after getting disposed
     ui.clean(el);
     model.obs.next("baby");
-    expect.true(hasAttr(el, "id", "my"));
-    expect.end();
+    t.true(hasAttr(el, "id", "my"));
+    
 });
 
-it("attr: bind multiple attributes to multiple observables", expect => {
+it("attr: bind multiple attributes to multiple observables", async t => {
     const template = `<div :id="obs1" :name="obs2">empty</div>`;
     const el = <HTMLInputElement> parse(template)[0];
 
     const model = { obs1: new BehaviorSubject(1), obs2: new BehaviorSubject("hello") };
 
-    expect.false(hasAttr(el, "id"));
-    expect.false(hasAttr(el, "name"));
-    expect.doesNotThrow(() => ui.domManager.applyDirectives(model, el));
-    expect.true(hasAttr(el, "id", "1"));
-    expect.true(hasAttr(el, "name", "hello"));
+    t.false(hasAttr(el, "id"));
+    t.false(hasAttr(el, "name"));
+    t.notThrows(() => ui.domManager.applyDirectives(model, el));
+    t.true(hasAttr(el, "id", "1"));
+    t.true(hasAttr(el, "name", "hello"));
 
     // should reflect value changes
     model.obs1.next(2);
     model.obs2.next("my");
-    expect.true(hasAttr(el, "id", "2"));
-    expect.true(hasAttr(el, "name", "my"));
+    t.true(hasAttr(el, "id", "2"));
+    t.true(hasAttr(el, "name", "my"));
 
     // directive should stop updating after getting disposed
     ui.clean(el);
     model.obs1.next(3);
     model.obs2.next("baby");
-    expect.true(hasAttr(el, "id", "2"));
-    expect.true(hasAttr(el, "name", "my"));
-    expect.end();
+    t.true(hasAttr(el, "id", "2"));
+    t.true(hasAttr(el, "name", "my"));
+    
 });
