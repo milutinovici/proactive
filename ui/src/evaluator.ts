@@ -1,9 +1,7 @@
-import { IScope } from "./interfaces";
 import { exception } from "./exceptionHandlers";
+import { IScope } from "./interfaces";
 
 export class Evaluator {
-    private static expressionCache = new Map<string, Function>();
-    private static writeCache = new Map<string, Function>();
 
     public static read<T>(scope: IScope, text: string): T {
         try {
@@ -12,7 +10,7 @@ export class Evaluator {
                 return fn(scope);
             } else {
                 const readBody = text ? `with($scope){with($data||{}){return ${text};}}` : "return null;";
-                let read = new Function("$scope", readBody) as (scope: IScope) => T;
+                const read = new Function("$scope", readBody) as (scope: IScope) => T;
                 Evaluator.expressionCache.set(text, read);
                 return read(scope);
             }
@@ -39,6 +37,8 @@ export class Evaluator {
             return (value: T) => {};
         }
     }
+    private static expressionCache = new Map<string, Function>();
+    private static writeCache = new Map<string, Function>();
 
     private static canWrite(expression: string): boolean {
         const javaScriptReservedWords = ["true", "false", "null", "undefined"];

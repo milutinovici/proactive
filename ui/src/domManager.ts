@@ -1,8 +1,8 @@
-import { Scope } from "./nodeState";
 import { DirectiveRegistry } from "./directiveRegistry";
-import { isElement, isTextNode } from "./utils";
-import { INodeState, IScope, IViewModel } from "./interfaces";
 import { exception } from "./exceptionHandlers";
+import { INodeState, IScope, IViewModel } from "./interfaces";
+import { Scope } from "./nodeState";
+import { isElement, isTextNode } from "./utils";
 
 export class DomManager {
     private readonly nodeStateManager: WeakMap<Node, INodeState>;
@@ -69,7 +69,7 @@ export class DomManager {
     public getScope(node: Node): IScope | undefined {
         let currentNode: Node | null = node;
         while (currentNode) {
-            let state = this.nodeStateManager.get(currentNode);
+            const state = this.nodeStateManager.get(currentNode);
             if (state !== undefined) {
                 return state.scope;
             }
@@ -91,7 +91,7 @@ export class DomManager {
 
         if (state != null) {
             if (state.directives != null) {
-                state.directives.forEach(x => {
+                state.directives.forEach((x) => {
                     x.directive.cleanup.unsubscribe();
                     x.directive["activated"] = - 1;
                 });
@@ -111,7 +111,7 @@ export class DomManager {
 
         // apply all directives
         for (const pair of state.directives) {
-            // if directive disables other directive when false 
+            // if directive disables other directive when false
             if (state.disabled === true) {
                 return true;
             }

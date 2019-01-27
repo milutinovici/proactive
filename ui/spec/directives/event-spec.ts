@@ -1,13 +1,13 @@
 import it from "ava";
 import { BehaviorSubject, Subject, Subscriber } from "rxjs";
-import { document, parse, triggerEvent } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
+import { document, parse, triggerEvent } from "../spec-utils";
 
 const ui = new ProactiveUI({ document });
 
-it("event: binds a single event to a handler function", async t => {
+it("event: binds a single event to a handler function", async (t) => {
     const template = `<button x-on:click="firstHandler">Click me</button>`;
-    const el = <HTMLInputElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLInputElement;
 
     const model = new TestVM();
 
@@ -23,12 +23,12 @@ it("event: binds a single event to a handler function", async t => {
     triggerEvent(el, "click");
 
     t.is(model.firstCount, 1, "handler is not called after clean operation");
-    
+
 });
 
-it("event: use shorthand for event directive", async t => {
+it("event: use shorthand for event directive", async (t) => {
     const template = `<button @click="firstHandler">Click me</button>`;
-    const el = <HTMLInputElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLInputElement;
     const model = new TestVM();
 
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
@@ -43,12 +43,12 @@ it("event: use shorthand for event directive", async t => {
     triggerEvent(el, "click");
 
     t.is(model.firstCount, 1, "handler is not called after clean operation");
-    
+
 });
 
-it("event: binds multiple events to handler functions", async t => {
+it("event: binds multiple events to handler functions", async (t) => {
     const template = `<input type="text" x-on:click="firstHandler" x-on:input="secondHandler" />`;
-    const el = <HTMLInputElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLInputElement;
 
     const model = new TestVM();
 
@@ -69,20 +69,20 @@ it("event: binds multiple events to handler functions", async t => {
     el.value = "old";
     triggerEvent(el, "input");
     t.is(model.secondCount, 1, "handler is not called after clean operation");
-    
+
 });
 
-it("event: binds multiple events to observers", async t => {
+it("event: binds multiple events to observers", async (t) => {
     const template = `<input type="text" x-on:click="clickObserver" x-on:input="inputObserver" />`;
-    const el = <HTMLInputElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLInputElement;
 
     let clickCallCount = 0;
     let inputCallCount = 0;
 
-    let clickSubject = new Subject<Event>();
-    let inputSubject = new Subject<Event>();
+    const clickSubject = new Subject<Event>();
+    const inputSubject = new Subject<Event>();
 
-    let model = {
+    const model = {
         clickObserver: new Subscriber<Event>((x) => { clickSubject.next(x); }),
         inputObserver: new Subscriber<Event>((x) => { inputSubject.next(x); }),
     };
@@ -110,17 +110,17 @@ it("event: binds multiple events to observers", async t => {
     el.value = "old";
     triggerEvent(el, "input");
     t.is(inputCallCount, 0);
-    
+
 });
 
-it("event: pass parameters to function", async t => {
+it("event: pass parameters to function", async (t) => {
     const template = `<input type="text" x-on:click="custom(5, 2)" />`;
-    const el = <HTMLInputElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLInputElement;
 
     let first = 0;
     let second = 0;
-    let model = {
-        custom: function (f: number, s: number) { first = f; second = s; },
+    const model = {
+        custom (f: number, s: number) { first = f; second = s; },
     };
 
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
@@ -129,14 +129,13 @@ it("event: pass parameters to function", async t => {
     t.is(first, 5, "1st parameter is good");
     t.is(second, 2, "2nd parameter is good");
 
-    
 });
 
-it("event: binds a single key to a handler function", async t => {
+it("event: binds a single key to a handler function", async (t) => {
     const template = `<input x-key:enter="firstHandler"/>`;
-    const el = <HTMLInputElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLInputElement;
 
-    let model = new TestVM();
+    const model = new TestVM();
 
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.is(model.firstCount, 0, "call count is initially 0");
@@ -151,14 +150,14 @@ it("event: binds a single key to a handler function", async t => {
 
     triggerEvent(el, "click");
     t.is(model.firstCount, 1, "not called, after clean operation");
-    
+
 });
 
-it("event: binds multiple keys to handler functions", async t => {
+it("event: binds multiple keys to handler functions", async (t) => {
     const template = `<input type="text" x-key:tab="firstHandler" x-key:enter="secondHandler"/>`;
-    const el = <HTMLInputElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLInputElement;
 
-    let model = new TestVM();
+    const model = new TestVM();
 
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
 
@@ -180,14 +179,14 @@ it("event: binds multiple keys to handler functions", async t => {
     el.value = "old";
     triggerEvent(el, "keydown", 13);
     t.is(model.secondCount, 1, "should no longer fire");
-    
+
 });
 
-it("event: binds a modified key to a handler function", async t => {
+it("event: binds a modified key to a handler function", async (t) => {
     const template = `<input type="text" x-key:shift-enter="firstHandler"/>`;
-    const el = <HTMLInputElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLInputElement;
 
-    let model = new TestVM();
+    const model = new TestVM();
 
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
 
@@ -200,19 +199,19 @@ it("event: binds a modified key to a handler function", async t => {
     triggerEvent(el, "keydown", 13);
     t.is(model.firstCount, 1);
 
-    
+
 });
 
-it("event: event delegation works", async t => {
+it("event: event delegation works", async (t) => {
     const template = `<ul x-on:click.a="select">
                         <li><a id="1">Click to select</a></li>
                         <li><button id="2">Click to select</button></li>
                       </ul>`;
-    const el = <HTMLElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLElement;
 
     const viewmodel = {
         selected: new BehaviorSubject(0),
-        select: function(e: Event) { this.selected.next(parseInt(e.target ? (<Element> (e.target)).id : "")); },
+        select(e: Event) { this.selected.next(parseInt(e.target ? ((e.target) as Element).id : "")); },
     };
 
     t.notThrows(() => ui.domManager.applyDirectives(viewmodel, el));
@@ -220,7 +219,7 @@ it("event: event delegation works", async t => {
     t.is(viewmodel.selected.getValue(), 1);
     triggerEvent(el.children[1].children[0], "click");
     t.is(viewmodel.selected.getValue(), 1);
-    
+
 });
 
 class TestVM {

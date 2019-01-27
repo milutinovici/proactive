@@ -1,5 +1,5 @@
 import { BehaviorSubject } from "rxjs";
-import { IScope, INodeState, IViewModel, IPair, IKeyValue } from "./interfaces";
+import { IKeyValue, INodeState, IPair, IScope, IViewModel } from "./interfaces";
 
 export class NodeState implements INodeState {
     public scope: IScope;        // scope model
@@ -15,8 +15,8 @@ export class NodeState implements INodeState {
         this.disabled = false;
         this.controlsDescendants = 0;
     }
-    public getDirectives<T>(name: string): IPair<T>[] {
-        return this.directives.filter(x => x.directive.name === name) as IPair<T>[];
+    public getDirectives<T>(name: string): Array<IPair<T>> {
+        return this.directives.filter((x) => x.directive.name === name) as Array<IPair<T>>;
     }
 }
 

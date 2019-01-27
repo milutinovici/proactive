@@ -1,4 +1,4 @@
-import { Observable, Subscription, Observer } from "rxjs";
+import { Observable, Observer, Subscription } from "rxjs";
 
 export interface IDirective<T = unknown> {
     readonly name: string;
@@ -59,7 +59,7 @@ export interface INodeState {
     readonly controlsDescendants: number;
     readonly scope: IScope;
     disabled: boolean;
-    getDirectives<T>(name: string): IPair<T>[];
+    getDirectives<T>(name: string): Array<IPair<T>>;
 }
 // Component viewmodel
 export interface IViewModel {

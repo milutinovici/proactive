@@ -1,69 +1,69 @@
 import it from "ava";
-import { document, parse } from "../spec-utils";
-import { ProactiveUI } from "../../src/ui";
 import { BehaviorSubject } from "rxjs";
+import { ProactiveUI } from "../../src/ui";
+import { document, parse } from "../spec-utils";
 const ui = new ProactiveUI({ document });
 
-it("text: bind to a string constant", async t => {
+it("text: bind to a string constant", async (t) => {
     const template = `<span x-text="'foo'">invalid</span>`;
-    const el = <HTMLElement> parse(template)[0];
-    let model = {};
+    const el = parse(template)[0] as HTMLElement;
+    const model = {};
 
     t.is(el.textContent, "invalid");
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.is(el.textContent, "foo");
-    
+
 });
 
-it("text: bind to a numeric constant", async t => {
+it("text: bind to a numeric constant", async (t) => {
     const template = `<span x-text="42">invalid</span>`;
-    const el = <HTMLElement> parse(template)[0];
-    let model = {};
+    const el = parse(template)[0] as HTMLElement;
+    const model = {};
 
     t.is(el.textContent, "invalid");
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.is(el.textContent, "42");
-    
+
 });
 
-it("text: bind to a falsy numeric model value", async t => {
+it("text: bind to a falsy numeric model value", async (t) => {
     const template = `<span x-text="zero">invalid</span>`;
-    const el = <HTMLElement> parse(template)[0];
-    let model = { zero: 0 };
+    const el = parse(template)[0] as HTMLElement;
+    const model = { zero: 0 };
 
     t.is(el.textContent, "invalid");
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.is(el.textContent, "0");
-    
+
 });
 
-it("text: bind to a boolean constant", async t => {
+it("text: bind to a boolean constant", async (t) => {
     const template = `<span x-text="true">invalid</span>`;
-    const el = <HTMLElement> parse(template)[0];
-    let model = {};
+    const el = parse(template)[0] as HTMLElement;
+    const model = {};
 
     t.is(el.textContent, "invalid");
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.is(el.textContent, "true");
-    
+
 });
 
-it("text: bind to a non-observable model value", async t => {
+it("text: bind to a non-observable model value", async (t) => {
     const template = `<span x-text="constantString">invalid</span>`;
-    const el = <HTMLElement> parse(template)[0];
-    let model = { constantString: "foo" };
+    const el = parse(template)[0] as HTMLElement;
+    const model = { constantString: "foo" };
 
     t.is(el.textContent, "invalid");
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.is(el.textContent, model.constantString);
-    
+
 });
 
-it("text: bind to a observable model value", async t => {
+it("text: bind to a observable model value", async (t) => {
     const template = `<span x-text="observableString">invalid</span>`;
-    const el = <HTMLElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLElement;
 
-    let model = { observableString: new BehaviorSubject("foo") };
+    const model = { observableString: new BehaviorSubject("foo") };
 
     t.is(el.textContent, "invalid");
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
@@ -72,11 +72,11 @@ it("text: bind to a observable model value", async t => {
     model.observableString.next("magic");
     t.is(el.textContent, model.observableString.getValue(), "should reflect value changes");
 
-    let oldValue = model.observableString.getValue();
+    const oldValue = model.observableString.getValue();
     ui.clean(el);
     model.observableString.next("nope");
     t.is(el.textContent, oldValue, "should stop updating after getting disposed");
-    
+
 });
 
 // it("text: bind to a view computed observable", async t => {
@@ -90,14 +90,14 @@ it("text: bind to a observable model value", async t => {
 //     t.is(el.textContent, "hello " + model.observableString());
 //     model.observableString("bar");
 //     t.is(el.textContent, "hello " + model.observableString());
-//     
+//
 // });
 
-it("text: handlebar directive works", async t => {
+it("text: handlebar directive works", async (t) => {
     const template = `<div>{{observableString}}</div>"`;
-    const el = <HTMLElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLElement;
 
-    let model = { observableString: new BehaviorSubject("foo") };
+    const model = { observableString: new BehaviorSubject("foo") };
 
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.is(el.textContent, model.observableString.getValue());
@@ -108,14 +108,14 @@ it("text: handlebar directive works", async t => {
     ui.clean(el);
     model.observableString.next("nope");
     t.is(el.textContent, "magic", "should stop updating after getting disposed");
-    
+
 });
 
-it("text: multiple handlebar directive work", async t => {
+it("text: multiple handlebar directive work", async (t) => {
     const template = `<div>{{o1}} {{o2}}</div>"`;
-    const el = <HTMLElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLElement;
 
-    let model = { o1: new BehaviorSubject("Hello"), o2: new BehaviorSubject("World") };
+    const model = { o1: new BehaviorSubject("Hello"), o2: new BehaviorSubject("World") };
 
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.is(el.textContent, "Hello World");
@@ -125,5 +125,5 @@ it("text: multiple handlebar directive work", async t => {
 
     model.o2.next("Universe");
     t.is(el.textContent, "Greetings Universe");
-    
+
 });

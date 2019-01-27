@@ -1,6 +1,10 @@
 {
   "extends": "tslint:recommended",
   "rules": {
-
+    "max-line-length": [
+      150
+    ],
+    "no-string-literal": false,
+    "radix": false,
   }
 }

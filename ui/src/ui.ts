@@ -1,17 +1,17 @@
 import { fromEvent } from "rxjs";
 import { ComponentRegistry } from "./componentRegistry";
-import { DomManager } from "./domManager";
-import { HtmlEngine } from "./templateEngines";
 import { DirectiveRegistry } from "./directiveRegistry";
-import { IScope, IConfiguration, IViewModel, IComponentDescriptor } from "./interfaces";
-import { EventDirective } from "./directives/event";
-import { IfDirective } from "./directives/if";
-import { TextDirective } from "./directives/text";
-import { AttrDirective, CssDirective, StyleDirective } from "./directives/oneWay";
-import { ForDirective } from "./directives/for";
-import { ValueDirective } from "./directives/value";
 import { ComponentDirective } from "./directives/component";
+import { EventDirective } from "./directives/event";
+import { ForDirective } from "./directives/for";
+import { IfDirective } from "./directives/if";
 import { KeyPressDirective } from "./directives/keypress";
+import { AttrDirective, CssDirective, StyleDirective } from "./directives/oneWay";
+import { TextDirective } from "./directives/text";
+import { ValueDirective } from "./directives/value";
+import { DomManager } from "./domManager";
+import { IComponentDescriptor, IConfiguration, IScope, IViewModel } from "./interfaces";
+import { HtmlEngine } from "./templateEngines";
 
 export * from "./interfaces";
 export { DirectiveHandler } from "./directives/directiveHandler";
@@ -55,7 +55,7 @@ export class ProactiveUI {
         this.domManager.cleanNode(node);
     }
     /**
-    * Gets the scope of the supplied node. 
+    * Gets the scope of the supplied node.
     * Scope contains viewmodel, and also new variables introduced in templates.
     * @param {Node} node The node
     */
@@ -63,7 +63,7 @@ export class ProactiveUI {
         return this.domManager.getScope(node);
     }
     /**
-    * Gets the viewmodel of the component which defined supplied node. 
+    * Gets the viewmodel of the component which defined supplied node.
     * @param {Node} node The node
     */
     public getViewmodel(node: Element): IViewModel | undefined {

@@ -1,8 +1,8 @@
-import { IDirectiveHandler, IScope, IDirective } from "./interfaces";
-import { NodeState } from "./nodeState";
 import { Directive } from "./directive";
-import { isElement, tryParse } from "./utils";
 import { exception } from "./exceptionHandlers";
+import { IDirective, IDirectiveHandler, IScope } from "./interfaces";
+import { NodeState } from "./nodeState";
+import { isElement, tryParse } from "./utils";
 
 export class DirectiveRegistry {
     public static readonly PREFIX = "x";
@@ -24,7 +24,7 @@ export class DirectiveRegistry {
         if (!isElement(node)) {
             return new NodeState([{ directive: this.handleBarsToDirective(node, scope) as IDirective, handler: this.handlers.get("text") as IDirectiveHandler }], {}, scope);
         }
-        const tag = node["tagName"];
+        const tag = node.tagName;
         const isCustomElement = tag.indexOf("-") !== -1;
         if (!isCustomElement && !node.hasAttributes()) {
             return null;

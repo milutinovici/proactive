@@ -1,9 +1,9 @@
-import { Observable, from, of, EMPTY } from "rxjs";
-import { map, tap, catchError } from "rxjs/operators";
-import { IComponentDescriptor, IViewModel } from "./interfaces";
-import { isFunction, isTemplate } from "./utils";
-import { HtmlEngine } from "./templateEngines";
+import { EMPTY, from, Observable, of } from "rxjs";
+import { catchError, map, tap } from "rxjs/operators";
 import { exception } from "./exceptionHandlers";
+import { IComponentDescriptor, IViewModel } from "./interfaces";
+import { HtmlEngine } from "./templateEngines";
+import { isFunction, isTemplate } from "./utils";
 export class ComponentRegistry {
 
     private readonly components = new Map<string, IComponentDescriptor | string>();
@@ -33,6 +33,20 @@ export class ComponentRegistry {
         );
     }
 
+    public initialize<T extends Object>(name: string, descriptor: IComponentDescriptor, props: T, viewmodel?: T): IViewModel | undefined {
+        let vm = viewmodel || descriptor.viewmodel || props; // if no vm defined, props are vm, aka stateless
+        if (isFunction(vm)) {
+            let model: IViewModel | undefined;
+            try {
+                model = new vm(props);
+            } catch (e) {
+                exception.next(new Error(`Failed in constructor of component "${name}". ${e.message}`));
+            }
+            return model;
+        }
+        return vm;
+    }
+
     private getDescriptor(name: string): Observable<IComponentDescriptor> {
         const descriptor = this.components.get(name);
         if (descriptor != null) {
@@ -48,20 +62,6 @@ export class ComponentRegistry {
             exception.next(new Error(`No component with name '${name}' is registered`));
             return EMPTY;
         }
-    }
-
-    public initialize<T extends Object>(name: string, descriptor: IComponentDescriptor, props: T, viewmodel?: T): IViewModel | undefined {
-        let vm = viewmodel || descriptor.viewmodel || props; // if no vm defined, props are vm, aka stateless
-        if (isFunction(vm)) {
-            let model: IViewModel | undefined;
-            try {
-                model = new vm(props);
-            } catch (e) {
-                exception.next(new Error(`Failed in constructor of component "${name}". ${e.message}`));
-            }
-            return model;
-        }
-        return vm;
     }
 
     private compileTemplate(template: HTMLTemplateElement | DocumentFragment | string): HTMLTemplateElement {

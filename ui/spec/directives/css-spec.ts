@@ -1,36 +1,36 @@
 import it from "ava";
 import { BehaviorSubject } from "rxjs";
-import { document, parse, hasClass } from "../spec-utils";
 import { ProactiveUI } from "../../src/ui";
+import { document, hasClass, parse } from "../spec-utils";
 
 const ui = new ProactiveUI({ document });
 
-it("css: bind to a string constant", async t => {
+it("css: bind to a string constant", async (t) => {
     const template = `<div x-css:foo="true">empty</div>`;
-    const el = <HTMLElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLElement;
 
     const model = {};
     t.false(hasClass(el, "foo"));
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.true(hasClass(el, "foo"));
-    
+
 });
 
-it("css: bind to a non-observable model value", async t => {
+it("css: bind to a non-observable model value", async (t) => {
     const template = `<div x-css:foo="bool">empty</div>`;
-    const el = <HTMLElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLElement;
 
     const model = { bool: true };
 
     t.false(hasClass(el, "foo"));
     t.notThrows(() => ui.domManager.applyDirectives(model, el));
     t.true(hasClass(el, "foo"));
-    
+
 });
 
-it("css: bind to a observable model value", async t => {
+it("css: bind to a observable model value", async (t) => {
     const template = `<div x-css:foo="obs">empty</div>`;
-    const el = <HTMLElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLElement;
 
     const model = { obs: new BehaviorSubject(true) };
 
@@ -44,14 +44,14 @@ it("css: bind to a observable model value", async t => {
     ui.clean(el);
     model.obs.next(true);
     t.false(hasClass(el, "foo"), "should stop updating after getting disposed");
-    
+
 });
 
-it("css: bind multiple css classes to multiple observable model properties", async t => {
+it("css: bind multiple css classes to multiple observable model properties", async (t) => {
     const template = `<div x-css:foo="obs1" x-css:bar="obs2">empty</div>`;
-    const el = <HTMLElement> parse(template)[0];
+    const el = parse(template)[0] as HTMLElement;
 
-    let model = { obs1: new BehaviorSubject(true), obs2: new BehaviorSubject(false) };
+    const model = { obs1: new BehaviorSubject(true), obs2: new BehaviorSubject(false) };
 
     t.false(hasClass(el, "foo"));
     t.false(hasClass(el, "bar"));
@@ -79,5 +79,5 @@ it("css: bind multiple css classes to multiple observable model properties", asy
     model.obs2.next(false);
     t.true(hasClass(el, "foo"), "should stop updating after getting disposed");
     t.true(hasClass(el, "bar"), "should stop updating after getting disposed");
-    
+
 });

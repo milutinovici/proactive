@@ -1,8 +1,8 @@
-import { exception } from "./exceptionHandlers";
-import { Observable, Observer, Subscriber, Subscription, of, isObservable } from "rxjs";
-import { IScope, IDirective, DataFlow } from "./interfaces";
-import { isObserver, isFunction } from "./utils";
+import { isObservable, Observable, Observer, of, Subscriber, Subscription } from "rxjs";
 import { Evaluator } from "./evaluator";
+import { exception } from "./exceptionHandlers";
+import { DataFlow, IDirective, IScope } from "./interfaces";
+import { isFunction, isObserver } from "./utils";
 
 export class Directive<T = unknown> implements IDirective<T> {
     public readonly scope: IScope;
@@ -36,14 +36,14 @@ export class Directive<T = unknown> implements IDirective<T> {
     // this can possibly have side-effects
     public value(): T {
         if (Array.isArray(this.text)) {
-            return this.text.map(txt => this.createObservable(Evaluator.read(this.scope, txt))) as any;
+            return this.text.map((txt) => this.createObservable(Evaluator.read(this.scope, txt))) as any;
         } else {
             return Evaluator.read(this.scope, this.text);
         }
-    };
+    }
 
     private createObserver(): Observer<T> {
-        const subscriber = new Subscriber<T>(x => {
+        const subscriber = new Subscriber<T>((x) => {
             const result: unknown = this.value();
             if (isFunction(result)) {
                 return result.bind(this.scope.$data)(x);

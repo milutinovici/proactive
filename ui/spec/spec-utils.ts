@@ -9,15 +9,15 @@ export function fragment(template: string): DocumentFragment {
     return JSDOM.fragment(template);
 }
 
-let knownEvents = {} as any;
-let knownEventTypesByEventName: Map<string> = {};
+const knownEvents = {} as any;
+const knownEventTypesByEventName: Map<string> = {};
 const keyEventTypeName = "KeyboardEvent";
 knownEvents[keyEventTypeName] = ["keyup", "keydown", "keypress"];
-knownEvents["MouseEvents"] = ["click", "dblclick", "mousedown", "mouseup", "mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"];
+knownEvents.MouseEvents = ["click", "dblclick", "mousedown", "mouseup", "mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"];
 
-Object.keys(knownEvents).forEach(x => {
-    let eventType = x;
-    let knownEventsForType = knownEvents[x];
+Object.keys(knownEvents).forEach((x) => {
+    const eventType = x;
+    const knownEventsForType = knownEvents[x];
 
     if (knownEventsForType.length) {
         for (let i = 0, j = knownEventsForType.length; i < j; i++) {
@@ -31,14 +31,14 @@ function createEvent(category: any): Event {
 
 export function triggerEvent(element: Element, eventType: string, keyCode?: number, modifier= "") {
     if (typeof element.dispatchEvent === "function") {
-        let eventCategory = knownEventTypesByEventName[eventType] || "HTMLEvents";
+        const eventCategory = knownEventTypesByEventName[eventType] || "HTMLEvents";
         let event: Event;
 
         if (eventCategory !== "KeyboardEvent") {
             event = createEvent(eventCategory);
             event.initEvent(eventType, true, true);
         } else {
-            let keyEvent = createEvent(eventCategory) as KeyboardEvent;
+            const keyEvent = createEvent(eventCategory) as KeyboardEvent;
             keyEvent.initKeyboardEvent(eventType, true, true, dom.window, "", 0, modifier, false, "");
 
             if (keyCode) {
