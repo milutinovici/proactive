@@ -120,7 +120,7 @@ export class ForDirective<T> extends BaseDirectiveHandler<T[]> {
         const start = Array.prototype.indexOf.call(parent.childNodes, placeholder) + 1;
         for (const move of moves) {
             let node = parent.childNodes[start + move.index];
-            let before = parent.childNodes[start + move.moved];
+            let before = parent.childNodes[start + move.moved!];
             parent.insertBefore(node, before);
             if (indexName) {
                 let state = this.domManager.getState(node) as INodeState;

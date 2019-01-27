@@ -40,4 +40,4 @@ suite.add("ComputedArray#filter", () => {
     });
 
 suite.run({ async: true });
-export = suite;
+export default suite;

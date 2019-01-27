@@ -1,25 +1,6 @@
 {
-  "extends": "tslint:latest",
+  "extends": "tslint:recommended",
   "rules": {
-    "ordered-imports": false,
-    "max-line-length": true,
-    "no-string-literal": false,
-    "radix": false,
-    "jsdoc-format": false,
-    "interface-name": [
-      false
-    ],
-    "member-ordering": [
-      false
-    ],
-    "object-literal-sort-keys": false,
-    "object-literal-shorthand": false,
-    "variable-name": [
-      false
-    ],
-    "forin": false,
-    "no-bitwise": false,
-    "no-empty": false,
-    "only-arrow-functions": false
+
   }
 }

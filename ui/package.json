@@ -11,16 +11,17 @@
     },
     "author": "Ivan Milutinović",
     "license": "MIT",
-    "dependencies": {
-        "rxjs": "^6.3.1"
+    "peerDependencies": {
+        "rxjs": "^6.3.3"
     },
     "devDependencies": {
+        "rxjs": "^6.3.3",
         "@proactive/extensions": "^0.5.0",
-        "typescript": "^3.0.1",
-        "ts-node": "7.0.1",
-        "ava": "^1.0.0-beta.8",
-        "jsdom": "^12.0.0",
-        "@types/jsdom": "^11.0.6"
+        "typescript": "^3.2.4",
+        "ts-node": "^8.0.2",
+        "ava": "^1.1.0",
+        "jsdom": "^13.2.0",
+        "@types/jsdom": "^12.2.1"
     },
     "main": "lib/src/ui.js",
     "types": "lib/src/ui.d.ts",
@@ -36,13 +37,14 @@
             "ts"
         ],
         "require": [
-            "ts-node/register"
+            "ts-node/register",
+            "esm"
         ],
         "files": [
-			"spec/**/*.ts"
-		],
-		"sources": [
-			"src/**/*.ts"
-		]
+            "spec/**/*.ts"
+        ],
+        "sources": [
+            "src/**/*.ts"
+        ]
     }
 }

@@ -51,7 +51,7 @@ export class DomManager {
 
     public applyDirectivesRecursive(node: Node, scope: IScope): void {
         if (this.shouldBind(node) && !this.applyDirectivesInternal(node, scope) && node.hasChildNodes()) {
-            let child = node.firstChild;
+            let child = node.firstChild as Node | null;
             // iterate over descendants
             while (child) {
                 this.applyDirectivesRecursive(child, scope);

@@ -55,7 +55,7 @@ export function isFunction(obj: any): obj is Function {
 }
 
 export function removeEmptyChildren(element: Node) {
-    let child = element.firstChild;
+    let child = element.firstChild as Node | null;
     while (child !== null) {
         if (isTextNode(child) && (child.textContent as string).trim() === "") {
             element.removeChild(child);
